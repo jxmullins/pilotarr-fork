@@ -2,6 +2,7 @@
 Routes pour gérer les torrents (qBittorrent)
 """
 
+import logging
 from typing import Any
 
 from fastapi import APIRouter, Depends, HTTPException
@@ -12,6 +13,8 @@ from app.db import get_db
 from app.models.models import LibraryItemTorrent, ServiceConfiguration
 from app.services.connector_factory import create_connector
 from app.services.torrent_enrichment_service import TorrentEnrichmentService
+
+logger = logging.getLogger(__name__)
 
 router = APIRouter(prefix="/api/torrents", tags=["torrents"])
 
@@ -55,7 +58,8 @@ async def get_torrent_info(
         return torrent_info
 
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération du torrent : {str(e)}") from e
+        logger.error(f"Erreur lors de la récupération du torrent {torrent_hash}: {e}")
+        raise HTTPException(status_code=500, detail="Erreur lors de la récupération du torrent") from e
 
 
 @router.get("/item/{library_item_id}")

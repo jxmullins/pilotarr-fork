@@ -30,7 +30,7 @@ const MediaCard = ({ item }) => {
   };
 
   const handleClick = () => {
-    navigate("/media-detail");
+    navigate(`/media-detail/${item.id}`);
   };
 
   return (

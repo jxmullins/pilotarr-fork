@@ -5,7 +5,7 @@ then aggregates results back onto LibraryItem.torrent_info.
 """
 
 import logging
-from datetime import datetime
+from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
@@ -65,7 +65,7 @@ class TorrentEnrichmentService:
                 return False
 
             item.torrent_info = torrent_info
-            item.updated_at = datetime.utcnow()
+            item.updated_at = datetime.now(UTC)
 
             self.db.commit()
 
@@ -115,7 +115,7 @@ class TorrentEnrichmentService:
                     info = torrents_data.get(row.torrent_hash.upper() if row.torrent_hash else "")
                     if info:
                         row.torrent_info = info
-                        row.updated_at = datetime.utcnow()
+                        row.updated_at = datetime.now(UTC)
                         enriched_count += 1
 
                 self.db.commit()
@@ -168,7 +168,7 @@ class TorrentEnrichmentService:
                     if info:
                         info["torrent_count"] = 1
                         item.torrent_info = info
-                        item.updated_at = datetime.utcnow()
+                        item.updated_at = datetime.now(UTC)
                         stats["success"] += 1
                         stats["total"] += 1
                     else:
@@ -262,7 +262,7 @@ class TorrentEnrichmentService:
         }
 
         item.torrent_info = aggregated
-        item.updated_at = datetime.utcnow()
+        item.updated_at = datetime.now(UTC)
 
     async def enrich_recent_items(self, days: int = 7) -> dict:
         """
@@ -277,7 +277,7 @@ class TorrentEnrichmentService:
         try:
             from datetime import timedelta
 
-            cutoff_date = datetime.utcnow() - timedelta(days=days)
+            cutoff_date = datetime.now(UTC) - timedelta(days=days)
 
             connector = await self._get_qbt_connector()
             if not connector:
@@ -303,7 +303,7 @@ class TorrentEnrichmentService:
                     info = torrents_data.get(row.torrent_hash.upper() if row.torrent_hash else "")
                     if info:
                         row.torrent_info = info
-                        row.updated_at = datetime.utcnow()
+                        row.updated_at = datetime.now(UTC)
 
                 self.db.commit()
 
@@ -348,7 +348,7 @@ class TorrentEnrichmentService:
                     if info:
                         info["torrent_count"] = 1
                         item.torrent_info = info
-                        item.updated_at = datetime.utcnow()
+                        item.updated_at = datetime.now(UTC)
                         stats["success"] += 1
                         stats["total"] += 1
                     else:
