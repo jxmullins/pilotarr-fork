@@ -10,6 +10,7 @@ from app.models import (
     DashboardStatistic,
     JellyseerrRequest,
     LibraryItem,
+    LibraryItemTorrent,
     MediaType,
     RequestPriority,
     RequestStatus,
@@ -32,9 +33,37 @@ class SyncService:
         """Récupérer la configuration d'un service actif"""
         return (
             self.db.query(ServiceConfiguration)
-            .filter(ServiceConfiguration.service_name == service_type, ServiceConfiguration.is_active == True)
+            .filter(ServiceConfiguration.service_name == service_type, ServiceConfiguration.is_active.is_(True))
             .first()
         )
+
+    def _upsert_torrent(
+        self,
+        library_item_id: str,
+        torrent_hash: str,
+        episode_id: int | None = None,
+        season_number: int | None = None,
+        is_season_pack: bool = False,
+    ):
+        """Insert a torrent row if it doesn't already exist for this item+hash"""
+        existing = (
+            self.db.query(LibraryItemTorrent)
+            .filter(
+                LibraryItemTorrent.library_item_id == library_item_id,
+                LibraryItemTorrent.torrent_hash == torrent_hash,
+            )
+            .first()
+        )
+        if not existing:
+            self.db.add(
+                LibraryItemTorrent(
+                    library_item_id=library_item_id,
+                    torrent_hash=torrent_hash,
+                    episode_id=episode_id,
+                    season_number=season_number,
+                    is_season_pack=is_season_pack,
+                )
+            )
 
     def update_sync_metadata(
         self, service_type: ServiceType, status: SyncStatus, records: int = 0, duration_ms: int = 0, error: str = None
@@ -202,6 +231,9 @@ class SyncService:
                         existing.updated_at = datetime.now(UTC)
                         updated_count += 1
                         print(f"  🔄 Mise à jour hash pour: {movie.get('title')} - {torrent_hash[:8]}...")
+                    # Write to junction table
+                    if torrent_hash:
+                        self._upsert_torrent(existing.id, torrent_hash)
                     # Toujours mettre à jour nb_media
                     existing.nb_media = nb_media
                     # Mettre à jour la taille si elle était à 0
@@ -248,9 +280,11 @@ class SyncService:
                     )
 
                     self.db.add(item)
+                    self.db.flush()  # Ensure item.id is available
                     added_count += 1
 
                     if torrent_hash:
+                        self._upsert_torrent(item.id, torrent_hash)
                         print(f"  ✅ {movie.get('title')} - hash: {torrent_hash[:8]}...")
 
             # Récupérer le calendrier
@@ -335,9 +369,10 @@ class SyncService:
             # Récupérer les séries récentes
             recent_series = await connector.get_recent_additions(days=30)
 
-            # Récupérer la map seriesId -> torrent_hash
-            series_hash_map = await connector.get_series_history_map()
-            print(f"📥 {len(series_hash_map)} hash de torrents récupérés depuis Sonarr")
+            # Récupérer la map seriesId -> [{hash, episode_id, season_number, is_season_pack}, ...]
+            series_torrents_map = await connector.get_series_torrents_map()
+            total_hashes = sum(len(v) for v in series_torrents_map.values())
+            print(f"📥 {total_hashes} hash de torrents récupérés depuis Sonarr ({len(series_torrents_map)} séries)")
 
             added_count = 0
             updated_count = 0
@@ -353,19 +388,29 @@ class SyncService:
                     .first()
                 )
 
-                # Récupérer le torrent_hash depuis la map
+                # Récupérer les torrents depuis la map
                 series_id = series.get("id")
-                torrent_hash = series_hash_map.get(series_id) if series_id else None
+                torrent_entries = series_torrents_map.get(series_id, []) if series_id else []
+                first_hash = torrent_entries[0]["hash"] if torrent_entries else None
 
                 nb_media = series.get("statistics", {}).get("episodeFileCount", 0)
 
                 if existing:
                     # Mettre à jour le hash si on en a un et qu'il n'existe pas encore
-                    if torrent_hash and not existing.torrent_hash:
-                        existing.torrent_hash = torrent_hash
+                    if first_hash and not existing.torrent_hash:
+                        existing.torrent_hash = first_hash
                         existing.updated_at = datetime.now(UTC)
                         updated_count += 1
-                        print(f"  🔄 Mise à jour hash pour: {series.get('title')} - {torrent_hash[:8]}...")
+                        print(f"  🔄 Mise à jour hash pour: {series.get('title')} - {first_hash[:8]}...")
+                    # Upsert all torrents into junction table
+                    for entry in torrent_entries:
+                        self._upsert_torrent(
+                            existing.id,
+                            entry["hash"],
+                            episode_id=entry.get("episode_id"),
+                            season_number=entry.get("season_number"),
+                            is_season_pack=entry.get("is_season_pack", False),
+                        )
                     # Toujours mettre à jour nb_media
                     existing.nb_media = nb_media
                     # Mettre à jour la taille si elle était à 0
@@ -405,15 +450,29 @@ class SyncService:
                         description=series.get("overview", ""),
                         added_date=time_ago,
                         size=f"{size_gb} GB",
-                        torrent_hash=torrent_hash,
+                        torrent_hash=first_hash,
                         nb_media=nb_media,
                     )
 
                     self.db.add(item)
+                    self.db.flush()  # Ensure item.id is available
                     added_count += 1
 
-                    if torrent_hash:
-                        print(f"  ✅ {series.get('title')} - hash: {torrent_hash[:8]}...")
+                    # Write all torrents to junction table
+                    for entry in torrent_entries:
+                        self._upsert_torrent(
+                            item.id,
+                            entry["hash"],
+                            episode_id=entry.get("episode_id"),
+                            season_number=entry.get("season_number"),
+                            is_season_pack=entry.get("is_season_pack", False),
+                        )
+
+                    if first_hash:
+                        print(
+                            f"  ✅ {series.get('title')} - {len(torrent_entries)} torrent(s), "
+                            f"first: {first_hash[:8]}..."
+                        )
 
             # Récupérer le calendrier (includeSeries=true dans le connector)
             calendar = await connector.get_calendar(days_ahead=30)

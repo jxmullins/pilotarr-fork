@@ -118,9 +118,21 @@ class LibraryItemResponse(BaseModel):
     description: str | None = None
     added_date: str
     size: str
-    torrent_info: dict[str, Any] | None = None  # ⬅️ NOUVEAU
+    torrent_info: dict[str, Any] | None = None
+    torrent_count: int = 0
     nb_media: int = 0
     created_at: datetime
+
+    @field_validator("torrent_count", mode="before")
+    @classmethod
+    def compute_torrent_count(cls, v, info):
+        """Extract torrent_count from torrent_info if available"""
+        if v and v > 0:
+            return v
+        torrent_info = info.data.get("torrent_info")
+        if torrent_info and isinstance(torrent_info, dict):
+            return torrent_info.get("torrent_count", 0)
+        return 0
 
     class Config:
         from_attributes = True

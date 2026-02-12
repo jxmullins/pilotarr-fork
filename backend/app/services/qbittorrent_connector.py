@@ -145,6 +145,58 @@ class QBittorrentConnector(BaseConnector):
             logger.error(f"❌ Erreur lors de la récupération du torrent : {e}")
             return None
 
+    async def get_torrents_info(self, hashes: list[str]) -> dict[str, dict[str, Any]]:
+        """
+        Batch-fetch torrent info for multiple hashes in a single API call.
+
+        Args:
+            hashes: List of torrent hashes
+
+        Returns:
+            Dict mapping hash -> torrent info dict. Missing torrents are omitted.
+        """
+        if not hashes:
+            return {}
+
+        try:
+            await self._ensure_authenticated()
+
+            url = f"{self.base_url}/api/v2/torrents/info"
+            params = {"hashes": "|".join(hashes)}
+
+            logger.info(f"🔍 Batch fetch {len(hashes)} torrents")
+
+            async with self.session.get(url, params=params) as response:
+                if response.status == 200:
+                    torrents = await response.json()
+                    result = {}
+                    for torrent in torrents:
+                        h = torrent.get("hash", "").upper()
+                        result[h] = {
+                            "hash": h,
+                            "name": torrent.get("name"),
+                            "status": self._map_status(torrent.get("state")),
+                            "ratio": round(torrent.get("ratio", 0), 2),
+                            "tags": torrent.get("tags", "").split(",") if torrent.get("tags") else [],
+                            "seeding_time": torrent.get("seeding_time", 0),
+                            "download_date": torrent.get("completion_on"),
+                            "size": torrent.get("size", 0),
+                            "progress": round(torrent.get("progress", 0) * 100, 1),
+                        }
+                    logger.info(f"✅ Batch fetch: {len(result)}/{len(hashes)} torrents found")
+                    return result
+                elif response.status == 403:
+                    logger.error("❌ 403 Forbidden - Session expirée ?")
+                    self._authenticated = False
+                    return {}
+                else:
+                    logger.error(f"❌ Erreur HTTP {response.status}")
+                    return {}
+
+        except Exception as e:
+            logger.error(f"❌ Erreur lors du batch fetch torrents : {e}")
+            return {}
+
     def _map_status(self, qbt_state: str) -> str:
         """
         Mappe les états qBittorrent vers des états simplifiés

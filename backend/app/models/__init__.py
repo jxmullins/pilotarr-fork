@@ -12,6 +12,7 @@ from app.models.models import (
     DashboardStatistic,
     JellyseerrRequest,
     LibraryItem,
+    LibraryItemTorrent,
     ServiceConfiguration,
     SyncMetadata,
 )
@@ -28,6 +29,7 @@ __all__ = [
     "DashboardStatistic",
     "SyncMetadata",
     "LibraryItem",
+    "LibraryItemTorrent",
     "CalendarEvent",
     "JellyseerrRequest",
 ]

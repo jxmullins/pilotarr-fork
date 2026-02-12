@@ -1,7 +1,21 @@
 import uuid
 
-from sqlalchemy import JSON, Boolean, Column, Date, DateTime, Float, Index, Integer, String, Text
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    ForeignKey,
+    Index,
+    Integer,
+    String,
+    Text,
+    UniqueConstraint,
+)
 from sqlalchemy import Enum as SQLEnum
+from sqlalchemy.orm import relationship
 from sqlalchemy.sql import func
 
 from app.db import Base
@@ -93,6 +107,27 @@ class LibraryItem(Base):
     nb_media = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    torrents = relationship("LibraryItemTorrent", back_populates="library_item", lazy="select")
+
+
+# Table 4b: Library Item Torrents (junction table for multi-torrent support)
+class LibraryItemTorrent(Base):
+    __tablename__ = "library_item_torrents"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    library_item_id = Column(String(36), ForeignKey("library_items.id", ondelete="CASCADE"), nullable=False, index=True)
+    torrent_hash = Column(String(255), nullable=False, index=True)
+    episode_id = Column(Integer, nullable=True)
+    season_number = Column(Integer, nullable=True)
+    is_season_pack = Column(Boolean, default=False)
+    torrent_info = Column(JSON, nullable=True)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    library_item = relationship("LibraryItem", back_populates="torrents")
+
+    __table_args__ = (UniqueConstraint("library_item_id", "torrent_hash", name="uq_item_torrent_hash"),)
 
 
 # Table 5: Calendar Events

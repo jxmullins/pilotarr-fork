@@ -9,7 +9,7 @@ from sqlalchemy.orm import Session
 
 from app.core.security import verify_api_key
 from app.db import get_db
-from app.models.models import ServiceConfiguration
+from app.models.models import LibraryItemTorrent, ServiceConfiguration
 from app.services.connector_factory import create_connector
 from app.services.torrent_enrichment_service import TorrentEnrichmentService
 
@@ -32,7 +32,7 @@ async def get_torrent_info(
     # Récupérer la config qBittorrent
     qbt_service = (
         db.query(ServiceConfiguration)
-        .filter(ServiceConfiguration.service_name == "qbittorrent", ServiceConfiguration.is_active == True)
+        .filter(ServiceConfiguration.service_name == "qbittorrent", ServiceConfiguration.is_active.is_(True))
         .first()
     )
 
@@ -56,6 +56,35 @@ async def get_torrent_info(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Erreur lors de la récupération du torrent : {str(e)}") from e
+
+
+@router.get("/item/{library_item_id}")
+async def get_item_torrents(
+    library_item_id: str, db: Session = Depends(get_db), _: str = Depends(verify_api_key)
+) -> list[dict[str, Any]]:
+    """
+    Get all torrent rows for a library item (for media detail page).
+
+    Returns:
+        List of torrent info dicts with episode/season metadata
+    """
+    rows = (
+        db.query(LibraryItemTorrent)
+        .filter(LibraryItemTorrent.library_item_id == library_item_id)
+        .order_by(LibraryItemTorrent.season_number, LibraryItemTorrent.episode_id)
+        .all()
+    )
+
+    return [
+        {
+            "hash": row.torrent_hash,
+            "episode_id": row.episode_id,
+            "season_number": row.season_number,
+            "is_season_pack": row.is_season_pack,
+            **(row.torrent_info or {}),
+        }
+        for row in rows
+    ]
 
 
 @router.post("/enrich")

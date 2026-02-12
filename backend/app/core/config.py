@@ -15,7 +15,6 @@ class Settings(BaseSettings):
     API_HOST: str = "0.0.0.0"
     API_PORT: int = 8000
     DEBUG: bool = False
-    JELLYFIN_PUBLIC_URL: str
 
     # Security
     SECRET_KEY: str
@@ -27,7 +26,7 @@ class Settings(BaseSettings):
     APP_VERSION: str = "1.0.0"
 
     @property
-    def DATABASE_URL(self) -> str:
+    def DATABASE_URL(self) -> str:  # noqa: N802
         """Construit l'URL de connexion MariaDB"""
         return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 

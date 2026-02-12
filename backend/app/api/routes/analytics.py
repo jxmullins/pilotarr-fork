@@ -24,8 +24,15 @@ from app.api.schemas import (
 from app.core.config import settings
 from app.core.security import verify_api_key
 from app.db import get_db
-from app.models.enums import MediaType
-from app.models.models import DailyAnalytic, LibraryItem, MediaStatistic, PlaybackSession, ServerMetric
+from app.models.enums import MediaType, ServiceType
+from app.models.models import (
+    DailyAnalytic,
+    LibraryItem,
+    MediaStatistic,
+    PlaybackSession,
+    ServerMetric,
+    ServiceConfiguration,
+)
 from app.services.analytics_service import AnalyticsService
 
 logger = logging.getLogger(__name__)
@@ -155,9 +162,12 @@ async def receive_playback_webhook(request: Request, db: Session = Depends(get_d
             device_name = session_info.get("DeviceName", "Unknown")
             client_name = session_info.get("Client", "Unknown")
 
-            # URL du poster : Utiliser l'URL publique de Jellyfin
+            # URL du poster : Utiliser l'URL de Jellyfin depuis la base de données
             poster_url = None
-            jellyfin_url = getattr(settings, "JELLYFIN_PUBLIC_URL", None)
+            jellyfin_service = (
+                db.query(ServiceConfiguration).filter(ServiceConfiguration.service_name == ServiceType.JELLYFIN).first()
+            )
+            jellyfin_url = jellyfin_service.url.rstrip("/") if jellyfin_service else None
             if item.get("ImageTags", {}).get("Primary") and jellyfin_url:
                 poster_url = f"{jellyfin_url}/Items/{media_id}/Images/Primary"
 

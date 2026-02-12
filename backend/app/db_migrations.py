@@ -27,37 +27,100 @@ def create_analytics_tables():
     for table in existing_tables:
         print(f"  - {table}")
 
-    new_tables = ["playback_sessions", "media_statistics", "device_statistics", "daily_analytics", "server_metrics"]
+    new_tables = [
+        "playback_sessions",
+        "media_statistics",
+        "device_statistics",
+        "daily_analytics",
+        "server_metrics",
+        "library_item_torrents",
+    ]
 
     tables_to_create = [t for t in new_tables if t not in existing_tables]
 
     if not tables_to_create:
-        print("\n✅ Toutes les tables analytics existent déjà!")
-        return True
+        print("\n✅ Toutes les tables existent déjà!")
+    else:
+        print(f"\n🆕 Nouvelles tables à créer : {len(tables_to_create)}")
+        for table in tables_to_create:
+            print(f"  - {table}")
 
-    print(f"\n🆕 Nouvelles tables à créer : {len(tables_to_create)}")
-    for table in tables_to_create:
-        print(f"  - {table}")
+        try:
+            print("\n🚀 Création des nouvelles tables...")
+            Base.metadata.create_all(bind=engine, checkfirst=True)
+            print("✅ Tables créées avec succès!")
 
+            new_existing_tables = get_existing_tables()
+            created = set(new_existing_tables) - set(existing_tables)
+            if created:
+                print("\n✨ Tables créées :")
+                for table in created:
+                    print(f"  - {table}")
+
+        except Exception as e:
+            print(f"❌ Erreur lors de la création des tables : {e}")
+            return False
+
+    # Migrate existing torrent_hash data into library_item_torrents
+    if "library_item_torrents" in get_existing_tables():
+        try:
+            migrate_torrent_hashes()
+        except Exception as e:
+            print(f"❌ Erreur lors de la migration des torrents : {e}")
+            return False
+
+    return True
+
+
+def migrate_torrent_hashes():
+    """Migrate existing LibraryItem.torrent_hash rows into library_item_torrents"""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    db = SessionLocal()
     try:
-        print("\n🚀 Création des nouvelles tables...")
-        # Crée uniquement les tables qui n'existent pas
-        Base.metadata.create_all(bind=engine, checkfirst=True)
-        print("✅ Tables créées avec succès!")
+        # Find library_items with a torrent_hash that don't already have a matching row
+        rows = db.execute(
+            text(
+                """
+                SELECT li.id, li.torrent_hash
+                FROM library_items li
+                WHERE li.torrent_hash IS NOT NULL
+                  AND li.torrent_hash != ''
+                  AND NOT EXISTS (
+                    SELECT 1 FROM library_item_torrents lit
+                    WHERE lit.library_item_id = li.id AND lit.torrent_hash = li.torrent_hash
+                  )
+                """
+            )
+        ).fetchall()
 
-        # Vérification
-        new_existing_tables = get_existing_tables()
-        created = set(new_existing_tables) - set(existing_tables)
-        if created:
-            print("\n✨ Tables créées :")
-            for table in created:
-                print(f"  - {table}")
+        if not rows:
+            print("✅ Aucune donnée torrent à migrer")
+            return
 
-        return True
+        print(f"🔄 Migration de {len(rows)} torrents existants...")
+        import uuid
 
+        for row in rows:
+            db.execute(
+                text(
+                    """
+                    INSERT INTO library_item_torrents (id, library_item_id, torrent_hash, is_season_pack, created_at, updated_at)
+                    VALUES (:id, :item_id, :hash, 0, NOW(), NOW())
+                    """
+                ),
+                {"id": str(uuid.uuid4()), "item_id": row[0], "hash": row[1]},
+            )
+
+        db.commit()
+        print(f"✅ {len(rows)} torrents migrés avec succès")
     except Exception as e:
-        print(f"❌ Erreur lors de la création des tables : {e}")
-        return False
+        db.rollback()
+        raise e
+    finally:
+        db.close()
 
 
 def show_table_info():

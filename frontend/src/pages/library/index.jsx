@@ -1,12 +1,11 @@
-import React, { useState, useMemo, useEffect } from 'react';
-import Header from '../../components/navigation/Header';
+import React, { useState, useMemo, useEffect } from "react";
+import Header from "../../components/navigation/Header";
 
+import Icon from "../../components/AppIcon";
 
-import Icon from '../../components/AppIcon';
-
-import MediaGrid from './components/MediaGrid';
-import FilterToolbar from './components/FilterToolbar';
-import { getRecentItems } from '../../services/libraryService';
+import MediaGrid from "./components/MediaGrid";
+import FilterToolbar from "./components/FilterToolbar";
+import { getRecentItems } from "../../services/libraryService";
 
 /**
  * Format file size from API response
@@ -16,45 +15,45 @@ import { getRecentItems } from '../../services/libraryService';
  */
 const formatFileSize = (size) => {
   // If size is null or undefined
-  if (!size && size !== 0) return '0.0 GB';
-  
+  if (!size && size !== 0) return "0.0 GB";
+
   // If size is already a string with units (e.g., "8.5 GB", "142.8 GB")
-  if (typeof size === 'string') {
+  if (typeof size === "string") {
     // Check if it already contains GB, MB, KB, etc.
     if (/\d+(\.\d+)?\s*(GB|MB|KB|TB)/i?.test(size)) {
       return size;
     }
     // Try to parse as number if it's a numeric string
     const parsed = parseFloat(size);
-    if (isNaN(parsed)) return '0.0 GB';
+    if (isNaN(parsed)) return "0.0 GB";
     size = parsed;
   }
-  
+
   // If size is 0
-  if (size === 0) return '0.0 GB';
-  
+  if (size === 0) return "0.0 GB";
+
   // If size is a number, assume it's in bytes and convert to GB
   // Only convert if the number is large enough to be bytes (> 1024)
-  if (typeof size === 'number') {
+  if (typeof size === "number") {
     if (size > 1024) {
       // Likely in bytes, convert to GB
-      return `${(size / (1024 ** 3))?.toFixed(1)} GB`;
+      return `${(size / 1024 ** 3)?.toFixed(1)} GB`;
     } else {
       // Small number, likely already in GB
       return `${size?.toFixed(1)} GB`;
     }
   }
-  
-  return '0.0 GB';
+
+  return "0.0 GB";
 };
 
 const Library = () => {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [searchQuery, setSearchQuery] = useState("");
   const [filters, setFilters] = useState({
-    contentType: 'all',
-    quality: 'all',
-    sortBy: 'added_date',
-    order: 'desc'
+    contentType: "all",
+    quality: "all",
+    sortBy: "added_date",
+    order: "desc",
   });
   const [limit, setLimit] = useState(20);
   const [mediaData, setMediaData] = useState([]);
@@ -65,25 +64,33 @@ const Library = () => {
     const fetchMediaData = async () => {
       setLoading(true);
       try {
-        const data = await getRecentItems(limit, filters?.sortBy, filters?.order);
+        const data = await getRecentItems(
+          limit,
+          filters?.sortBy,
+          filters?.order,
+        );
         // Transform API response to match component structure
-        const transformedData = data?.map((item) => ({
-          id: item?.id,
-          title: item?.title,
-          type: item?.media_type,
-          quality: item?.quality || 'N/A',
-          size: item?.size || '0.0 GB',
-          addedDate: item?.created_at?.split('T')?.[0] || item?.added_date,
-          viewCount: 99, // Hard-coded as requested
-          hasSubtitles: true,
-          seedRatio: item?.torrent_info?.ratio || 0,
-          nbMedia: item?.nb_media || 0,
-          image: item?.image_url || 'https://via.placeholder.com/300x450',
-          imageAlt: item?.image_alt || `${item?.title} poster`
-        })) || [];
+        const transformedData =
+          data?.map((item) => ({
+            id: item?.id,
+            title: item?.title,
+            type: item?.media_type,
+            quality: item?.quality || "N/A",
+            size: item?.size || "0.0 GB",
+            addedDate: item?.created_at?.split("T")?.[0] || item?.added_date,
+            viewCount: 99, // Hard-coded as requested
+            torrent_info: item?.torrent_info,
+            torrentCount:
+              item?.torrent_info?.torrent_count || item?.torrent_count || 0,
+            hasSubtitles: true,
+            seedRatio: item?.torrent_info?.ratio || 0,
+            nbMedia: item?.nb_media || 0,
+            image: item?.image_url || "https://via.placeholder.com/300x450",
+            imageAlt: item?.image_alt || `${item?.title} poster`,
+          })) || [];
         setMediaData(transformedData);
       } catch (error) {
-        console.error('Error loading media data:', error);
+        console.error("Error loading media data:", error);
         setMediaData([]);
       } finally {
         setLoading(false);
@@ -100,18 +107,20 @@ const Library = () => {
     // Apply search filter
     if (searchQuery) {
       result = result?.filter((item) =>
-      item?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase())
+        item?.title?.toLowerCase()?.includes(searchQuery?.toLowerCase()),
       );
     }
 
     // Apply content type filter
-    if (filters?.contentType !== 'all') {
+    if (filters?.contentType !== "all") {
       result = result?.filter((item) => item?.type === filters?.contentType);
     }
 
     // Apply quality filter
-    if (filters?.quality !== 'all') {
-      result = result?.filter((item) => item?.quality?.includes(filters?.quality));
+    if (filters?.quality !== "all") {
+      result = result?.filter((item) =>
+        item?.quality?.includes(filters?.quality),
+      );
     }
 
     return result;
@@ -132,8 +141,12 @@ const Library = () => {
               <Icon name="Library" size={20} color="var(--color-primary)" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Media Library</h1>
-              <p className="text-sm text-muted-foreground">Browse and manage your complete Jellyfin collection</p>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                Media Library
+              </h1>
+              <p className="text-sm text-muted-foreground">
+                Browse and manage your complete Jellyfin collection
+              </p>
             </div>
           </div>
         </div>
@@ -144,8 +157,8 @@ const Library = () => {
           onSearchChange={setSearchQuery}
           filters={filters}
           onFilterChange={handleFilterChange}
-          totalResults={filteredMedia?.length} />
-        
+          totalResults={filteredMedia?.length}
+        />
 
         {/* Media Grid */}
         {loading ? (
@@ -169,7 +182,8 @@ const Library = () => {
                 onClick={() => setLimit(value)}
                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
                   limit === value
-                    ? 'bg-primary text-white' :'bg-card text-foreground hover:bg-primary/10'
+                    ? "bg-primary text-white"
+                    : "bg-card text-foreground hover:bg-primary/10"
                 }`}
               >
                 {value}
@@ -180,7 +194,6 @@ const Library = () => {
       </div>
     </div>
   );
-
 };
 
 export default Library;

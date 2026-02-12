@@ -123,25 +123,71 @@ class SonarrConnector(BaseConnector):
 
     async def get_series_history_map(self) -> dict[int, str]:
         """
-        Créer une map {seriesId: torrent_hash}
+        Créer une map {seriesId: torrent_hash} (backward compat, returns first hash only)
 
         Returns:
             Dictionnaire associant les IDs de séries aux hash de torrents
         """
-        history = await self.get_history(page_size=200)
-        series_hash_map = {}
+        torrents_map = await self.get_series_torrents_map()
+        return {series_id: entries[0]["hash"] for series_id, entries in torrents_map.items() if entries}
+
+    async def get_series_torrents_map(self) -> dict[int, list[dict]]:
+        """
+        Créer une map {seriesId: [{hash, episode_id, season_number, is_season_pack}, ...]}
+
+        Fetches history with a larger page size to capture all torrents per series.
+        Detects season packs by finding hashes shared across multiple episodes.
+
+        Returns:
+            Dict mapping series IDs to lists of torrent info dicts
+        """
+        history = await self.get_history(page_size=500)
+
+        # First pass: collect all (hash, episode, season) tuples per series
+        # Also track which episodes each hash covers (for season pack detection)
+        series_entries: dict[int, dict[str, dict]] = {}  # {seriesId: {hash: entry_dict}}
+        hash_episodes: dict[str, set[int]] = {}  # {hash: {episodeId, ...}}
 
         for record in history:
             series_id = record.get("seriesId")
             download_id = record.get("downloadId", "")
+            episode_id = record.get("episodeId")
+            season_number = record.get("seasonNumber")
 
-            if series_id and download_id:
-                # Extraire le hash du downloadId
-                hash_value = self._extract_hash(download_id)
-                if hash_value:
-                    series_hash_map[series_id] = hash_value
+            if not series_id or not download_id:
+                continue
 
-        return series_hash_map
+            hash_value = self._extract_hash(download_id)
+            if not hash_value:
+                continue
+
+            # Track episodes per hash for season pack detection
+            if hash_value not in hash_episodes:
+                hash_episodes[hash_value] = set()
+            if episode_id:
+                hash_episodes[hash_value].add(episode_id)
+
+            # Store unique hash per series
+            if series_id not in series_entries:
+                series_entries[series_id] = {}
+
+            if hash_value not in series_entries[series_id]:
+                series_entries[series_id][hash_value] = {
+                    "hash": hash_value,
+                    "episode_id": episode_id,
+                    "season_number": season_number,
+                    "is_season_pack": False,
+                }
+
+        # Second pass: mark season packs (hash covers 2+ episodes)
+        for series_id, entries in series_entries.items():
+            for hash_value, entry in entries.items():
+                if len(hash_episodes.get(hash_value, set())) > 1:
+                    entry["is_season_pack"] = True
+                    entry["episode_id"] = None  # Not tied to a single episode
+
+        # Convert to list format
+        return {series_id: list(entries.values()) for series_id, entries in series_entries.items()}
 
     def _extract_hash(self, download_id: str) -> str | None:
         """
