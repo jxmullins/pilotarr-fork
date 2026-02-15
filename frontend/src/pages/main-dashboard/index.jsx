@@ -236,7 +236,7 @@ const MainDashboard = () => {
         loadStatistics(),
         loadLibraryItems(),
         loadCalendarEvents(),
-        loadJellyseerrRequests() // Fixed: Changed from loadPendingRequests to loadJellyseerrRequests
+        loadJellyseerrRequests()
       ]);
       
       setLastRefresh(new Date());

@@ -28,7 +28,7 @@ export const getRecentItems = async (
  * @param {number} limit - Number of items to fetch
  * @param {string} sortBy - Sort field (added_date, ratio, size, title)
  * @param {string} sortOrder - Sort order (asc, desc)
- * @returns {Promise<Array>} Array of recent items
+ * @returns {Promise<Array>} Array item
  */
 export const getLibraryItems = async (
   limit = 20,
@@ -45,6 +45,23 @@ export const getLibraryItems = async (
     return [];
   }
 };
+
+/**
+ * Get library item by id
+ * @param {string} id - Media item ID
+ * @returns {Promise<Object|null>} Media detail object or null
+ */
+export const getLibraryItemById = async (id) => {
+try {
+    const response = await servarrHubClient?.get(
+      `/library/${id}`,
+    );
+    return response?.data || [];
+  } catch (error) {
+    console.error("Error fetching library items:", error?.message);
+    return null;
+  }
+}
 
 /**
  * Get detailed information for a specific media item

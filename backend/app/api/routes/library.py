@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, Query, HTTPException
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
@@ -75,3 +75,38 @@ async def get_library(
         results.append(data)
 
     return results
+
+
+@router.get("/{id}", response_model=LibraryItemResponse)
+async def get_library_item(
+    id: str,
+    db: Session = Depends(get_db),
+):
+    item = (
+        db.query(LibraryItem)
+        .where(LibraryItem.id == id, LibraryItem.size != 0)
+        .options(selectinload(LibraryItem.torrents))
+        .first()
+    )
+
+    if not item:
+        raise HTTPException(status_code=404, detail="Library item not found")
+
+    data = {
+        "id": item.id,
+        "title": item.title,
+        "year": item.year,
+        "media_type": item.media_type,
+        "image_url": item.image_url,
+        "image_alt": item.image_alt,
+        "quality": item.quality,
+        "rating": item.rating,
+        "description": item.description,
+        "added_date": item.added_date,
+        "size": item.size,
+        "nb_media": item.nb_media,
+        "created_at": item.created_at,
+        "torrent_info": _build_torrent_info_array(item),
+    }
+
+    return data

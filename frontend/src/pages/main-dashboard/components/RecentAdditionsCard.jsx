@@ -15,7 +15,7 @@ const RecentAdditionsCard = ({ item }) => {
   };
 
   const handleClick = () => {
-    navigate('/media-detail');
+    navigate(`/library/${item?.id || ''}`);
   };
 
   return (

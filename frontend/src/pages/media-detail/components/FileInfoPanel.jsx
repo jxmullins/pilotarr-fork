@@ -77,7 +77,7 @@ const FileInfoPanel = ({ media }) => {
         <div className="flex items-center gap-2">
           <div className="bg-accent px-3 py-1 rounded-md">
             <span className="text-sm font-bold text-accent-foreground">
-              {media?.quality || "N/A"}
+              {media?.fileInfo.quality || "N/A"}
             </span>
           </div>
         </div>
@@ -91,7 +91,7 @@ const FileInfoPanel = ({ media }) => {
         <div className="flex items-center gap-2">
           <Icon name="HardDrive" size={16} className="text-muted-foreground" />
           <span className="text-foreground font-medium">
-            {media?.size || "0.0 GB"}
+            {media?.fileInfo.size || "0.0 GB"}
           </span>
         </div>
       </div>
@@ -120,9 +120,9 @@ const FileInfoPanel = ({ media }) => {
         <h3 className="text-sm font-semibold text-muted-foreground uppercase">
           Subtitles
         </h3>
-        {media?.subtitles && media?.subtitles?.length > 0 ? (
+        {media?.fileInfo.subtitles && media?.fileInfo.subtitles?.length > 0 ? (
           <div className="space-y-2">
-            {media?.subtitles?.map((subtitle, index) => (
+            {media?.fileInfo.subtitles?.map((subtitle, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between bg-muted px-3 py-2 rounded-md"

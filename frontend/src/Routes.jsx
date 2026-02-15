@@ -24,7 +24,7 @@ const Routes = () => {
         <Route path="/jellyfin-statistics" element={<JellyfinStatistics />} />
         <Route path="/initial-configuration" element={<InitialConfiguration />} />
         <Route path="/library" element={<Library />} />
-        <Route path="/media-detail" element={<MediaDetail />} />
+        <Route path="/library/:id" element={<MediaDetail />} />
         <Route path="/monitoring" element={<Monitoring />} />
         <Route path="/jellyseerr-requests" element={<JellyseerrRequests />} />
         <Route path="/calendar" element={<Calendar />} />
