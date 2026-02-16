@@ -2,7 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
-    """Configuration de l'application"""
+    """App config"""
 
     # Database
     DB_HOST: str
@@ -22,7 +22,7 @@ class Settings(BaseSettings):
     WEBHOOK_SECRET: str = ""
 
     # App Info
-    APP_NAME: str = "Servarr Hub"
+    APP_NAME: str = "Pilotarr"
     APP_VERSION: str = "1.0.0"
 
     @property

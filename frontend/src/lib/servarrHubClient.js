@@ -1,19 +1,19 @@
 import axios from "axios";
 
-const apiUrl = import.meta.env?.VITE_SERVARRHUB_API_URL;
-const apiKey = import.meta.env?.VITE_SERVARRHUB_API_KEY;
+const apiUrl = import.meta.env?.VITE_PILOTARR_API_URL;
+const apiKey = import.meta.env?.VITE_PILOTARR_API_KEY;
 
 if (!apiUrl || !apiKey) {
   console.warn(
-    "Missing ServarrHub environment variables. Please check your .env file for VITE_SERVARRHUB_API_URL and VITE_SERVARRHUB_API_KEY",
+    "Missing Pilotarr environment variables. Please check your .env file for VITE_PILOTARR_API_URL and VITE_PILOTARR_API_KEY",
   );
 }
 
 /**
- * ServarrHub API Client
+ * Pilotarr API Client
  * Backend API for all data operations and service integrations
  */
-export const servarrHubClient = axios?.create({
+export const PilotarrClient = axios?.create({
   baseURL: apiUrl,
   headers: {
     "X-API-Key": apiKey,
@@ -23,7 +23,7 @@ export const servarrHubClient = axios?.create({
 });
 
 // Add response interceptor for error handling
-servarrHubClient?.interceptors?.response?.use(
+PilotarrClient?.interceptors?.response?.use(
   (response) => response,
   (error) => {
     // Only log errors that aren't 404s (those are handled by individual services)
@@ -40,4 +40,4 @@ servarrHubClient?.interceptors?.response?.use(
   },
 );
 
-export default servarrHubClient;
+export default PilotarrClient;
