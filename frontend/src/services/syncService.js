@@ -1,4 +1,4 @@
-import servarrHubClient from '../lib/servarrHubClient';
+import pilotarrClient from '../lib/pilotarrClient';
 
 /**
  * Sync Metadata Operations
@@ -7,7 +7,7 @@ import servarrHubClient from '../lib/servarrHubClient';
 // Get all sync metadata
 export const getAllSyncMetadata = async () => {
   try {
-    const response = await servarrHubClient?.get('/sync/metadata');
+    const response = await pilotarrClient?.get('/sync/metadata');
     return response?.data || [];
   } catch (error) {
     console.error('Error fetching sync metadata:', error?.message);
@@ -18,7 +18,7 @@ export const getAllSyncMetadata = async () => {
 // Get sync metadata for a specific service
 export const getSyncMetadata = async (serviceName) => {
   try {
-    const response = await servarrHubClient?.get(`/sync/metadata/${serviceName}`);
+    const response = await pilotarrClient?.get(`/sync/metadata/${serviceName}`);
     return response?.data || null;
   } catch (error) {
     console.error(`Error fetching sync metadata for ${serviceName}:`, error?.message);
@@ -29,7 +29,7 @@ export const getSyncMetadata = async (serviceName) => {
 // Update sync status
 export const updateSyncStatus = async (serviceName, status, errorMessage = null) => {
   try {
-    const response = await servarrHubClient?.post('/sync/status', {
+    const response = await pilotarrClient?.post('/sync/status', {
       serviceName,
       status,
       errorMessage,
@@ -45,7 +45,7 @@ export const updateSyncStatus = async (serviceName, status, errorMessage = null)
 // Complete sync with results
 export const completeSyncMetadata = async (serviceName, recordsSynced, durationMs, nextSyncTime) => {
   try {
-    const response = await servarrHubClient?.post('/sync/complete', {
+    const response = await pilotarrClient?.post('/sync/complete', {
       serviceName,
       recordsSynced,
       durationMs,
@@ -61,7 +61,7 @@ export const completeSyncMetadata = async (serviceName, recordsSynced, durationM
 // Get services that need syncing
 export const getServicesNeedingSync = async () => {
   try {
-    const response = await servarrHubClient?.get('/sync/pending');
+    const response = await pilotarrClient?.get('/sync/pending');
     return response?.data || [];
   } catch (error) {
     console.error('Error fetching services needing sync:', error?.message);
@@ -72,7 +72,7 @@ export const getServicesNeedingSync = async () => {
 // Trigger manual sync for all services
 export const triggerSync = async () => {
   try {
-    const response = await servarrHubClient?.post('/sync/trigger');
+    const response = await pilotarrClient?.post('/sync/trigger');
     return response?.data || { success: false };
   } catch (error) {
     console.error('Error triggering sync:', error?.message);

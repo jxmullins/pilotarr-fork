@@ -1,4 +1,4 @@
-import servarrHubClient from "../lib/servarrHubClient";
+import pilotarrClient from "../lib/pilotarrClient";
 
 /**
  * Get recent items (media and request) from dashboard API
@@ -13,7 +13,7 @@ export const getRecentItems = async (
   sortOrder = "desc",
 ) => {
   try {
-    const response = await servarrHubClient?.get(
+    const response = await pilotarrClient?.get(
       `/dashboard/recent-items?limit=${limit}&sort_by=${sortBy}&sort_order=${sortOrder}`,
     );
     return response?.data || [];
@@ -36,7 +36,7 @@ export const getLibraryItems = async (
   sortOrder = "desc",
 ) => {
   try {
-    const response = await servarrHubClient?.get(
+    const response = await pilotarrClient?.get(
       `/library?limit=${limit}&sort_by=${sortBy}&sort_order=${sortOrder}`,
     );
     return response?.data || [];
@@ -53,7 +53,7 @@ export const getLibraryItems = async (
  */
 export const getLibraryItemById = async (id) => {
 try {
-    const response = await servarrHubClient?.get(
+    const response = await pilotarrClient?.get(
       `/library/${id}`,
     );
     return response?.data || [];

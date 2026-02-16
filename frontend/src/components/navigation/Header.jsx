@@ -16,7 +16,7 @@ const Header = () => {
   const [configProgress, setConfigProgress] = useState(false);
 
   useEffect(() => {
-    const configComplete = localStorage.getItem('servarrhub_config_complete');
+    const configComplete = localStorage.getItem('pilotarr_config_complete');
     setConfigProgress(!configComplete);
   }, []);
 
@@ -143,7 +143,7 @@ const Header = () => {
             <div className="nav-header-logo-icon">
               <Icon name="Server" size={24} color="var(--color-primary)" />
             </div>
-            <span className="nav-header-logo-text">ServarrHub</span>
+            <span className="nav-header-logo-text">Pilotarr</span>
           </div>
 
           <nav className="nav-header-menu">
@@ -262,7 +262,7 @@ const Header = () => {
             <div className="nav-header-logo-icon">
               <Icon name="Server" size={24} color="var(--color-primary)" />
             </div>
-            <span className="nav-header-logo-text">ServarrHub</span>
+            <span className="nav-header-logo-text">Pilotarr</span>
           </div>
         </div>
 

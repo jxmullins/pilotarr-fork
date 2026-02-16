@@ -1,4 +1,4 @@
-import servarrHubClient from '../lib/servarrHubClient';
+import pilotarrClient from '../lib/pilotarrClient';
 
 /**
  * Dashboard Statistics Operations
@@ -7,7 +7,7 @@ import servarrHubClient from '../lib/servarrHubClient';
 // Get all dashboard statistics
 export const getDashboardStatistics = async () => {
   try {
-    const response = await servarrHubClient?.get('/dashboard/statistics');
+    const response = await pilotarrClient?.get('/dashboard/statistics');
     return response?.data || [];
   } catch (error) {
     // Silently handle errors - API might be down or endpoint not implemented
@@ -18,7 +18,7 @@ export const getDashboardStatistics = async () => {
 // Get single statistic by type
 export const getDashboardStatistic = async (statType) => {
   try {
-    const response = await servarrHubClient?.get(`/dashboard/statistics/${statType}`);
+    const response = await pilotarrClient?.get(`/dashboard/statistics/${statType}`);
     return response?.data || null;
   } catch (error) {
     return null;
@@ -28,7 +28,7 @@ export const getDashboardStatistic = async (statType) => {
 // Get recent library additions
 export const getRecentItems = async (limit = 20) => {
   try {
-    const response = await servarrHubClient?.get(`/dashboard/recent-items?limit=${limit}`);
+    const response = await pilotarrClient?.get(`/dashboard/recent-items?limit=${limit}`);
     return response?.data || [];
   } catch (error) {
     return [];
@@ -38,7 +38,7 @@ export const getRecentItems = async (limit = 20) => {
 // Save or update dashboard statistic
 export const saveDashboardStatistic = async (statType, totalCount, details) => {
   try {
-    const response = await servarrHubClient?.post('/dashboard/statistics', {
+    const response = await pilotarrClient?.post('/dashboard/statistics', {
       statType,
       totalCount,
       details,
@@ -54,7 +54,7 @@ export const saveDashboardStatistic = async (statType, totalCount, details) => {
 // Bulk update dashboard statistics
 export const bulkUpdateDashboardStatistics = async (statistics) => {
   try {
-    const response = await servarrHubClient?.post('/dashboard/statistics/bulk', {
+    const response = await pilotarrClient?.post('/dashboard/statistics/bulk', {
       statistics
     });
     return response?.data || [];

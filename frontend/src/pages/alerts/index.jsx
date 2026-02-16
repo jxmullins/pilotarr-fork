@@ -104,7 +104,7 @@ const Alerts = () => {
       dismissed: false,
       suggestions: [
         "Generate new API key in Radarr settings",
-        "Update API key in ServarrHub",
+        "Update API key in Pilotarr",
         "Test connection after update",
       ],
     },
@@ -232,7 +232,7 @@ const Alerts = () => {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `servarrhub-alerts-${new Date()?.toISOString()?.split("T")?.[0]}.json`;
+    a.download = `pilotarr-alerts-${new Date()?.toISOString()?.split("T")?.[0]}.json`;
     document.body?.appendChild(a);
     a?.click();
     document.body?.removeChild(a);
@@ -333,7 +333,7 @@ const Alerts = () => {
                 System Alerts
               </h1>
               <p className="text-gray-600">
-                Monitor and manage system notifications across all Servarr
+                Monitor and manage system notifications across all Pilotarr
                 services
               </p>
             </div>

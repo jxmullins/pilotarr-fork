@@ -1,4 +1,4 @@
-import servarrHubClient from '../lib/servarrHubClient';
+import pilotarrClient from '../lib/pilotarrClient';
 
 /**
  * Get all Jellyseerr requests
@@ -6,7 +6,7 @@ import servarrHubClient from '../lib/servarrHubClient';
  */
 export const getJellyseerrRequests = async (status = 'pending', limit = 10) => {
   try {
-    const response = await servarrHubClient?.get(`/dashboard/requests?status=${status}&limit=${limit}`);
+    const response = await pilotarrClient?.get(`/dashboard/requests?status=${status}&limit=${limit}`);
     
     // Map snake_case API response to camelCase for frontend
     const requests = response?.data?.map(request => ({
@@ -37,7 +37,7 @@ export const getJellyseerrRequests = async (status = 'pending', limit = 10) => {
  */
 export const addJellyseerrRequest = async (request) => {
   try {
-    const response = await servarrHubClient?.post('/jellyseerr/requests', request);
+    const response = await pilotarrClient?.post('/jellyseerr/requests', request);
     return response?.data || null;
   } catch (error) {
     return null;
@@ -51,7 +51,7 @@ export const addJellyseerrRequest = async (request) => {
  */
 export const deleteJellyseerrRequest = async (id) => {
   try {
-    await servarrHubClient?.delete(`/jellyseerr/requests/${id}`);
+    await pilotarrClient?.delete(`/jellyseerr/requests/${id}`);
     return true;
   } catch (error) {
     return false;
@@ -66,7 +66,7 @@ export const deleteJellyseerrRequest = async (id) => {
  */
 export const updateRequestPriority = async (id, priority) => {
   try {
-    await servarrHubClient?.patch(`/jellyseerr/requests/${id}`, { priority });
+    await pilotarrClient?.patch(`/jellyseerr/requests/${id}`, { priority });
     return true;
   } catch (error) {
     return false;

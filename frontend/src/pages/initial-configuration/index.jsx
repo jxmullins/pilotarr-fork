@@ -333,7 +333,7 @@ const InitialConfiguration = () => {
                   Initial Configuration
                 </h1>
                 <p className="text-sm md:text-base text-muted-foreground mt-1">
-                  Configure API connections to your Servarr services
+                  Configure API connections to your Pilotarr services
                 </p>
               </div>
             </div>

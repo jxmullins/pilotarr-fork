@@ -258,7 +258,7 @@ const MainDashboard = () => {
                 Dashboard Overview
               </h1>
               <p className="text-sm md:text-base text-muted-foreground">
-                Monitor your entire Servarr media ecosystem from one place
+                Monitor your entire Servarr* media ecosystem from one place
               </p>
             </div>
             <div className="flex items-center gap-3">

@@ -1,4 +1,4 @@
-import servarrHubClient from '../lib/servarrHubClient';
+import pilotarrClient from '../lib/pilotarrClient';
 
 /**
  * Get all calendar events (upcoming releases)
@@ -6,7 +6,7 @@ import servarrHubClient from '../lib/servarrHubClient';
  */
 export const getCalendarEvents = async (days = 7) => {
   try {
-    const response = await servarrHubClient?.get(`/dashboard/calendar?days=${days}`);
+    const response = await pilotarrClient?.get(`/dashboard/calendar?days=${days}`);
     
     // Map snake_case API response to camelCase for frontend
     const events = response?.data?.map(event => ({
@@ -33,7 +33,7 @@ export const getCalendarEvents = async (days = 7) => {
  */
 export const addCalendarEvent = async (event) => {
   try {
-    const response = await servarrHubClient?.post('/calendar/events', event);
+    const response = await pilotarrClient?.post('/calendar/events', event);
     return response?.data || null;
   } catch (error) {
     return null;
@@ -48,7 +48,7 @@ export const addCalendarEvent = async (event) => {
  */
 export const updateCalendarEventStatus = async (id, status) => {
   try {
-    await servarrHubClient?.patch(`/calendar/events/${id}`, { status });
+    await pilotarrClient?.patch(`/calendar/events/${id}`, { status });
     return true;
   } catch (error) {
     return false;
@@ -62,7 +62,7 @@ export const updateCalendarEventStatus = async (id, status) => {
  */
 export const deleteCalendarEvent = async (id) => {
   try {
-    await servarrHubClient?.delete(`/calendar/events/${id}`);
+    await pilotarrClient?.delete(`/calendar/events/${id}`);
     return true;
   } catch (error) {
     return false;

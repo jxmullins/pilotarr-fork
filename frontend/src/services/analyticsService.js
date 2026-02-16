@@ -1,8 +1,8 @@
-import servarrHubClient from '../lib/servarrHubClient';
+import pilotarrClient from '../lib/pilotarrClient';
 
 /**
  * Analytics Service
- * Handles fetching analytics data from ServarrHub API
+ * Handles fetching analytics data from Pilotarr API
  */
 
 /**
@@ -13,7 +13,7 @@ import servarrHubClient from '../lib/servarrHubClient';
  */
 export const getUsageAnalytics = async (startDate, endDate) => {
   try {
-    const response = await servarrHubClient?.get('/analytics/usage', {
+    const response = await pilotarrClient?.get('/analytics/usage', {
       params: {
         start_date: startDate,
         end_date: endDate
@@ -33,7 +33,7 @@ export const getUsageAnalytics = async (startDate, endDate) => {
  */
 export const getDeviceBreakdown = async (periodDays = 365) => {
   try {
-    const response = await servarrHubClient?.get('/analytics/devices', {
+    const response = await pilotarrClient?.get('/analytics/devices', {
       params: {
         period_days: periodDays
       }
@@ -54,7 +54,7 @@ export const getDeviceBreakdown = async (periodDays = 365) => {
  */
 export const getMediaAnalytics = async (limit = 10, sortBy = 'plays', order = 'desc') => {
   try {
-    const response = await servarrHubClient?.get('/analytics/media', {
+    const response = await pilotarrClient?.get('/analytics/media', {
       params: {
         limit,
         sort_by: sortBy,
@@ -74,7 +74,7 @@ export const getMediaAnalytics = async (limit = 10, sortBy = 'plays', order = 'd
  */
 export const getServerMetrics = async () => {
   try {
-    const response = await servarrHubClient?.get('/analytics/server-metrics');
+    const response = await pilotarrClient?.get('/analytics/server-metrics');
     return response?.data || null;
   } catch (error) {
     console.error('Failed to fetch server metrics:', error);

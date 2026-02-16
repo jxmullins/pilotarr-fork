@@ -1,4 +1,4 @@
-import servarrHubClient from '../lib/servarrHubClient';
+import pilotarrClient from '../lib/pilotarrClient';
 
 /**
  * Service Configuration Operations
@@ -31,7 +31,7 @@ export const getServiceConfigurations = async () => {
     // Fetch all services individually since the API uses /api/services/{service_name}
     const serviceNames = ['jellyfin', 'jellyseerr', 'radarr', 'sonarr', 'qbittorrent'];
     const promises = serviceNames?.map(name => 
-      servarrHubClient?.get(`/services/${name}`)?.then(response => mapServiceResponse(response?.data))?.catch(error => {
+      pilotarrClient?.get(`/services/${name}`)?.then(response => mapServiceResponse(response?.data))?.catch(error => {
           // If service not found (404), return null
           if (error?.response?.status === 404) {
             return null;
@@ -51,7 +51,7 @@ export const getServiceConfigurations = async () => {
 // Get single service configuration by service name
 export const getServiceConfiguration = async (serviceName) => {
   try {
-    const response = await servarrHubClient?.get(`/services/${serviceName}`);
+    const response = await pilotarrClient?.get(`/services/${serviceName}`);
     return mapServiceResponse(response?.data);
   } catch (error) {
     console.error(`Error fetching ${serviceName} configuration:`, error?.message);
@@ -61,7 +61,7 @@ export const getServiceConfiguration = async (serviceName) => {
 
 export const saveServiceConfiguration = async (serviceName, config) => {
   try {
-    const response = await servarrHubClient?.put(`/services/${serviceName}`, {
+    const response = await pilotarrClient?.put(`/services/${serviceName}`, {
       service_name: serviceName,
       url: config?.url,
       api_key: config?.apiKey,
@@ -84,7 +84,7 @@ export const saveServiceConfiguration = async (serviceName, config) => {
 // Test service connection
 export const testServiceConnection = async (serviceName) => {
   try {
-    const response = await servarrHubClient?.post(`/services/${serviceName}/test`, {});
+    const response = await pilotarrClient?.post(`/services/${serviceName}/test`, {});
     return {
       success: response?.data?.success,
       message: response?.data?.message,
@@ -99,7 +99,7 @@ export const testServiceConnection = async (serviceName) => {
 // Update test status for a service
 export const updateServiceTestStatus = async (serviceName, testStatus, testMessage) => {
   try {
-    const response = await servarrHubClient?.patch(`/services/${serviceName}/test`, {
+    const response = await pilotarrClient?.patch(`/services/${serviceName}/test`, {
       test_status: testStatus,
       test_message: testMessage,
       last_tested_at: new Date()?.toISOString()
@@ -114,7 +114,7 @@ export const updateServiceTestStatus = async (serviceName, testStatus, testMessa
 // Delete service configuration
 export const deleteServiceConfiguration = async (serviceName) => {
   try {
-    await servarrHubClient?.delete(`/services/${serviceName}`);
+    await pilotarrClient?.delete(`/services/${serviceName}`);
     return true;
   } catch (error) {
     console.error('Error deleting service configuration:', error?.message);

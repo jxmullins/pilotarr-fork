@@ -31,7 +31,7 @@ PilotarrClient?.interceptors?.response?.use(
       // Only log if it's not a network error (API might be down)
       if (error?.code !== "ERR_NETWORK" && error?.message !== "Network Error") {
         console.error(
-          "ServarrHub API Error:",
+          "Pilotarr API Error:",
           error?.response?.data || error?.message,
         );
       }
