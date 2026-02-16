@@ -10,9 +10,11 @@ from app.models.enums import (
 from app.models.models import (
     CalendarEvent,
     DashboardStatistic,
+    Episode,
     JellyseerrRequest,
     LibraryItem,
     LibraryItemTorrent,
+    Season,
     ServiceConfiguration,
     SyncMetadata,
 )
@@ -30,6 +32,8 @@ __all__ = [
     "SyncMetadata",
     "LibraryItem",
     "LibraryItemTorrent",
+    "Season",
+    "Episode",
     "CalendarEvent",
     "JellyseerrRequest",
 ]

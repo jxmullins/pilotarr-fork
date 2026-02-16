@@ -8,12 +8,14 @@ from app.models import (
     CalendarEvent,
     CalendarStatus,
     DashboardStatistic,
+    Episode,
     JellyseerrRequest,
     LibraryItem,
     LibraryItemTorrent,
     MediaType,
     RequestPriority,
     RequestStatus,
+    Season,
     ServiceConfiguration,
     ServiceType,
     StatType,
@@ -353,6 +355,88 @@ class SyncService:
         finally:
             await connector.close()
 
+    async def sync_sonarr_seasons(self) -> dict[str, Any]:
+        """
+        Sync seasons for TV shows from embedded series data
+        Runs as part of sync_sonarr()
+        """
+        print("📺 Synchronisation des saisons Sonarr...")
+
+        service = self.get_active_service(ServiceType.SONARR)
+        if not service:
+            return {"success": False, "message": "Service non configuré"}
+
+        connector = SonarrConnector(base_url=service.url, api_key=service.api_key, port=service.port)
+
+        try:
+            # Get all TV show items
+            series_items = self.db.query(LibraryItem).filter(LibraryItem.media_type == MediaType.TV).all()
+
+            # Get all series from Sonarr (with embedded seasons)
+            series_list = await connector.get_series()
+
+            seasons_synced = 0
+            seasons_updated = 0
+
+            for item in series_items:
+                # Find Sonarr series by title + year
+                series_data = next(
+                    (s for s in series_list if s.get("title") == item.title and s.get("year") == item.year), None
+                )
+
+                if not series_data or "seasons" not in series_data:
+                    continue
+
+                # Upsert seasons from embedded data
+                for season_data in series_data["seasons"]:
+                    season_num = season_data.get("seasonNumber")
+                    if season_num is None:
+                        continue
+
+                    stats = season_data.get("statistics", {})
+
+                    existing = (
+                        self.db.query(Season)
+                        .filter(Season.library_item_id == item.id, Season.season_number == season_num)
+                        .first()
+                    )
+
+                    if existing:
+                        # Update existing season
+                        existing.monitored = season_data.get("monitored", True)
+                        existing.episode_count = stats.get("episodeCount", 0)
+                        existing.episode_file_count = stats.get("episodeFileCount", 0)
+                        existing.total_episode_count = stats.get("totalEpisodeCount", 0)
+                        existing.size_on_disk = stats.get("sizeOnDisk", 0)
+                        existing.statistics = stats
+                        seasons_updated += 1
+                    else:
+                        # Create new season
+                        new_season = Season(
+                            library_item_id=item.id,
+                            sonarr_series_id=series_data["id"],
+                            season_number=season_num,
+                            monitored=season_data.get("monitored", True),
+                            episode_count=stats.get("episodeCount", 0),
+                            episode_file_count=stats.get("episodeFileCount", 0),
+                            total_episode_count=stats.get("totalEpisodeCount", 0),
+                            size_on_disk=stats.get("sizeOnDisk", 0),
+                            statistics=stats,
+                        )
+                        self.db.add(new_season)
+                        seasons_synced += 1
+
+            self.db.commit()
+
+            print(f"✅ Saisons: {seasons_synced} créées, {seasons_updated} mises à jour")
+            return {"success": True, "seasons_synced": seasons_synced, "seasons_updated": seasons_updated}
+
+        except Exception as e:
+            print(f"❌ Erreur sync saisons: {e}")
+            return {"success": False, "error": str(e)}
+        finally:
+            await connector.close()
+
     async def sync_sonarr(self) -> dict[str, Any]:
         """Synchroniser les données Sonarr"""
         print("📺 Synchronisation Sonarr...")
@@ -550,16 +634,212 @@ class SyncService:
 
             self.db.commit()
 
+            # Sync seasons after syncing series
+            seasons_result = await self.sync_sonarr_seasons()
+
             duration_ms = int((time.time() - start_time) * 1000)
             self.update_sync_metadata(ServiceType.SONARR, SyncStatus.SUCCESS, added_count + calendar_count, duration_ms)
 
-            print(f"✅ Sonarr: {added_count} séries, {calendar_count} événements")
-            return {"success": True, "series_added": added_count, "calendar_events": calendar_count}
+            print(
+                f"✅ Sonarr: {added_count} séries, {calendar_count} événements, "
+                f"{seasons_result.get('seasons_synced', 0)} saisons"
+            )
+            return {
+                "success": True,
+                "series_added": added_count,
+                "calendar_events": calendar_count,
+                "seasons_synced": seasons_result.get("seasons_synced", 0),
+            }
 
         except Exception as e:
             duration_ms = int((time.time() - start_time) * 1000)
             self.update_sync_metadata(ServiceType.SONARR, SyncStatus.FAILED, 0, duration_ms, str(e))
             print(f"❌ Erreur sync Sonarr: {e}")
+            return {"success": False, "error": str(e)}
+        finally:
+            await connector.close()
+
+    async def sync_sonarr_episodes(self, full_sync: bool = False, series_limit: int = 5) -> dict[str, Any]:
+        """
+        Sync episodes for TV shows - separate job from series sync
+
+        Args:
+            full_sync: If True, sync all series. If False, only monitored.
+            series_limit: Max series per run (rate limiting)
+        """
+        print("📺 Synchronisation des épisodes Sonarr...")
+        start_time = time.time()
+
+        service = self.get_active_service(ServiceType.SONARR)
+        if not service:
+            print("⚠️ Service Sonarr non configuré")
+            return {"success": False, "message": "Service non configuré"}
+
+        connector = SonarrConnector(base_url=service.url, api_key=service.api_key, port=service.port)
+
+        try:
+            # Get series to sync (limited batch)
+            if full_sync:
+                # Sync all TV series
+                series_items = (
+                    self.db.query(LibraryItem).filter(LibraryItem.media_type == MediaType.TV).limit(series_limit).all()
+                )
+            else:
+                # Only sync series with monitored seasons (use distinct to avoid duplicates)
+                series_items = (
+                    self.db.query(LibraryItem)
+                    .join(Season, Season.library_item_id == LibraryItem.id)
+                    .filter(LibraryItem.media_type == MediaType.TV, Season.monitored)
+                    .distinct()
+                    .limit(series_limit)
+                    .all()
+                )
+
+            print(f"  📊 Found {len(series_items)} series to sync (full_sync={full_sync}, limit={series_limit})")
+
+            if not series_items:
+                print("  ⚠️  No series found to sync")
+                return {"success": True, "series_processed": 0, "episodes_synced": 0, "episodes_updated": 0}
+
+            series_list = await connector.get_series()
+            print(f"  📡 Fetched {len(series_list)} series from Sonarr")
+
+            episodes_synced = 0
+            episodes_updated = 0
+
+            for idx, item in enumerate(series_items, 1):
+                print(f"  📺 [{idx}/{len(series_items)}] Processing: {item.title} ({item.year})")
+
+                # Find Sonarr series
+                series_data = next(
+                    (s for s in series_list if s.get("title") == item.title and s.get("year") == item.year), None
+                )
+
+                if not series_data:
+                    print("    ⚠️  Not found in Sonarr")
+                    continue
+
+                series_id = series_data["id"]
+                print(f"    🔍 Sonarr series ID: {series_id}")
+
+                # Fetch episodes + files
+                episodes = await connector.get_episodes_by_series(series_id)
+                episode_files = await connector.get_episode_files_by_series(series_id)
+                file_map = {f["id"]: f for f in episode_files}
+
+                print(f"    📥 Fetched {len(episodes)} episodes, {len(episode_files)} files")
+
+                # Upsert episodes
+                series_episodes_synced = 0
+                series_episodes_updated = 0
+
+                for ep_data in episodes:
+                    season_num = ep_data.get("seasonNumber")
+                    episode_num = ep_data.get("episodeNumber")
+
+                    if season_num is None or episode_num is None:
+                        continue
+
+                    # Find or create season
+                    season = (
+                        self.db.query(Season)
+                        .filter(Season.library_item_id == item.id, Season.season_number == season_num)
+                        .first()
+                    )
+
+                    if not season:
+                        # Create season if it doesn't exist
+                        season = Season(
+                            library_item_id=item.id,
+                            sonarr_series_id=series_id,
+                            season_number=season_num,
+                        )
+                        self.db.add(season)
+                        self.db.flush()
+
+                    # Extract file info
+                    has_file = ep_data.get("hasFile", False)
+                    episode_file_id = ep_data.get("episodeFileId")
+                    file_info = file_map.get(episode_file_id) if episode_file_id else None
+
+                    # Parse air date
+                    air_date = None
+                    if ep_data.get("airDate"):
+                        try:
+                            air_date = datetime.fromisoformat(ep_data["airDate"]).date()
+                        except (ValueError, TypeError):
+                            pass
+
+                    # Upsert episode
+                    existing = self.db.query(Episode).filter(Episode.sonarr_episode_id == ep_data["id"]).first()
+
+                    if existing:
+                        # Update existing
+                        existing.title = ep_data.get("title")
+                        existing.overview = ep_data.get("overview")
+                        existing.air_date = air_date
+                        existing.monitored = ep_data.get("monitored", True)
+                        existing.has_file = has_file
+                        existing.downloaded = has_file
+                        existing.sonarr_episode_file_id = episode_file_id
+
+                        if file_info:
+                            existing.file_size = file_info.get("size")
+                            existing.quality_profile = file_info.get("quality", {}).get("quality", {}).get("name")
+                            existing.relative_path = file_info.get("relativePath")
+                            existing.episode_file_info = file_info
+
+                        episodes_updated += 1
+                        series_episodes_updated += 1
+                    else:
+                        # Insert new
+                        new_episode = Episode(
+                            season_id=season.id,
+                            library_item_id=item.id,
+                            sonarr_episode_id=ep_data["id"],
+                            sonarr_series_id=series_id,
+                            season_number=season_num,
+                            episode_number=episode_num,
+                            absolute_episode_number=ep_data.get("absoluteEpisodeNumber"),
+                            title=ep_data.get("title"),
+                            overview=ep_data.get("overview"),
+                            air_date=air_date,
+                            monitored=ep_data.get("monitored", True),
+                            has_file=has_file,
+                            downloaded=has_file,
+                            sonarr_episode_file_id=episode_file_id,
+                        )
+
+                        if file_info:
+                            new_episode.file_size = file_info.get("size")
+                            new_episode.quality_profile = file_info.get("quality", {}).get("quality", {}).get("name")
+                            new_episode.relative_path = file_info.get("relativePath")
+                            new_episode.episode_file_info = file_info
+
+                        self.db.add(new_episode)
+                        episodes_synced += 1
+                        series_episodes_synced += 1
+
+                print(f"    ✅ {series_episodes_synced} created, {series_episodes_updated} updated")
+
+            self.db.commit()
+
+            duration_ms = int((time.time() - start_time) * 1000)
+
+            print(
+                f"✅ Épisodes: {episodes_synced} créés, {episodes_updated} mis à jour "
+                f"({len(series_items)} séries, {duration_ms}ms)"
+            )
+            return {
+                "success": True,
+                "series_processed": len(series_items),
+                "episodes_synced": episodes_synced,
+                "episodes_updated": episodes_updated,
+                "duration_ms": duration_ms,
+            }
+
+        except Exception as e:
+            print(f"❌ Erreur sync épisodes: {e}")
             return {"success": False, "error": str(e)}
         finally:
             await connector.close()

@@ -2,6 +2,7 @@ import uuid
 
 from sqlalchemy import (
     JSON,
+    BigInteger,
     Boolean,
     Column,
     Date,
@@ -109,6 +110,7 @@ class LibraryItem(Base):
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
     torrents = relationship("LibraryItemTorrent", back_populates="library_item", lazy="select")
+    seasons = relationship("Season", back_populates="library_item", lazy="select")
 
 
 # Table 4b: Library Item Torrents (junction table for multi-torrent support)
@@ -128,6 +130,87 @@ class LibraryItemTorrent(Base):
     library_item = relationship("LibraryItem", back_populates="torrents")
 
     __table_args__ = (UniqueConstraint("library_item_id", "torrent_hash", name="uq_item_torrent_hash"),)
+
+
+# Table 4c: Seasons (TV Show seasons)
+class Season(Base):
+    __tablename__ = "seasons"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    library_item_id = Column(String(36), ForeignKey("library_items.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Sonarr identifiers
+    sonarr_series_id = Column(Integer, nullable=False, index=True)
+    season_number = Column(Integer, nullable=False, index=True)
+
+    # Status & Statistics (from Sonarr)
+    monitored = Column(Boolean, default=True, index=True)
+    episode_count = Column(Integer, default=0)
+    episode_file_count = Column(Integer, default=0)  # Downloaded episodes
+    total_episode_count = Column(Integer, default=0)
+    size_on_disk = Column(BigInteger, default=0)
+    statistics = Column(JSON, nullable=True)  # Full Sonarr statistics
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    library_item = relationship("LibraryItem", back_populates="seasons")
+    episodes = relationship("Episode", back_populates="season", cascade="all, delete-orphan", lazy="select")
+
+    __table_args__ = (
+        UniqueConstraint("library_item_id", "season_number", name="uq_item_season_number"),
+        Index("idx_season_series_number", "sonarr_series_id", "season_number"),
+    )
+
+
+# Table 4d: Episodes (TV Show episodes)
+class Episode(Base):
+    __tablename__ = "episodes"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    season_id = Column(String(36), ForeignKey("seasons.id", ondelete="CASCADE"), nullable=False, index=True)
+    library_item_id = Column(String(36), ForeignKey("library_items.id", ondelete="CASCADE"), nullable=False, index=True)
+
+    # Sonarr identifiers
+    sonarr_episode_id = Column(Integer, unique=True, nullable=False, index=True)
+    sonarr_series_id = Column(Integer, nullable=False, index=True)
+    sonarr_episode_file_id = Column(Integer, nullable=True, index=True)
+
+    # Episode identifiers
+    season_number = Column(Integer, nullable=False, index=True)  # Denormalized
+    episode_number = Column(Integer, nullable=False, index=True)
+    absolute_episode_number = Column(Integer, nullable=True)
+
+    # Metadata
+    title = Column(Text, nullable=True)
+    overview = Column(Text, nullable=True)
+    air_date = Column(Date, nullable=True, index=True)
+    air_date_utc = Column(DateTime(timezone=True), nullable=True)
+
+    # Status flags
+    monitored = Column(Boolean, default=True, index=True)
+    has_file = Column(Boolean, default=False, index=True)
+    downloaded = Column(Boolean, default=False, index=True)
+
+    # File details (when downloaded)
+    file_size = Column(BigInteger, nullable=True)
+    quality_profile = Column(String(100), nullable=True)
+    relative_path = Column(Text, nullable=True)
+    episode_file_info = Column(JSON, nullable=True)  # Full episodeFile object
+
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+    # Relationships
+    season = relationship("Season", back_populates="episodes")
+    library_item = relationship("LibraryItem")
+
+    __table_args__ = (
+        UniqueConstraint("sonarr_series_id", "season_number", "episode_number", name="uq_series_season_episode"),
+        Index("idx_episode_air_date", "air_date", "monitored"),
+        Index("idx_episode_series_season", "sonarr_series_id", "season_number"),
+    )
 
 
 # Table 5: Calendar Events

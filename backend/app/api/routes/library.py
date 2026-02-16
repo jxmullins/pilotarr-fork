@@ -1,10 +1,10 @@
-from fastapi import APIRouter, Depends, Query, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import func
 from sqlalchemy.orm import Session, selectinload
 
-from app.api.schemas import LibraryItemResponse
+from app.api.schemas import EpisodeResponse, LibraryItemResponse, SeasonResponse
 from app.db import get_db
-from app.models import LibraryItem
+from app.models import Episode, LibraryItem, MediaType, Season
 from app.models.enums import ItemSortBy
 
 router = APIRouter(prefix="/library", tags=["Library"])
@@ -110,3 +110,29 @@ async def get_library_item(
     }
 
     return data
+
+
+@router.get("/{id}/seasons", response_model=list[SeasonResponse])
+async def get_series_seasons(id: str, db: Session = Depends(get_db)):
+    """Get all seasons for a TV series"""
+    item = db.query(LibraryItem).filter(LibraryItem.id == id).first()
+
+    if not item or item.media_type != MediaType.TV:
+        raise HTTPException(status_code=404, detail="TV series not found")
+
+    seasons = db.query(Season).filter(Season.library_item_id == id).order_by(Season.season_number).all()
+
+    return seasons
+
+
+@router.get("/{id}/seasons/{season_number}/episodes", response_model=list[EpisodeResponse])
+async def get_season_episodes(id: str, season_number: int, db: Session = Depends(get_db)):
+    """Get all episodes for a specific season"""
+    season = db.query(Season).filter(Season.library_item_id == id, Season.season_number == season_number).first()
+
+    if not season:
+        raise HTTPException(status_code=404, detail="Season not found")
+
+    episodes = db.query(Episode).filter(Episode.season_id == season.id).order_by(Episode.episode_number).all()
+
+    return episodes

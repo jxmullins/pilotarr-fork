@@ -95,6 +95,36 @@ class DashboardStatisticResponse(BaseModel):
         from_attributes = True
 
 
+# Season & Episode Schemas
+class SeasonResponse(BaseModel):
+    id: str
+    season_number: int
+    monitored: bool
+    episode_count: int
+    episode_file_count: int
+    size_on_disk: int
+
+    class Config:
+        from_attributes = True
+
+
+class EpisodeResponse(BaseModel):
+    id: str
+    season_number: int
+    episode_number: int
+    title: str | None = None
+    overview: str | None = None
+    air_date: date | None = None
+    monitored: bool
+    has_file: bool
+    downloaded: bool
+    file_size: int | None = None
+    quality_profile: str | None = None
+
+    class Config:
+        from_attributes = True
+
+
 # Library Item Schemas
 class LibraryItemResponse(BaseModel):
     id: str

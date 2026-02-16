@@ -34,6 +34,57 @@ class SonarrConnector(BaseConnector):
             print(f"❌ Erreur récupération séries Sonarr: {e}")
             return []
 
+    async def get_series_by_id(self, series_id: int) -> dict[str, Any]:
+        """
+        GET /api/v3/series/{id} - Get single series with full season details
+
+        Args:
+            series_id: Sonarr series ID
+
+        Returns:
+            Series details with embedded seasons array
+        """
+        try:
+            series = await self._get(f"/api/v3/series/{series_id}")
+            return series if series else {}
+        except Exception as e:
+            print(f"❌ Erreur récupération série {series_id}: {e}")
+            return {}
+
+    async def get_episodes_by_series(self, series_id: int) -> list[dict[str, Any]]:
+        """
+        GET /api/v3/episode?seriesId={id} - Get all episodes for a series
+
+        Args:
+            series_id: Sonarr series ID
+
+        Returns:
+            List of episodes with metadata, monitoring status, and file info
+        """
+        try:
+            episodes = await self._get("/api/v3/episode", params={"seriesId": series_id})
+            return episodes if episodes else []
+        except Exception as e:
+            print(f"❌ Erreur récupération épisodes série {series_id}: {e}")
+            return []
+
+    async def get_episode_files_by_series(self, series_id: int) -> list[dict[str, Any]]:
+        """
+        GET /api/v3/episodefile?seriesId={id} - Get all episode files
+
+        Args:
+            series_id: Sonarr series ID
+
+        Returns:
+            List of downloaded files with quality, size, path
+        """
+        try:
+            files = await self._get("/api/v3/episodefile", params={"seriesId": series_id})
+            return files if files else []
+        except Exception as e:
+            print(f"❌ Erreur récupération fichiers épisodes série {series_id}: {e}")
+            return []
+
     async def get_calendar(self, days_ahead: int = 30) -> list[dict[str, Any]]:
         """
         Récupérer le calendrier des épisodes à venir
