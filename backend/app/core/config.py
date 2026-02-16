@@ -27,7 +27,7 @@ class Settings(BaseSettings):
 
     @property
     def DATABASE_URL(self) -> str:  # noqa: N802
-        """Construit l'URL de connexion MariaDB"""
+        """MariaDB connexion url"""
         return f"mysql+pymysql://{self.DB_USER}:{self.DB_PASSWORD}@{self.DB_HOST}:{self.DB_PORT}/{self.DB_NAME}"
 
     class Config:
@@ -35,5 +35,4 @@ class Settings(BaseSettings):
         case_sensitive = True
 
 
-# Instance globale des settings
 settings = Settings()

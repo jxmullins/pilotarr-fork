@@ -10,8 +10,40 @@ services:
       - "8000:8000"
     environment:
       - PYTHONUNBUFFERED=1
+      - DATABASE_URL=mysql+pymysql://pilotarr_user:pilotarr_password@mysql:3306/pilotarr_db
+    depends_on:
+      mysql:
+        condition: service_healthy
     extra_hosts:
       - "host.docker.internal:host-gateway"
     stdin_open: true
     tty: true
+    networks:
+      - pilotarr-network
 
+  mysql:
+    image: mysql:8.0
+    container_name: pilotarr-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: pilotarr_db
+      MYSQL_USER: pilotarr_user
+      MYSQL_PASSWORD: pilotarr_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-proot_password"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - pilotarr-network
+
+volumes:
+  mysql_data: {}
+
+networks:
+  pilotarr-network: {}

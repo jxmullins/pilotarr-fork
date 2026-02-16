@@ -3,13 +3,13 @@ from fastapi.security import APIKeyHeader
 
 from app.core.config import settings
 
-# Définir le header X-API-Key
+# Header X-API-Key
 api_key_header = APIKeyHeader(name="X-API-Key", auto_error=True)
 
 
 async def verify_api_key(api_key: str = Security(api_key_header)):
     """
-    Vérifie que l'API key fournie dans le header X-API-Key est valide
+    Check header X-API-Key is valide
     """
     if api_key != settings.API_KEY:
         raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid or missing API Key")

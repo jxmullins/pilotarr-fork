@@ -17,7 +17,6 @@ async def lifespan(app: FastAPI):
     # Startup
     print(f"🚀 Démarrage de {settings.APP_NAME} v{settings.APP_VERSION}")
 
-    # Vérifier la connexion DB
     if check_db_connection():
         print("✅ Connexion à la base de données OK")
         init_db()
@@ -25,7 +24,7 @@ async def lifespan(app: FastAPI):
     else:
         print("❌ Échec de connexion à la base de données")
 
-    # Démarrer le scheduler (sync toutes les 15 minutes)
+    # Start scheduler (sync every 15 minutes)
     app_scheduler.start(interval_minutes=15)
     analytics_scheduler.start()
 
@@ -37,19 +36,19 @@ async def lifespan(app: FastAPI):
     analytics_scheduler.stop()
 
 
-# Créer l'application FastAPI
+# Start FastAPI
 app = FastAPI(title=settings.APP_NAME, version=settings.APP_VERSION, debug=settings.DEBUG, lifespan=lifespan)
 
-# Configuration CORS
+# CORS Configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # À restreindre en production
+    allow_origins=["*"],  # Remove in production
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Inclure les routers
+# Include routers
 app.include_router(services.router, prefix="/api", dependencies=[Depends(verify_api_key)])
 app.include_router(dashboard.router, prefix="/api", dependencies=[Depends(verify_api_key)])
 app.include_router(jellyseerr.router, prefix="/api", dependencies=[Depends(verify_api_key)])

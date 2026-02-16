@@ -17,25 +17,20 @@ from app.models.enums import (
     VideoQuality,
 )
 
-# ============================================
-# SERVICE CONFIGURATION SCHEMAS (MODIFIÉ)
-# ============================================
-
 
 class ServiceConfigurationBase(BaseModel):
     service_name: ServiceType
     url: str
-    api_key: str | None = None  # ⬅️ MODIFIÉ : Optionnel
+    api_key: str | None = None
     port: int | None = None
-    username: str | None = None  # ⬅️ NOUVEAU
-    password: str | None = None  # ⬅️ NOUVEAU
+    username: str | None = None
+    password: str | None = None
     is_active: bool = True
 
     @field_validator("api_key", "username", "password")
     @classmethod
     def validate_credentials(cls, v, info):
         """Valide que soit api_key soit username/password est fourni"""
-        # Cette validation sera faite au niveau du endpoint
         return v
 
 
@@ -52,12 +47,12 @@ class ServiceConfigurationCreate(ServiceConfigurationBase):
         # Services qui utilisent API key
         if service_name in [ServiceType.RADARR, ServiceType.SONARR, ServiceType.JELLYFIN, ServiceType.JELLYSEERR]:
             if not data.get("api_key"):
-                raise ValueError(f"{service_name.value} nécessite une api_key")
+                raise ValueError(f"{service_name.value} needs api_key")
 
         # Services qui utilisent username/password
         elif service_name == ServiceType.QBITTORRENT:
             if not data.get("username") or not data.get("password"):
-                raise ValueError("qBittorrent nécessite username et password")
+                raise ValueError("qBittorrent needs username and password")
 
         return v
 
@@ -66,8 +61,8 @@ class ServiceConfigurationUpdate(BaseModel):
     url: str | None = None
     api_key: str | None = None
     port: int | None = None
-    username: str | None = None  # ⬅️ NOUVEAU
-    password: str | None = None  # ⬅️ NOUVEAU
+    username: str | None = None
+    password: str | None = None
     is_active: bool | None = None
 
 
@@ -84,11 +79,6 @@ class ServiceConfigurationResponse(ServiceConfigurationBase):
 
     class Config:
         from_attributes = True
-
-
-# ============================================
-# SCHEMAS EXISTANTS (INCHANGÉS)
-# ============================================
 
 
 # Dashboard Statistics Schemas
@@ -209,8 +199,6 @@ class DashboardResponse(BaseModel):
 
 # Playback Session Schemas
 class PlaybackSessionResponse(BaseModel):
-    """Schéma de réponse pour une session de lecture"""
-
     id: str
     media_id: str
     media_title: str

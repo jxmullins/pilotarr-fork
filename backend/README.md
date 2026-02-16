@@ -1,4 +1,4 @@
-# ServarrHub
+# Pilotarr
 
 TODO
-For the stats part, dont forget to add cleaning methode > 3 month
+- [ ] For the stats part, dont forget to add cleaning methode > 3 month

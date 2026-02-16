@@ -3,14 +3,14 @@ from app.models import models  # noqa: F401 - import needed to register models w
 
 
 def init_database():
-    """Créer toutes les tables"""
+    """Create all tables"""
     if not check_db_connection():
-        print("❌ Impossible de se connecter à la base de données")
+        print("❌ Can't connect to database")
         return
 
-    print("📦 Création des tables...")
+    print("📦 Writing tables...")
     Base.metadata.create_all(bind=engine)
-    print("✅ Tables créées avec succès!")
+    print("✅ Succes!")
 
 
 if __name__ == "__main__":
