@@ -56,7 +56,7 @@ class AnalyticsScheduler:
                     db.close()
 
                 # Attendre 30 secondes
-                time.sleep(30)
+                time.sleep(180)
 
             except Exception as e:
                 logger.error(f"❌ Erreur dans metrics_loop : {e}")
