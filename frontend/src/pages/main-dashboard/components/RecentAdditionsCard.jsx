@@ -1,25 +1,25 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
-import Image from '../../../components/AppImage';
-import Icon from '../../../components/AppIcon';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import Image from "../../../components/AppImage";
+import Icon from "../../../components/AppIcon";
 
 const RecentAdditionsCard = ({ item }) => {
   const navigate = useNavigate();
 
   const getTypeIcon = () => {
-    return item?.type === 'movie' ? 'Film' : 'Tv';
+    return item?.type === "movie" ? "Film" : "Tv";
   };
 
   const getTypeColor = () => {
-    return item?.type === 'movie' ? 'text-blue-400' : 'text-purple-400';
+    return item?.type === "movie" ? "text-blue-400" : "text-purple-400";
   };
 
   const handleClick = () => {
-    navigate(`/library/${item?.id || ''}`);
+    navigate(`/library/${item?.id || ""}`);
   };
 
   return (
-    <div 
+    <div
       onClick={handleClick}
       className="bg-card border border-border rounded-lg overflow-hidden hover:shadow-elevation-2 transition-smooth group cursor-pointer"
     >
@@ -31,23 +31,31 @@ const RecentAdditionsCard = ({ item }) => {
         />
         <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
           <Icon name={getTypeIcon()} size={14} className={getTypeColor()} />
-          <span className="text-xs font-medium text-foreground capitalize">{item?.type}</span>
+          <span className="text-xs font-medium text-foreground capitalize">
+            {item?.type}
+          </span>
         </div>
         {item?.quality && (
           <div className="absolute top-2 left-2 bg-accent/90 backdrop-blur-sm px-2 py-1 rounded-md">
-            <span className="text-xs font-bold text-accent-foreground">{item?.quality}</span>
+            <span className="text-xs font-bold text-accent-foreground">
+              {item?.quality}
+            </span>
           </div>
         )}
       </div>
-      <div className="p-3 md:p-4">
-        <h3 className="text-sm md:text-base font-semibold text-foreground mb-1 line-clamp-1">
+      <div className="p-2 md:p-3">
+        <h3 className="text-xs md:text-sm font-semibold text-foreground mb-1 line-clamp-1">
           {item?.title}
         </h3>
         <div className="flex items-center justify-between text-xs text-muted-foreground mb-2">
           <span>{item?.year}</span>
           {item?.rating && (
             <div className="flex items-center gap-1">
-              <Icon name="Star" size={12} className="text-warning fill-warning" />
+              <Icon
+                name="Star"
+                size={12}
+                className="text-warning fill-warning"
+              />
               <span>{item?.rating}</span>
             </div>
           )}

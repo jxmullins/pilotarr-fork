@@ -319,17 +319,12 @@ const InitialConfiguration = () => {
       <main className="pt-20 md:pt-24 pb-8 md:pb-12">
         <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
           <div className="mb-6 md:mb-8">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 md:w-14 md:h-14 rounded-lg flex items-center justify-center bg-primary/10">
-                <Icon
-                  name="Settings"
-                  size={24}
-                  color="var(--color-primary)"
-                  className="md:w-7 md:h-7"
-                />
+            <div className="flex items-center gap-3 mb-2">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Icon name="Settings" size={20} color="var(--color-primary)" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold text-foreground">
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
                   Initial Configuration
                 </h1>
                 <p className="text-sm md:text-base text-muted-foreground mt-1">

@@ -182,7 +182,7 @@ const Library = () => {
   return (
     <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-6 md:py-8">
+      <div className="container mx-auto px-4 pt-20 md:pt-24 pb-6 md:pb-8">
         {/* Page Header */}
         <div className="mb-6 md:mb-8">
           <div className="flex items-center gap-3 mb-2">

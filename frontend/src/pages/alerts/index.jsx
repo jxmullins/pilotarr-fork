@@ -322,20 +322,25 @@ const Alerts = () => {
   }, [soundEnabled]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-white to-amber-50">
+    <div className="min-h-screen bg-background">
       <Header />
-      <div className="container mx-auto px-4 py-8">
+      <div className="container mx-auto px-4 pt-20 md:pt-24 pb-8">
         {/* Page Header */}
-        <div className="mb-8">
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900 mb-2">
-                System Alerts
-              </h1>
-              <p className="text-gray-600">
-                Monitor and manage system notifications across all Pilotarr
-                services
-              </p>
+        <div className="mb-6 md:mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
+                <Icon name="Bell" size={20} color="var(--color-primary)" />
+              </div>
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
+                  System Alerts
+                </h1>
+                <p className="text-sm text-muted-foreground">
+                  Monitor and manage system notifications across all Pilotarr
+                  services
+                </p>
+              </div>
             </div>
             <div className="flex items-center gap-3">
               <Button
