@@ -158,6 +158,7 @@ class EpisodeDetailResponse(BaseModel):
     download_status: str  # "downloaded" | "missing"
     file_size_str: str | None = None  # e.g. "2.1 GB"
     quality_profile: str | None = None
+    media_streams: dict[str, Any] | None = None  # {"subtitles": [...], "audio": [...]}
 
     class Config:
         from_attributes = True
@@ -188,6 +189,7 @@ class LibraryItemResponse(BaseModel):
     torrent_info: list[dict[str, Any]] = []
     torrent_count: int = 0
     nb_media: int = 0
+    media_streams: dict[str, Any] | None = None  # {"subtitles": [...], "audio": [...]}
     created_at: datetime
 
     @field_validator("torrent_count", mode="before")

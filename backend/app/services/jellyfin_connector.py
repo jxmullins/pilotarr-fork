@@ -234,3 +234,70 @@ class JellyfinConnector(BaseConnector):
         except Exception as e:
             print(f"❌ Erreur récupération détails TV shows: {e}")
             return {"total_series": 0, "total_episodes": 0, "total_hours": 0}
+
+    async def get_series_id_by_title(self, title: str) -> str | None:
+        """
+        Rechercher l'ID Jellyfin d'une série par son titre.
+
+        Returns:
+            ID Jellyfin de la série, ou None si non trouvée
+        """
+        try:
+            params = {
+                "Recursive": True,
+                "IncludeItemTypes": "Series",
+                "SearchTerm": title,
+                "Limit": 5,
+            }
+            response = await self._get("/Items", params=params)
+            items = response.get("Items", [])
+            if items:
+                return items[0].get("Id")
+            return None
+        except Exception as e:
+            print(f"❌ Erreur recherche série Jellyfin '{title}': {e}")
+            return None
+
+    async def get_episodes_with_streams(self, series_jellyfin_id: str) -> list[dict[str, Any]]:
+        """
+        Récupérer tous les épisodes d'une série avec leurs MediaStreams (sous-titres, audio).
+
+        Args:
+            series_jellyfin_id: ID Jellyfin de la série
+
+        Returns:
+            Liste des épisodes avec leurs MediaStreams
+        """
+        try:
+            params = {
+                "Recursive": True,
+                "IncludeItemTypes": "Episode",
+                "SeriesId": series_jellyfin_id,
+                "Fields": "MediaStreams",
+                "EnableTotalRecordCount": False,
+            }
+            response = await self._get("/Items", params=params)
+            return response.get("Items", [])
+        except Exception as e:
+            print(f"❌ Erreur récupération épisodes avec streams (series {series_jellyfin_id}): {e}")
+            return []
+
+    async def get_movies_with_streams(self) -> list[dict[str, Any]]:
+        """
+        Récupérer tous les films avec leurs MediaStreams (sous-titres, audio).
+
+        Returns:
+            Liste des films avec leurs MediaStreams
+        """
+        try:
+            params = {
+                "Recursive": True,
+                "IncludeItemTypes": "Movie",
+                "Fields": "MediaStreams,ProductionYear",
+                "EnableTotalRecordCount": False,
+            }
+            response = await self._get("/Items", params=params)
+            return response.get("Items", [])
+        except Exception as e:
+            print(f"❌ Erreur récupération films avec streams: {e}")
+            return []

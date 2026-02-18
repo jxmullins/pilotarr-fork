@@ -59,6 +59,7 @@ const MediaDetail = () => {
           fileInfo: {
             size: data.size,
             torrentInfo: { seedRatio: torrent.ratio, status: torrent.status },
+            subtitles: data.media_streams?.subtitles || [],
           },
 
           monitored: seasonsData.some((s) => s.is_monitored),
@@ -77,7 +78,9 @@ const MediaDetail = () => {
               downloadStatus: ep.download_status,
               fileSize: ep.file_size_str,
               quality: ep.quality_profile,
-              hasSubtitles: false,
+              hasSubtitles: (ep.media_streams?.subtitles?.length ?? 0) > 0,
+              subtitleLanguages:
+                ep.media_streams?.subtitles?.map((s) => s.language) ?? [],
               watched: false,
             })),
           })),

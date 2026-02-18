@@ -3,6 +3,7 @@ from apscheduler.triggers.interval import IntervalTrigger
 
 from app.db import SessionLocal
 from app.schedulers.sync_service import SyncService
+from app.services.jellyfin_streams_service import JellyfinStreamsService
 from app.services.torrent_enrichment_service import TorrentEnrichmentService
 
 
@@ -26,6 +27,10 @@ class AppScheduler:
             torrent_service = TorrentEnrichmentService(db)
             stats = await torrent_service.enrich_all_items(limit=50)  # Limiter à 50 par run
             print(f"✅ Torrents enrichis : {stats.get('success')}/{stats.get('total')}")
+
+            # 3. Synchronisation des MediaStreams Jellyfin (sous-titres, audio)
+            streams_service = JellyfinStreamsService(db)
+            await streams_service.sync_all()
 
         except Exception as e:
             print(f"❌ Erreur lors de la synchro planifiée: {e}")

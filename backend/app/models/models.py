@@ -105,6 +105,7 @@ class LibraryItem(Base):
     size = Column(Text, nullable=False)
     torrent_hash = Column(String(255), nullable=True, index=True)
     torrent_info = Column(JSON, nullable=True)
+    media_streams = Column(JSON, nullable=True)  # Subtitle + audio tracks from Jellyfin (movies)
     nb_media = Column(Integer, default=0)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
@@ -198,6 +199,7 @@ class Episode(Base):
     quality_profile = Column(String(100), nullable=True)
     relative_path = Column(Text, nullable=True)
     episode_file_info = Column(JSON, nullable=True)  # Full episodeFile object
+    media_streams = Column(JSON, nullable=True)  # Subtitle + audio tracks from Jellyfin
 
     created_at = Column(DateTime(timezone=True), server_default=func.now())
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())

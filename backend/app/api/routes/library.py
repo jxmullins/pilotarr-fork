@@ -75,6 +75,7 @@ async def get_library(
             "added_date": item.added_date,
             "size": item.size,
             "nb_media": item.nb_media,
+            "media_streams": item.media_streams,
             "created_at": item.created_at,
             "torrent_info": _build_torrent_info_array(item),
         }
@@ -111,6 +112,7 @@ async def get_library_item(
         "added_date": item.added_date,
         "size": item.size,
         "nb_media": item.nb_media,
+        "media_streams": item.media_streams,
         "created_at": item.created_at,
         "torrent_info": _build_torrent_info_array(item),
     }
@@ -190,6 +192,7 @@ async def get_seasons_with_episodes(id: str, db: Session = Depends(get_db)):
                         download_status="downloaded" if ep.has_file else "missing",
                         file_size_str=_format_bytes(ep.file_size),
                         quality_profile=ep.quality_profile,
+                        media_streams=ep.media_streams,
                     )
                     for ep in eps
                 ],

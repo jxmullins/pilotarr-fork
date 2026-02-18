@@ -76,6 +76,22 @@ def create_analytics_tables():
             print(f"❌ Erreur lors de la migration de added_date : {e}")
             return False
 
+    # Add media_streams column to library_items (movies)
+    if "library_items" in get_existing_tables():
+        try:
+            migrate_add_media_streams_to_library_items()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de media_streams sur library_items : {e}")
+            return False
+
+    # Add media_streams column to episodes (TV shows)
+    if "episodes" in get_existing_tables():
+        try:
+            migrate_add_media_streams_to_episodes()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de media_streams sur episodes : {e}")
+            return False
+
     return True
 
 
@@ -165,6 +181,56 @@ def migrate_added_date_column():
         db.execute(text("ALTER TABLE library_items MODIFY COLUMN added_date DATETIME NULL"))
         db.commit()
         print("✅ added_date column migrated to DATETIME NULL (existing rows nulled — re-sync to repopulate)")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_add_media_streams_to_library_items():
+    """Add media_streams JSON column to library_items if it doesn't exist."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("library_items")}
+    if "media_streams" in columns:
+        print("✅ media_streams already exists on library_items, skipping")
+        return
+
+    print("🔄 Adding media_streams column to library_items...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE library_items ADD COLUMN media_streams JSON NULL"))
+        db.commit()
+        print("✅ media_streams column added to library_items")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_add_media_streams_to_episodes():
+    """Add media_streams JSON column to episodes if it doesn't exist."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("episodes")}
+    if "media_streams" in columns:
+        print("✅ media_streams already exists on episodes, skipping")
+        return
+
+    print("🔄 Adding media_streams column to episodes...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE episodes ADD COLUMN media_streams JSON NULL"))
+        db.commit()
+        print("✅ media_streams column added to episodes")
     except Exception as e:
         db.rollback()
         raise e
