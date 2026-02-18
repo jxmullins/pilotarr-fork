@@ -454,17 +454,10 @@ async def get_device_breakdown(
     db: Session = Depends(get_db),
     api_key: str = Depends(verify_api_key),
 ):
-    """
-    📊 VUE 3 : Device Breakdown - Répartition par type d'appareil
-
-    Retourne le nombre de sessions par type d'appareil sur une période
-    """
     try:
-        # Calculer la période
         end_date = date.today()
         start_date = end_date - timedelta(days=period_days)
 
-        # Requête pour compter les sessions par device_type
         device_stats = (
             db.query(PlaybackSession.device_type, func.count(PlaybackSession.id).label("session_count"))
             .filter(
@@ -502,11 +495,6 @@ async def get_device_breakdown(
 
 @router.get("/server-metrics", response_model=ServerPerformanceResponse | None)
 async def get_server_metrics(db: Session = Depends(get_db), api_key: str = Depends(verify_api_key)):
-    """
-    📊 VUE 3 : Server Performance - Métriques serveur en temps réel
-
-    Retourne les dernières métriques du serveur + sessions actives
-    """
     try:
         # Récupérer la dernière métrique serveur
         latest_metric = db.query(ServerMetric).order_by(desc(ServerMetric.recorded_at)).first()
