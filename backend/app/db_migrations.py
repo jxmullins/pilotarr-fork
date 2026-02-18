@@ -156,10 +156,13 @@ def migrate_added_date_column():
     print("🔄 Migrating library_items.added_date from TEXT → DATETIME ...")
     db = SessionLocal()
     try:
-        # Null out existing stale strings so ALTER doesn't fail in strict mode
+        # Step 1: drop the NOT NULL constraint while keeping TEXT type, so we can null values
+        db.execute(text("ALTER TABLE library_items MODIFY COLUMN added_date TEXT NULL"))
+        db.commit()
+        # Step 2: null out the stale human-readable strings
         db.execute(text("UPDATE library_items SET added_date = NULL"))
         db.commit()
-        # Change column type
+        # Step 3: change to DATETIME now that all values are NULL
         db.execute(text("ALTER TABLE library_items MODIFY COLUMN added_date DATETIME NULL"))
         db.commit()
         print("✅ added_date column migrated to DATETIME NULL (existing rows nulled — re-sync to repopulate)")
