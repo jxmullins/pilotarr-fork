@@ -312,7 +312,7 @@ async def get_usage_analytics(
 async def get_media_playback_analytics(
     limit: int = Query(50, ge=1, le=100, description="Nombre de résultats"),
     sort_by: Literal["plays", "duration", "last_played"] = Query(
-        "plays", description="Tri par : plays, duration, last_played"
+        "last_played", description="Tri par : plays, duration, last_played"
     ),
     order: Literal["asc", "desc"] = Query("desc", description="Ordre : asc ou desc"),
     db: Session = Depends(get_db),
@@ -344,6 +344,7 @@ async def get_media_playback_analytics(
                 PlaybackSession.media_id,
                 func.max(PlaybackSession.media_title).label("media_title"),
                 func.max(PlaybackSession.media_type).label("media_type"),
+                func.max(PlaybackSession.episode_info).label("episode_info"),
                 func.max(PlaybackSession.poster_url).label("poster_url"),
                 total_plays_col.label("total_plays"),
                 total_watched_col.label("total_watched_seconds"),
@@ -401,6 +402,7 @@ async def get_media_playback_analytics(
                 MediaPlaybackAnalyticsItem(
                     media_title=row.media_title,
                     media_type=row.media_type,
+                    episode_info=row.episode_info,
                     plays=row.total_plays,
                     duration=duration_str,
                     quality=quality_map.get(row.media_id, "Unknown"),

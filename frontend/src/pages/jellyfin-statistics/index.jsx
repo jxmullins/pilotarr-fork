@@ -116,12 +116,13 @@ const JellyfinStatistics = () => {
   const fetchMediaAnalytics = async () => {
     setIsLoadingMedia(true);
     try {
-      const data = await getMediaAnalytics(10, "plays", "desc");
+      const data = await getMediaAnalytics(20, "last_played", "desc");
 
       // Transform API response to component format
       const transformedData =
         data?.map((item) => ({
           title: item?.media_title || "Unknown",
+          episodeInfo: item?.episode_info || null,
           thumbnail:
             item?.poster_url ||
             "https://images.unsplash.com/photo-1574267432644-f610f5b7e4d1",
