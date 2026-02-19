@@ -549,7 +549,7 @@ async def get_sessions(
     end: date | None = Query(default=None, description="End date YYYY-MM-DD"),
     db: Session = Depends(get_db),
 ):
-    """Récupérer les sessions de lecture pour une plage de dates"""
+    """Récupérer les sessions de lecture pour une plage de dates (dédupliquées par épisode/spectateur/jour)"""
     today = date.today()
     start_date = start or (today - timedelta(days=30))
     end_date = end or today
@@ -568,4 +568,13 @@ async def get_sessions(
         .all()
     )
 
-    return sessions
+    # Deduplicate: keep the session with the most watched_seconds per
+    # (media_title, episode_info, user_name, calendar_day)
+    seen: dict[tuple, PlaybackSession] = {}
+    for s in sessions:
+        key = (s.media_title, s.episode_info, s.user_name, s.start_time.date())
+        existing = seen.get(key)
+        if existing is None or (s.watched_seconds or 0) > (existing.watched_seconds or 0):
+            seen[key] = s
+
+    return list(seen.values())
