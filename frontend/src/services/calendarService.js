@@ -1,25 +1,33 @@
-import pilotarrClient from '../lib/pilotarrClient';
+import pilotarrClient from "../lib/pilotarrClient";
 
 /**
- * Get all calendar events (upcoming releases)
+ * Get calendar events for a date range
+ * @param {string} start - Start date YYYY-MM-DD
+ * @param {string} end - End date YYYY-MM-DD
  * @returns {Promise<Array>} Array of calendar events
  */
-export const getCalendarEvents = async (days = 7) => {
+export const getCalendarEvents = async (start, end) => {
   try {
-    const response = await pilotarrClient?.get(`/dashboard/calendar?days=${days}`);
-    
+    const params = new URLSearchParams();
+    if (start) params.append("start", start);
+    if (end) params.append("end", end);
+
+    const response = await pilotarrClient?.get(`/dashboard/calendar?${params}`);
+
     // Map snake_case API response to camelCase for frontend
-    const events = response?.data?.map(event => ({
-      id: event?.id,
-      title: event?.title,
-      mediaType: event?.media_type,
-      releaseDate: event?.release_date,
-      imageUrl: event?.image_url,
-      imageAlt: event?.image_alt,
-      episode: event?.episode,
-      status: event?.status
-    })) || [];
-    
+    const events =
+      response?.data?.map((event) => ({
+        id: event?.id,
+        title: event?.title,
+        type: event?.media_type, // "tv" or "movie"
+        eventType: "release", // all real events are releases
+        releaseDate: event?.release_date,
+        imageUrl: event?.image_url,
+        imageAlt: event?.image_alt,
+        episode: event?.episode,
+        status: event?.status,
+      })) || [];
+
     return events;
   } catch (error) {
     return [];
@@ -33,7 +41,7 @@ export const getCalendarEvents = async (days = 7) => {
  */
 export const addCalendarEvent = async (event) => {
   try {
-    const response = await pilotarrClient?.post('/calendar/events', event);
+    const response = await pilotarrClient?.post("/calendar/events", event);
     return response?.data || null;
   } catch (error) {
     return null;

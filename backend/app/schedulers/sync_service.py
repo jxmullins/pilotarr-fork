@@ -298,12 +298,12 @@ class SyncService:
                         self._upsert_torrent(item.id, torrent_hash)
                         print(f"  ✅ {movie.get('title')} - hash: {torrent_hash[:8]}...")
 
-            # Récupérer le calendrier
-            calendar = await connector.get_calendar(days_ahead=30)
+            # Récupérer le calendrier (passé + futur)
+            calendar = await connector.get_calendar(days_ahead=30, days_behind=30)
 
             # Ajouter/mettre à jour le calendrier
             calendar_count = 0
-            for event in calendar[:20]:
+            for event in calendar:
                 release_date_str = event.get("physicalRelease") or event.get("digitalRelease")
                 if not release_date_str:
                     continue
@@ -576,11 +576,11 @@ class SyncService:
                             f"first: {first_hash[:8]}..."
                         )
 
-            # Récupérer le calendrier (includeSeries=true dans le connector)
-            calendar = await connector.get_calendar(days_ahead=30)
+            # Récupérer le calendrier (passé + futur, includeSeries=true dans le connector)
+            calendar = await connector.get_calendar(days_ahead=30, days_behind=30)
             calendar_count = 0
 
-            for event in calendar[:20]:
+            for event in calendar:
                 if not event.get("airDate"):
                     continue
 
@@ -594,7 +594,12 @@ class SyncService:
                 series_title = series_data.get("title") or event.get("title", "Unknown")
                 season = event.get("seasonNumber", 0)
                 episode_num = event.get("episodeNumber", 0)
-                episode_str = f"Season {season}, Episode {episode_num}"
+                episode_title = event.get("title", "")
+                episode_str = f"S{season:02d}E{episode_num:02d}"
+                if episode_title:
+                    episode_str += f" - {episode_title}"
+                # Old format for backward compatibility lookup
+                old_episode_str = f"Season {season}, Episode {episode_num}"
 
                 # Récupérer l'image depuis les images de la série
                 image_url = ""
@@ -605,29 +610,16 @@ class SyncService:
                 if not image_url and series_data.get("images"):
                     image_url = series_data.get("images", [{}])[0].get("remoteUrl", "")
 
-                # Chercher un enregistrement existant (par titre + date + épisode)
+                # Chercher un enregistrement existant (nouveau format ou ancien format)
                 existing = (
                     self.db.query(CalendarEvent)
                     .filter(
                         CalendarEvent.release_date == air_date,
-                        CalendarEvent.episode == episode_str,
                         CalendarEvent.media_type == MediaType.TV,
+                        CalendarEvent.episode.in_([episode_str, old_episode_str]),
                     )
                     .first()
                 )
-
-                # Aussi chercher par ancien titre "Unknown" pour corriger
-                if not existing:
-                    existing = (
-                        self.db.query(CalendarEvent)
-                        .filter(
-                            CalendarEvent.title == "Unknown",
-                            CalendarEvent.release_date == air_date,
-                            CalendarEvent.episode == episode_str,
-                            CalendarEvent.media_type == MediaType.TV,
-                        )
-                        .first()
-                    )
 
                 if existing:
                     # Mettre à jour les champs vides ou incorrects
@@ -636,6 +628,9 @@ class SyncService:
                     if image_url and not existing.image_url:
                         existing.image_url = image_url
                     existing.image_alt = f"{series_title} poster"
+                    # Migrer l'ancien format d'épisode vers le nouveau
+                    if existing.episode == old_episode_str:
+                        existing.episode = episode_str
                 else:
                     cal_event = CalendarEvent(
                         title=series_title,

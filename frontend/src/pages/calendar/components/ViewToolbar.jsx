@@ -1,22 +1,22 @@
-import React from 'react';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import { Checkbox } from '../../../components/ui/Checkbox';
+import React from "react";
+import Icon from "../../../components/AppIcon";
+import Button from "../../../components/ui/Button";
+import { Checkbox } from "../../../components/ui/Checkbox";
 
-const ViewToolbar = ({ 
-  viewMode, 
-  setViewMode, 
-  eventFilters, 
-  setEventFilters, 
-  selectedDate, 
-  monthNames, 
-  navigateMonth, 
-  goToToday 
+const ViewToolbar = ({
+  viewMode,
+  setViewMode,
+  eventFilters,
+  setEventFilters,
+  selectedDate,
+  monthNames,
+  navigateMonth,
+  goToToday,
 }) => {
   const handleFilterChange = (filterKey) => {
-    setEventFilters(prev => ({
+    setEventFilters((prev) => ({
       ...prev,
-      [filterKey]: !prev?.[filterKey]
+      [filterKey]: !prev?.[filterKey],
     }));
   };
 
@@ -27,9 +27,9 @@ const ViewToolbar = ({
         {/* View Mode Switcher */}
         <div className="flex items-center gap-2">
           <Button
-            variant={viewMode === 'month' ? 'default' : 'outline'}
+            variant={viewMode === "month" ? "default" : "outline"}
             size="sm"
-            onClick={() => setViewMode('month')}
+            onClick={() => setViewMode("month")}
           >
             <Icon name="Calendar" size={16} className="mr-2" />
             Month
@@ -47,7 +47,8 @@ const ViewToolbar = ({
           />
           <div className="min-w-[200px] text-center">
             <h3 className="text-lg font-semibold text-foreground">
-              {monthNames?.[selectedDate?.getMonth()]} {selectedDate?.getFullYear()}
+              {monthNames?.[selectedDate?.getMonth()]}{" "}
+              {selectedDate?.getFullYear()}
             </h3>
           </div>
           <Button
@@ -57,11 +58,7 @@ const ViewToolbar = ({
             iconName="ChevronRight"
             iconSize={20}
           />
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={goToToday}
-          >
+          <Button variant="outline" size="sm" onClick={goToToday}>
             Today
           </Button>
         </div>
@@ -71,47 +68,31 @@ const ViewToolbar = ({
       <div className="border-t border-border pt-4">
         <div className="flex items-center gap-2 mb-3">
           <Icon name="Filter" size={16} className="text-muted-foreground" />
-          <span className="text-sm font-medium text-foreground">Filter Events:</span>
+          <span className="text-sm font-medium text-foreground">
+            Filter Events:
+          </span>
         </div>
         <div className="flex flex-wrap gap-4">
           <label className="flex items-center gap-2 cursor-pointer">
             <Checkbox
               checked={eventFilters?.tvReleases}
-              onChange={() => handleFilterChange('tvReleases')}
+              onChange={() => handleFilterChange("tvReleases")}
             />
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-blue-500"></div>
-              <span className="text-sm text-foreground">TV Episode Releases</span>
+              <span className="text-sm text-foreground">
+                TV Episode Releases
+              </span>
             </div>
           </label>
           <label className="flex items-center gap-2 cursor-pointer">
             <Checkbox
               checked={eventFilters?.movieReleases}
-              onChange={() => handleFilterChange('movieReleases')}
+              onChange={() => handleFilterChange("movieReleases")}
             />
             <div className="flex items-center gap-2">
               <div className="w-3 h-3 rounded-full bg-green-500"></div>
               <span className="text-sm text-foreground">Movie Releases</span>
-            </div>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Checkbox
-              checked={eventFilters?.downloads}
-              onChange={() => handleFilterChange('downloads')}
-            />
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-orange-500"></div>
-              <span className="text-sm text-foreground">Downloads</span>
-            </div>
-          </label>
-          <label className="flex items-center gap-2 cursor-pointer">
-            <Checkbox
-              checked={eventFilters?.views}
-              onChange={() => handleFilterChange('views')}
-            />
-            <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-purple-500"></div>
-              <span className="text-sm text-foreground">Viewing Activity</span>
             </div>
           </label>
         </div>

@@ -85,19 +85,21 @@ class SonarrConnector(BaseConnector):
             print(f"❌ Erreur récupération fichiers épisodes série {series_id}: {e}")
             return []
 
-    async def get_calendar(self, days_ahead: int = 30) -> list[dict[str, Any]]:
+    async def get_calendar(self, days_ahead: int = 30, days_behind: int = 30) -> list[dict[str, Any]]:
         """
-        Récupérer le calendrier des épisodes à venir
+        Récupérer le calendrier des épisodes
 
         Args:
             days_ahead: Nombre de jours à venir
+            days_behind: Nombre de jours passés à inclure
 
         Returns:
-            Liste des épisodes à venir
+            Liste des épisodes
         """
         try:
-            start_date = datetime.now(UTC).date()
-            end_date = start_date + timedelta(days=days_ahead)
+            today = datetime.now(UTC).date()
+            start_date = today - timedelta(days=days_behind)
+            end_date = today + timedelta(days=days_ahead)
 
             params = {"start": start_date.isoformat(), "end": end_date.isoformat(), "includeSeries": "true"}
 

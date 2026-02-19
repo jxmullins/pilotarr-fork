@@ -157,15 +157,34 @@ async def get_recent_items(
 
 
 @router.get("/calendar", response_model=list[CalendarEventResponse])
-async def get_calendar(days: int = Query(default=30, ge=1, le=90), db: Session = Depends(get_db)):
-    """Récupérer le calendrier des sorties à venir"""
+async def get_calendar(
+    start: str | None = Query(default=None, description="Start date YYYY-MM-DD"),
+    end: str | None = Query(default=None, description="End date YYYY-MM-DD"),
+    db: Session = Depends(get_db),
+):
+    """Récupérer le calendrier des sorties (passé et futur)"""
     today = datetime.now().date()
-    future_date = today + timedelta(days=days)
+
+    if start:
+        try:
+            start_date = datetime.strptime(start, "%Y-%m-%d").date()
+        except ValueError:
+            start_date = today - timedelta(days=30)
+    else:
+        start_date = today - timedelta(days=30)
+
+    if end:
+        try:
+            end_date = datetime.strptime(end, "%Y-%m-%d").date()
+        except ValueError:
+            end_date = today + timedelta(days=30)
+    else:
+        end_date = today + timedelta(days=30)
 
     events = (
         db.query(CalendarEvent)
-        .filter(CalendarEvent.release_date >= today)
-        .filter(CalendarEvent.release_date <= future_date)
+        .filter(CalendarEvent.release_date >= start_date)
+        .filter(CalendarEvent.release_date <= end_date)
         .order_by(CalendarEvent.release_date.asc())
         .all()
     )
