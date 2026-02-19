@@ -2,9 +2,10 @@ from fastapi import APIRouter, BackgroundTasks, Depends
 from sqlalchemy.orm import Session
 
 from app.api.schemas import SyncMetadataResponse
-from app.db import get_db
+from app.db import SessionLocal, get_db
 from app.models import SyncMetadata
 from app.schedulers.sync_service import SyncService
+from app.services.jellyfin_streams_service import JellyfinStreamsService
 
 router = APIRouter(prefix="/sync", tags=["Synchronization"])
 
@@ -78,6 +79,26 @@ async def trigger_service_sync(service_name: str, background_tasks: BackgroundTa
     background_tasks.add_task(run_service_sync)
 
     return {"message": f"Synchronisation {service_name} lancée", "status": "started"}
+
+
+@router.post("/trigger/jellyfin-streams")
+async def trigger_jellyfin_streams_sync(background_tasks: BackgroundTasks):
+    """Déclencher la synchronisation des MediaStreams Jellyfin (sous-titres, audio)"""
+
+    async def run_streams_sync():
+        db = SessionLocal()
+        try:
+            service = JellyfinStreamsService(db)
+            result = await service.sync_all()
+            print(f"📊 Streams sync completed: {result}")
+        except Exception as e:
+            print(f"❌ Error in streams sync: {e}")
+        finally:
+            db.close()
+
+    background_tasks.add_task(run_streams_sync)
+
+    return {"message": "Synchronisation MediaStreams Jellyfin lancée en arrière-plan", "status": "started"}
 
 
 @router.post("/debug/test-episodes")
