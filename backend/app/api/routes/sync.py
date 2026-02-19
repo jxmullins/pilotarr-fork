@@ -101,32 +101,6 @@ async def trigger_service_sync(service_name: str, background_tasks: BackgroundTa
     return {"message": f"Synchronisation {service_name} lancée", "status": "started"}
 
 
-@router.post("/debug/test-episodes")
-async def debug_test_episodes():
-    """Simple test endpoint to verify routing works"""
-    print("=" * 80)
-    print("🧪 DEBUG TEST ENDPOINT CALLED")
-    print("=" * 80)
-    return {"message": "Test endpoint called successfully", "timestamp": "2026-02-16"}
-
-
-@router.get("/debug/check-methods")
-async def debug_check_methods():
-    """Debug: vérifier que les méthodes existent"""
-
-    from app.schedulers.sync_service import SyncService
-
-    methods = [m for m in dir(SyncService) if not m.startswith("_")]
-    episodes_methods = [m for m in methods if "episode" in m.lower() or "season" in m.lower()]
-
-    return {
-        "all_methods": methods,
-        "episodes_season_methods": episodes_methods,
-        "sync_sonarr_episodes_exists": hasattr(SyncService, "sync_sonarr_episodes"),
-        "sync_sonarr_seasons_exists": hasattr(SyncService, "sync_sonarr_seasons"),
-    }
-
-
 @router.get("/status", response_model=list[SyncMetadataResponse])
 async def get_sync_status(db: Session = Depends(get_db)):
     """Récupérer le statut des dernières synchronisations"""
