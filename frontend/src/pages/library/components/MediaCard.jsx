@@ -133,17 +133,6 @@ const MediaCard = ({ item }) => {
                 </span>
               </div>
 
-              {/* View Count */}
-              <div className="flex items-center justify-between text-xs">
-                <div className="flex items-center gap-1 text-muted-foreground">
-                  <Icon name="Eye" size={12} />
-                  <span>Views</span>
-                </div>
-                <span className="font-medium text-foreground">
-                  {item?.viewCount}
-                </span>
-              </div>
-
               {/* Seed Ratio */}
               <div className="flex items-center justify-between text-xs">
                 <div className="flex items-center gap-1 text-muted-foreground">
