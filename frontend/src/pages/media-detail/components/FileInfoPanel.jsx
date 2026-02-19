@@ -120,9 +120,30 @@ const FileInfoPanel = ({ media }) => {
         <h3 className="text-sm font-semibold text-muted-foreground uppercase">
           Subtitles
         </h3>
-        {media?.fileInfo.subtitles && media?.fileInfo.subtitles?.length > 0 ? (
+        {media?.mediaType === "tv" ? (
+          Object.keys(media?.fileInfo?.subtitleCounts || {}).length > 0 ? (
+            <div className="flex flex-wrap gap-2">
+              {Object.entries(media.fileInfo.subtitleCounts)
+                .sort((a, b) => b[1] - a[1])
+                .map(([lang, count]) => (
+                  <span
+                    key={lang}
+                    className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted text-xs font-medium text-foreground"
+                  >
+                    <Icon name="Subtitles" size={12} className="text-success" />
+                    {lang}: {count}
+                  </span>
+                ))}
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-muted-foreground">
+              <Icon name="Subtitles" size={16} />
+              <span className="text-sm">No subtitles available</span>
+            </div>
+          )
+        ) : media?.fileInfo?.subtitles?.length > 0 ? (
           <div className="space-y-2">
-            {media?.fileInfo.subtitles?.map((subtitle, index) => (
+            {media.fileInfo.subtitles.map((subtitle, index) => (
               <div
                 key={index}
                 className="flex items-center justify-between bg-muted px-3 py-2 rounded-md"
@@ -134,7 +155,7 @@ const FileInfoPanel = ({ media }) => {
                   </span>
                 </div>
                 <span className="text-xs text-muted-foreground">
-                  {subtitle?.format}
+                  {subtitle?.codec}
                 </span>
               </div>
             ))}

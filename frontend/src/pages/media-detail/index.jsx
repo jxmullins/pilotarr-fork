@@ -60,6 +60,15 @@ const MediaDetail = () => {
             size: data.size,
             torrentInfo: { seedRatio: torrent.ratio, status: torrent.status },
             subtitles: data.media_streams?.subtitles || [],
+            subtitleCounts: seasonsData.reduce((acc, season) => {
+              season.episodes.forEach((ep) => {
+                ep.media_streams?.subtitles?.forEach((sub) => {
+                  const lang = sub.language || "Unknown";
+                  acc[lang] = (acc[lang] || 0) + 1;
+                });
+              });
+              return acc;
+            }, {}),
           },
 
           monitored: seasonsData.some((s) => s.is_monitored),
