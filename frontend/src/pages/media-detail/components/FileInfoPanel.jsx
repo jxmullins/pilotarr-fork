@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import Icon from "../../../components/AppIcon";
 import StatusIndicator from "../../monitoring/components/StatusIndicator";
+import { formatQuality } from "../../../utils/quality";
 
 const FileInfoPanel = ({ media }) => {
   const [showIndividualTorrents, setShowIndividualTorrents] = useState(false);
@@ -77,7 +78,7 @@ const FileInfoPanel = ({ media }) => {
         <div className="flex items-center gap-2">
           <div className="bg-accent px-3 py-1 rounded-md">
             <span className="text-sm font-bold text-accent-foreground">
-              {media?.fileInfo.quality || "N/A"}
+              {formatQuality(media?.fileInfo.quality) || "N/A"}
             </span>
           </div>
         </div>

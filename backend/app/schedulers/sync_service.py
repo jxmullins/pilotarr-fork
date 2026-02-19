@@ -200,6 +200,9 @@ class SyncService:
             # Récupérer les films récents
             recent_movies = await connector.get_recent_additions(days=30)
 
+            # Profils de qualité {id: name}
+            quality_profiles = await connector.get_quality_profiles()
+
             # Récupérer la map movieId -> torrent_hash
             movie_hash_map = await connector.get_movie_history_map()
             print(f"📥 {len(movie_hash_map)} hash de torrents récupérés depuis Radarr")
@@ -226,6 +229,12 @@ class SyncService:
 
                 nb_media = 1 if movie.get("hasFile") else 0
 
+                # Résoudre la qualité: fichier téléchargé > profil
+                file_quality = movie.get("movieFile", {}).get("quality", {}).get("quality", {}).get("name")
+                profile_id = movie.get("qualityProfileId")
+                profile_name = quality_profiles.get(profile_id, "") if profile_id else ""
+                resolved_quality = file_quality or profile_name or "Unknown"
+
                 if existing:
                     # Mettre à jour le hash si on en a un et qu'il n'existe pas encore
                     if torrent_hash and not existing.torrent_hash:
@@ -243,6 +252,9 @@ class SyncService:
                     if size_bytes > 0:
                         size_gb = round(size_bytes / (1024**3), 1)
                         existing.size = f"{size_gb} GB"
+                    # Mettre à jour la qualité si elle était un chiffre (ancien format)
+                    if existing.quality and existing.quality.isdigit():
+                        existing.quality = resolved_quality
                     # Repopulate added_date if missing (e.g. after migration from TEXT)
                     if existing.added_date is None:
                         raw = movie.get("added", "")
@@ -281,7 +293,7 @@ class SyncService:
                         media_type=MediaType.MOVIE,
                         image_url=image_url,
                         image_alt=f"{movie.get('title')} poster",
-                        quality=str(movie.get("qualityProfileId", "Unknown")),
+                        quality=resolved_quality,
                         rating=str(movie.get("ratings", {}).get("imdb", {}).get("value", "")),
                         description=movie.get("overview", ""),
                         added_date=added_dt,
@@ -462,6 +474,9 @@ class SyncService:
             # Récupérer les séries récentes
             recent_series = await connector.get_recent_additions(days=30)
 
+            # Profils de qualité {id: name}
+            quality_profiles = await connector.get_quality_profiles()
+
             # Récupérer la map seriesId -> [{hash, episode_id, season_number, is_season_pack}, ...]
             series_torrents_map = await connector.get_series_torrents_map()
             total_hashes = sum(len(v) for v in series_torrents_map.values())
@@ -488,6 +503,10 @@ class SyncService:
 
                 nb_media = series.get("statistics", {}).get("episodeFileCount", 0)
 
+                # Résoudre la qualité depuis le profil (les séries n'ont pas de fichier unique)
+                profile_id = series.get("qualityProfileId")
+                resolved_quality = quality_profiles.get(profile_id, "Unknown") if profile_id else "Unknown"
+
                 if existing:
                     # Mettre à jour le hash si on en a un et qu'il n'existe pas encore
                     if first_hash and not existing.torrent_hash:
@@ -511,6 +530,9 @@ class SyncService:
                     if size_bytes > 0:
                         size_gb = round(size_bytes / (1024**3), 1)
                         existing.size = f"{size_gb} GB"
+                    # Mettre à jour la qualité si elle était un chiffre (ancien format)
+                    if existing.quality and existing.quality.isdigit():
+                        existing.quality = resolved_quality
                     # Repopulate added_date if missing (e.g. after migration from TEXT)
                     if existing.added_date is None:
                         raw = series.get("added", "")
@@ -547,7 +569,7 @@ class SyncService:
                         media_type=MediaType.TV,
                         image_url=image_url,
                         image_alt=f"{series.get('title')} poster",
-                        quality=str(series.get("qualityProfileId", "Unknown")),
+                        quality=resolved_quality,
                         rating=str(series.get("ratings", {}).get("value", "")),
                         description=series.get("overview", ""),
                         added_date=added_dt,

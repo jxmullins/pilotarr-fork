@@ -171,6 +171,15 @@ class RadarrConnector(BaseConnector):
 
         return None
 
+    async def get_quality_profiles(self) -> dict[int, str]:
+        """Retourne un mapping {id: name} des profils de qualité Radarr"""
+        try:
+            profiles = await self._get("/api/v3/qualityprofile")
+            return {p["id"]: p["name"] for p in profiles if "id" in p and "name" in p}
+        except Exception as e:
+            print(f"❌ Erreur récupération profils qualité Radarr: {e}")
+            return {}
+
     async def get_statistics(self) -> dict[str, Any]:
         """
         Récupérer les statistiques Radarr

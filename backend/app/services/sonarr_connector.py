@@ -34,6 +34,15 @@ class SonarrConnector(BaseConnector):
             print(f"❌ Erreur récupération séries Sonarr: {e}")
             return []
 
+    async def get_quality_profiles(self) -> dict[int, str]:
+        """Retourne un mapping {id: name} des profils de qualité Sonarr"""
+        try:
+            profiles = await self._get("/api/v3/qualityprofile")
+            return {p["id"]: p["name"] for p in profiles if "id" in p and "name" in p}
+        except Exception as e:
+            print(f"❌ Erreur récupération profils qualité Sonarr: {e}")
+            return {}
+
     async def get_series_by_id(self, series_id: int) -> dict[str, Any]:
         """
         GET /api/v3/series/{id} - Get single series with full season details

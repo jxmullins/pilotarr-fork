@@ -2,6 +2,7 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import Image from "../../../components/AppImage";
 import Icon from "../../../components/AppIcon";
+import { formatQuality } from "../../../utils/quality";
 
 const RecentAdditionsCard = ({ item }) => {
   const navigate = useNavigate();
@@ -53,10 +54,10 @@ const RecentAdditionsCard = ({ item }) => {
             {item?.type}
           </span>
         </div>
-        {item?.quality && (
+        {formatQuality(item?.quality) && (
           <div className="absolute top-2 left-2 bg-accent/90 backdrop-blur-sm px-2 py-1 rounded-md">
             <span className="text-xs font-bold text-accent-foreground">
-              {item?.quality}
+              {formatQuality(item?.quality)}
             </span>
           </div>
         )}
