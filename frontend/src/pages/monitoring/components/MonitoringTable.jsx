@@ -1,24 +1,35 @@
-import React, { useState, useMemo } from 'react';
-import Icon from '../../../components/AppIcon';
-import StatusIndicator from './StatusIndicator';
-import ExpandableRow from './ExpandableRow';
-import { Checkbox } from '../../../components/ui/Checkbox';
-import Button from '../../../components/ui/Button';
+import React, { useState, useMemo } from "react";
+import Icon from "../../../components/AppIcon";
+import StatusIndicator from "./StatusIndicator";
+import ExpandableRow from "./ExpandableRow";
+import { Checkbox } from "../../../components/ui/Checkbox";
+import Button from "../../../components/ui/Button";
 
-const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => {
+const MonitoringTable = ({
+  data,
+  selectedItems,
+  onSelectAll,
+  onSelectItem,
+}) => {
   const [expandedRows, setExpandedRows] = useState([]);
-  const [sortConfig, setSortConfig] = useState({ key: 'title', direction: 'asc' });
+  const [sortConfig, setSortConfig] = useState({
+    key: "title",
+    direction: "asc",
+  });
 
   const toggleRow = (id) => {
     setExpandedRows((prev) =>
-      prev?.includes(id) ? prev?.filter((rowId) => rowId !== id) : [...prev, id]
+      prev?.includes(id)
+        ? prev?.filter((rowId) => rowId !== id)
+        : [...prev, id],
     );
   };
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
-      direction: prev?.key === key && prev?.direction === 'asc' ? 'desc' : 'asc'
+      direction:
+        prev?.key === key && prev?.direction === "asc" ? "desc" : "asc",
     }));
   };
 
@@ -27,9 +38,9 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
     sorted?.sort((a, b) => {
       const aValue = a?.[sortConfig?.key];
       const bValue = b?.[sortConfig?.key];
-      
-      if (aValue < bValue) return sortConfig?.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig?.direction === 'asc' ? 1 : -1;
+
+      if (aValue < bValue) return sortConfig?.direction === "asc" ? -1 : 1;
+      if (aValue > bValue) return sortConfig?.direction === "asc" ? 1 : -1;
       return 0;
     });
     return sorted;
@@ -37,24 +48,34 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date?.toLocaleString('en-US', { 
-      month: 'short', 
-      day: 'numeric', 
-      year: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date?.toLocaleString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
-  const allSelected = data?.length > 0 && selectedItems?.length === data?.length;
-  const someSelected = selectedItems?.length > 0 && selectedItems?.length < data?.length;
+  const allSelected =
+    data?.length > 0 && selectedItems?.length === data?.length;
+  const someSelected =
+    selectedItems?.length > 0 && selectedItems?.length < data?.length;
 
   if (data?.length === 0) {
     return (
       <div className="bg-card border border-border rounded-lg p-12 text-center">
-        <Icon name="Inbox" size={48} className="mx-auto mb-4 text-muted-foreground" />
-        <h3 className="text-lg font-semibold text-foreground mb-2">No monitored media found</h3>
-        <p className="text-sm text-muted-foreground">Try adjusting your filters or add new media to monitor</p>
+        <Icon
+          name="Inbox"
+          size={48}
+          className="mx-auto mb-4 text-muted-foreground"
+        />
+        <h3 className="text-lg font-semibold text-foreground mb-2">
+          No monitored media found
+        </h3>
+        <p className="text-sm text-muted-foreground">
+          Try adjusting your filters or add new media to monitor
+        </p>
       </div>
     );
   }
@@ -74,50 +95,72 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
                 />
               </th>
               <th className="px-4 py-3 text-left w-12"></th>
-              <th 
+              <th
                 className="px-4 py-3 text-left cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => handleSort('title')}
+                onClick={() => handleSort("title")}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">Title</span>
-                  {sortConfig?.key === 'title' && (
-                    <Icon 
-                      name={sortConfig?.direction === 'asc' ? 'ChevronUp' : 'ChevronDown'} 
-                      size={14} 
+                  <span className="text-sm font-semibold text-foreground">
+                    Title
+                  </span>
+                  {sortConfig?.key === "title" && (
+                    <Icon
+                      name={
+                        sortConfig?.direction === "asc"
+                          ? "ChevronUp"
+                          : "ChevronDown"
+                      }
+                      size={14}
                       className="text-primary"
                     />
                   )}
                 </div>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">Service</span>
+                <span className="text-sm font-semibold text-foreground">
+                  Service
+                </span>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">Monitoring</span>
+                <span className="text-sm font-semibold text-foreground">
+                  Monitoring
+                </span>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">Availability</span>
+                <span className="text-sm font-semibold text-foreground">
+                  Availability
+                </span>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">Quality</span>
+                <span className="text-sm font-semibold text-foreground">
+                  Quality
+                </span>
               </th>
-              <th 
+              <th
                 className="px-4 py-3 text-left cursor-pointer hover:bg-muted/50 transition-colors"
-                onClick={() => handleSort('lastUpdated')}
+                onClick={() => handleSort("lastUpdated")}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">Last Updated</span>
-                  {sortConfig?.key === 'lastUpdated' && (
-                    <Icon 
-                      name={sortConfig?.direction === 'asc' ? 'ChevronUp' : 'ChevronDown'} 
-                      size={14} 
+                  <span className="text-sm font-semibold text-foreground">
+                    Last Updated
+                  </span>
+                  {sortConfig?.key === "lastUpdated" && (
+                    <Icon
+                      name={
+                        sortConfig?.direction === "asc"
+                          ? "ChevronUp"
+                          : "ChevronDown"
+                      }
+                      size={14}
                       className="text-primary"
                     />
                   )}
                 </div>
               </th>
               <th className="px-4 py-3 text-right">
-                <span className="text-sm font-semibold text-foreground">Actions</span>
+                <span className="text-sm font-semibold text-foreground">
+                  Actions
+                </span>
               </th>
             </tr>
           </thead>
@@ -128,7 +171,9 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
                   <td className="px-4 py-3">
                     <Checkbox
                       checked={selectedItems?.includes(item?.id)}
-                      onChange={(e) => onSelectItem(item?.id, e?.target?.checked)}
+                      onChange={(e) =>
+                        onSelectItem(item?.id, e?.target?.checked)
+                      }
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -136,20 +181,30 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
                       onClick={() => toggleRow(item?.id)}
                       className="text-muted-foreground hover:text-foreground transition-colors"
                     >
-                      <Icon 
-                        name={expandedRows?.includes(item?.id) ? 'ChevronDown' : 'ChevronRight'} 
-                        size={18} 
+                      <Icon
+                        name={
+                          expandedRows?.includes(item?.id)
+                            ? "ChevronDown"
+                            : "ChevronRight"
+                        }
+                        size={18}
                       />
                     </button>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-2">
-                      <Icon 
-                        name={item?.service === 'sonarr' ? 'Tv' : 'Film'} 
-                        size={16} 
-                        className={item?.service === 'sonarr' ? 'text-purple-400' : 'text-blue-400'}
+                      <Icon
+                        name={item?.service === "sonarr" ? "Tv" : "Film"}
+                        size={16}
+                        className={
+                          item?.service === "sonarr"
+                            ? "text-purple-400"
+                            : "text-blue-400"
+                        }
                       />
-                      <span className="text-sm font-medium text-foreground">{item?.title}</span>
+                      <span className="text-sm font-medium text-foreground">
+                        {item?.title}
+                      </span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -158,16 +213,26 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <StatusIndicator status={item?.monitoringStatus} type="monitoring" />
+                    <StatusIndicator
+                      status={item?.monitoringStatus}
+                      type="monitoring"
+                    />
                   </td>
                   <td className="px-4 py-3">
-                    <StatusIndicator status={item?.availabilityStatus} type="availability" />
+                    <StatusIndicator
+                      status={item?.availabilityStatus}
+                      type="availability"
+                    />
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-sm text-foreground">{item?.qualityProfile}</span>
+                    <span className="text-sm text-foreground">
+                      {item?.qualityProfile}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-sm text-muted-foreground">{formatDate(item?.lastUpdated)}</span>
+                    <span className="text-sm text-muted-foreground">
+                      {formatDate(item?.lastUpdated)}
+                    </span>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-1">
@@ -176,14 +241,14 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
                         size="icon"
                         iconName="RefreshCw"
                         className="h-8 w-8"
-                        onClick={() => console.log('Refresh', item?.id)}
+                        onClick={() => console.log("Refresh", item?.id)}
                       />
                       <Button
                         variant="ghost"
                         size="icon"
                         iconName="Search"
                         className="h-8 w-8"
-                        onClick={() => console.log('Search', item?.id)}
+                        onClick={() => console.log("Search", item?.id)}
                       />
                     </div>
                   </td>
@@ -212,31 +277,53 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
               />
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
-                  <Icon 
-                    name={item?.service === 'sonarr' ? 'Tv' : 'Film'} 
-                    size={16} 
-                    className={item?.service === 'sonarr' ? 'text-purple-400' : 'text-blue-400'}
+                  <Icon
+                    name={item?.service === "sonarr" ? "Tv" : "Film"}
+                    size={16}
+                    className={
+                      item?.service === "sonarr"
+                        ? "text-purple-400"
+                        : "text-blue-400"
+                    }
                   />
-                  <h3 className="text-sm font-semibold text-foreground">{item?.title}</h3>
+                  <h3 className="text-sm font-semibold text-foreground">
+                    {item?.title}
+                  </h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Service</p>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Service
+                    </p>
                     <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary capitalize">
                       {item?.service}
                     </span>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Quality</p>
-                    <span className="text-xs text-foreground">{item?.qualityProfile}</span>
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Quality
+                    </p>
+                    <span className="text-xs text-foreground">
+                      {item?.qualityProfile}
+                    </span>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Monitoring</p>
-                    <StatusIndicator status={item?.monitoringStatus} type="monitoring" />
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Monitoring
+                    </p>
+                    <StatusIndicator
+                      status={item?.monitoringStatus}
+                      type="monitoring"
+                    />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">Availability</p>
-                    <StatusIndicator status={item?.availabilityStatus} type="availability" />
+                    <p className="text-xs text-muted-foreground mb-1">
+                      Availability
+                    </p>
+                    <StatusIndicator
+                      status={item?.availabilityStatus}
+                      type="availability"
+                    />
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
@@ -246,23 +333,27 @@ const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => 
                   <Button
                     variant="outline"
                     size="sm"
-                    iconName={expandedRows?.includes(item?.id) ? 'ChevronUp' : 'ChevronDown'}
+                    iconName={
+                      expandedRows?.includes(item?.id)
+                        ? "ChevronUp"
+                        : "ChevronDown"
+                    }
                     onClick={() => toggleRow(item?.id)}
                     className="flex-1"
                   >
-                    {expandedRows?.includes(item?.id) ? 'Hide' : 'Show'} Details
+                    {expandedRows?.includes(item?.id) ? "Hide" : "Show"} Details
                   </Button>
                   <Button
                     variant="outline"
                     size="sm"
                     iconName="RefreshCw"
-                    onClick={() => console.log('Refresh', item?.id)}
+                    onClick={() => console.log("Refresh", item?.id)}
                   />
                   <Button
                     variant="outline"
                     size="sm"
                     iconName="Search"
-                    onClick={() => console.log('Search', item?.id)}
+                    onClick={() => console.log("Search", item?.id)}
                   />
                 </div>
               </div>

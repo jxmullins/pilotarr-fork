@@ -1,33 +1,39 @@
-import React from 'react';
+import React from "react";
 
-import Select from '../../../components/ui/Select';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
+import Select from "../../../components/ui/Select";
+import Icon from "../../../components/AppIcon";
+import Button from "../../../components/ui/Button";
 
-const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, totalResults }) => {
+const FilterToolbar = ({
+  searchQuery,
+  onSearchChange,
+  filters,
+  onFilterChange,
+  totalResults,
+}) => {
   const contentTypeOptions = [
-    { label: 'All Content', value: 'all' },
-    { label: 'Movies', value: 'movie' },
-    { label: 'TV Shows', value: 'tv' }
+    { label: "All Content", value: "all" },
+    { label: "Movies", value: "movie" },
+    { label: "TV Shows", value: "tv" },
   ];
 
   const qualityOptions = [
-    { label: 'All Qualities', value: 'all' },
-    { label: '4K', value: '4K' },
-    { label: '1080p', value: '1080p' },
-    { label: '720p', value: '720p' }
+    { label: "All Qualities", value: "all" },
+    { label: "4K", value: "4K" },
+    { label: "1080p", value: "1080p" },
+    { label: "720p", value: "720p" },
   ];
 
   const sortOptions = [
-    { label: 'Added Date', value: 'added_date' },
-    { label: 'Ratio', value: 'ratio' },
-    { label: 'File Size', value: 'size' },
-    { label: 'Title', value: 'title' }
+    { label: "Added Date", value: "added_date" },
+    { label: "Ratio", value: "ratio" },
+    { label: "File Size", value: "size" },
+    { label: "Title", value: "title" },
   ];
 
   const orderOptions = [
-    { label: 'Descending', value: 'desc' },
-    { label: 'Ascending', value: 'asc' }
+    { label: "Descending", value: "desc" },
+    { label: "Ascending", value: "asc" },
   ];
 
   return (
@@ -35,10 +41,10 @@ const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, t
       {/* Search Bar */}
       <div className="mb-4">
         <div className="relative">
-          <Icon 
-            name="Search" 
-            size={18} 
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" 
+          <Icon
+            name="Search"
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
@@ -55,28 +61,28 @@ const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, t
         <Select
           options={contentTypeOptions}
           value={filters?.contentType}
-          onChange={(value) => onFilterChange('contentType', value)}
+          onChange={(value) => onFilterChange("contentType", value)}
           placeholder="Content Type"
         />
-        
+
         <Select
           options={qualityOptions}
           value={filters?.quality}
-          onChange={(value) => onFilterChange('quality', value)}
+          onChange={(value) => onFilterChange("quality", value)}
           placeholder="Quality"
         />
-        
+
         <Select
           options={sortOptions}
           value={filters?.sortBy}
-          onChange={(value) => onFilterChange('sortBy', value)}
+          onChange={(value) => onFilterChange("sortBy", value)}
           placeholder="Sort By"
         />
-        
+
         <Select
           options={orderOptions}
           value={filters?.order}
-          onChange={(value) => onFilterChange('order', value)}
+          onChange={(value) => onFilterChange("order", value)}
           placeholder="Order"
         />
       </div>
@@ -84,18 +90,22 @@ const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, t
       {/* Results Count */}
       <div className="flex items-center justify-between text-sm">
         <p className="text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{totalResults}</span> {totalResults === 1 ? 'item' : 'items'}
+          Showing{" "}
+          <span className="font-semibold text-foreground">{totalResults}</span>{" "}
+          {totalResults === 1 ? "item" : "items"}
         </p>
-        
-        {(searchQuery || filters?.contentType !== 'all' || filters?.quality !== 'all') && (
+
+        {(searchQuery ||
+          filters?.contentType !== "all" ||
+          filters?.quality !== "all") && (
           <Button
             variant="ghost"
             size="sm"
             iconName="X"
             onClick={() => {
-              onSearchChange('');
-              onFilterChange('contentType', 'all');
-              onFilterChange('quality', 'all');
+              onSearchChange("");
+              onFilterChange("contentType", "all");
+              onFilterChange("quality", "all");
             }}
           >
             Clear Filters

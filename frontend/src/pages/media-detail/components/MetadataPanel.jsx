@@ -1,5 +1,5 @@
-import React from 'react';
-import Icon from '../../../components/AppIcon';
+import React from "react";
+import Icon from "../../../components/AppIcon";
 
 const MetadataPanel = ({ media }) => {
   return (
@@ -11,7 +11,9 @@ const MetadataPanel = ({ media }) => {
 
       {/* Overview */}
       <div>
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-2">Overview</h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-2">
+          Overview
+        </h3>
         <p className="text-foreground">{media?.description}</p>
       </div>
 
@@ -20,7 +22,9 @@ const MetadataPanel = ({ media }) => {
         {/* Release Date */}
         {media?.releaseDate && (
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">Release Date</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">
+              Release Date
+            </h3>
             <p className="text-foreground">{media?.releaseDate}</p>
           </div>
         )}
@@ -28,7 +32,9 @@ const MetadataPanel = ({ media }) => {
         {/* Status */}
         {media?.status && (
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">Status</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">
+              Status
+            </h3>
             <p className="text-foreground">{media?.status}</p>
           </div>
         )}
@@ -37,7 +43,7 @@ const MetadataPanel = ({ media }) => {
         {media?.network && (
           <div>
             <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">
-              {media?.mediaType === 'tv' ? 'Network' : 'Studio'}
+              {media?.mediaType === "tv" ? "Network" : "Studio"}
             </h3>
             <p className="text-foreground">{media?.network}</p>
           </div>
@@ -46,7 +52,9 @@ const MetadataPanel = ({ media }) => {
         {/* Quality Profile */}
         {media?.qualityProfile && (
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">Quality Profile</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">
+              Quality Profile
+            </h3>
             <p className="text-foreground">{media?.qualityProfile}</p>
           </div>
         )}
@@ -54,7 +62,9 @@ const MetadataPanel = ({ media }) => {
         {/* Path */}
         {media?.path && (
           <div className="md:col-span-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">Path</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">
+              Path
+            </h3>
             <p className="text-foreground text-sm font-mono bg-muted px-3 py-2 rounded break-all">
               {media?.path}
             </p>
@@ -65,7 +75,9 @@ const MetadataPanel = ({ media }) => {
       {/* Cast */}
       {media?.cast && media?.cast?.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Cast</h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
+            Cast
+          </h3>
           <div className="flex flex-wrap gap-2">
             {media?.cast?.map((actor, index) => (
               <span

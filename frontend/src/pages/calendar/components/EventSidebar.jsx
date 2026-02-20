@@ -1,42 +1,50 @@
-import React from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
+import React from "react";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
 
 const EventSidebar = ({ selectedDate, events, isLoading }) => {
   const formatDate = (date) => {
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    return date?.toLocaleDateString('en-US', options);
+    const options = {
+      weekday: "long",
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    };
+    return date?.toLocaleDateString("en-US", options);
   };
 
   const getEventTypeIcon = (eventType, mediaType) => {
-    if (eventType === 'release' && mediaType === 'tv') return 'Tv';
-    if (eventType === 'release' && mediaType === 'movie') return 'Film';
-    if (eventType === 'download') return 'Download';
-    if (eventType === 'view') return 'Eye';
-    return 'Calendar';
+    if (eventType === "release" && mediaType === "tv") return "Tv";
+    if (eventType === "release" && mediaType === "movie") return "Film";
+    if (eventType === "download") return "Download";
+    if (eventType === "view") return "Eye";
+    return "Calendar";
   };
 
   const getEventTypeColor = (eventType, mediaType) => {
-    if (eventType === 'release' && mediaType === 'tv') return 'text-blue-400';
-    if (eventType === 'release' && mediaType === 'movie') return 'text-green-400';
-    if (eventType === 'download') return 'text-orange-400';
-    if (eventType === 'view') return 'text-purple-400';
-    return 'text-gray-400';
+    if (eventType === "release" && mediaType === "tv") return "text-blue-400";
+    if (eventType === "release" && mediaType === "movie")
+      return "text-green-400";
+    if (eventType === "download") return "text-orange-400";
+    if (eventType === "view") return "text-purple-400";
+    return "text-gray-400";
   };
 
   const getEventTypeLabel = (eventType, mediaType) => {
-    if (eventType === 'release' && mediaType === 'tv') return 'TV Episode Release';
-    if (eventType === 'release' && mediaType === 'movie') return 'Movie Release';
-    if (eventType === 'download') return 'Download';
-    if (eventType === 'view') return 'Viewed';
-    return 'Event';
+    if (eventType === "release" && mediaType === "tv")
+      return "TV Episode Release";
+    if (eventType === "release" && mediaType === "movie")
+      return "Movie Release";
+    if (eventType === "download") return "Download";
+    if (eventType === "view") return "Viewed";
+    return "Event";
   };
 
   const getStatusColor = (status) => {
     const colors = {
-      monitored: 'bg-primary/10 text-primary border-primary/20',
-      downloading: 'bg-warning/10 text-warning border-warning/20',
-      available: 'bg-success/10 text-success border-success/20'
+      monitored: "bg-primary/10 text-primary border-primary/20",
+      downloading: "bg-warning/10 text-warning border-warning/20",
+      available: "bg-success/10 text-success border-success/20",
     };
     return colors?.[status] || colors?.monitored;
   };
@@ -45,7 +53,11 @@ const EventSidebar = ({ selectedDate, events, isLoading }) => {
     return (
       <div className="bg-card border border-border rounded-lg p-6">
         <div className="flex items-center justify-center">
-          <Icon name="Loader2" size={24} className="animate-spin text-muted-foreground" />
+          <Icon
+            name="Loader2"
+            size={24}
+            className="animate-spin text-muted-foreground"
+          />
         </div>
       </div>
     );
@@ -55,9 +67,7 @@ const EventSidebar = ({ selectedDate, events, isLoading }) => {
     <div className="bg-card border border-border rounded-lg overflow-hidden">
       {/* Header */}
       <div className="p-4 border-b border-border bg-muted/30">
-        <h3 className="text-lg font-semibold text-foreground mb-1">
-          Events
-        </h3>
+        <h3 className="text-lg font-semibold text-foreground mb-1">Events</h3>
         <p className="text-sm text-muted-foreground">
           {formatDate(selectedDate)}
         </p>
@@ -67,12 +77,19 @@ const EventSidebar = ({ selectedDate, events, isLoading }) => {
       <div className="p-4 space-y-4 max-h-[600px] overflow-y-auto">
         {events?.length === 0 ? (
           <div className="text-center py-8">
-            <Icon name="Calendar" size={48} className="mx-auto mb-3 text-muted-foreground/50" />
+            <Icon
+              name="Calendar"
+              size={48}
+              className="mx-auto mb-3 text-muted-foreground/50"
+            />
             <p className="text-muted-foreground">No events for this date</p>
           </div>
         ) : (
-          events?.map(event => (
-            <div key={event?.id} className="bg-muted/30 border border-border rounded-lg p-3 hover:shadow-md transition-all">
+          events?.map((event) => (
+            <div
+              key={event?.id}
+              className="bg-muted/30 border border-border rounded-lg p-3 hover:shadow-md transition-all"
+            >
               <div className="flex gap-3">
                 {/* Event Image */}
                 <div className="flex-shrink-0 w-16 h-24 rounded-md overflow-hidden bg-muted">
@@ -89,10 +106,13 @@ const EventSidebar = ({ selectedDate, events, isLoading }) => {
                     <h4 className="text-sm font-semibold text-foreground line-clamp-2">
                       {event?.title}
                     </h4>
-                    <Icon 
-                      name={getEventTypeIcon(event?.eventType, event?.type)} 
-                      size={16} 
-                      className={getEventTypeColor(event?.eventType, event?.type)} 
+                    <Icon
+                      name={getEventTypeIcon(event?.eventType, event?.type)}
+                      size={16}
+                      className={getEventTypeColor(
+                        event?.eventType,
+                        event?.type,
+                      )}
                     />
                   </div>
 
@@ -119,7 +139,7 @@ const EventSidebar = ({ selectedDate, events, isLoading }) => {
                         <span>{event?.progress}%</span>
                       </div>
                       <div className="w-full bg-muted rounded-full h-1.5">
-                        <div 
+                        <div
                           className="bg-orange-500 h-1.5 rounded-full transition-all"
                           style={{ width: `${event?.progress}%` }}
                         ></div>
@@ -136,7 +156,9 @@ const EventSidebar = ({ selectedDate, events, isLoading }) => {
                   )}
 
                   {/* Status Badge */}
-                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(event?.status)}`}>
+                  <div
+                    className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${getStatusColor(event?.status)}`}
+                  >
                     <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
                     <span className="capitalize">{event?.status}</span>
                   </div>

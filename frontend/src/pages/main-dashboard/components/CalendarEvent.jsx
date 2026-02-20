@@ -1,21 +1,21 @@
-import React from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
+import React from "react";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
 
 const CalendarEvent = ({ event }) => {
   const getTypeIcon = () => {
-    return event?.mediaType === 'movie' ? 'Film' : 'Tv';
+    return event?.mediaType === "movie" ? "Film" : "Tv";
   };
 
   const getTypeColor = () => {
-    return event?.mediaType === 'movie' ? 'text-blue-400' : 'text-purple-400';
+    return event?.mediaType === "movie" ? "text-blue-400" : "text-purple-400";
   };
 
   const getStatusColor = () => {
     const colors = {
-      monitored: 'bg-primary/10 text-primary border-primary/20',
-      downloading: 'bg-warning/10 text-warning border-warning/20',
-      available: 'bg-success/10 text-success border-success/20'
+      monitored: "bg-primary/10 text-primary border-primary/20",
+      downloading: "bg-warning/10 text-warning border-warning/20",
+      available: "bg-success/10 text-success border-success/20",
     };
     return colors?.[event?.status] || colors?.monitored;
   };
@@ -48,7 +48,9 @@ const CalendarEvent = ({ event }) => {
                 <span>{event?.episode}</span>
               </div>
             )}
-            <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${getStatusColor()}`}>
+            <div
+              className={`inline-flex items-center gap-1 px-2 py-1 rounded-md text-xs font-medium ${getStatusColor()}`}
+            >
               <span className="w-1.5 h-1.5 rounded-full bg-current"></span>
               <span className="capitalize">{event?.status}</span>
             </div>

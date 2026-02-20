@@ -1,22 +1,22 @@
-import React from 'react';
-import Icon from '../../../components/AppIcon';
-import Image from '../../../components/AppImage';
-import Button from '../../../components/ui/Button';
+import React from "react";
+import Icon from "../../../components/AppIcon";
+import Image from "../../../components/AppImage";
+import Button from "../../../components/ui/Button";
 
 const RequestCard = ({ request, onApprove, onReject }) => {
   const getTypeIcon = () => {
-    return request?.mediaType === 'movie' ? 'Film' : 'Tv';
+    return request?.mediaType === "movie" ? "Film" : "Tv";
   };
 
   const getTypeColor = () => {
-    return request?.mediaType === 'movie' ? 'text-blue-400' : 'text-purple-400';
+    return request?.mediaType === "movie" ? "text-blue-400" : "text-purple-400";
   };
 
   const getPriorityColor = () => {
     const colors = {
-      high: 'bg-error/10 text-error border-error/20',
-      medium: 'bg-warning/10 text-warning border-warning/20',
-      low: 'bg-muted text-muted-foreground border-border'
+      high: "bg-error/10 text-error border-error/20",
+      medium: "bg-warning/10 text-warning border-warning/20",
+      low: "bg-muted text-muted-foreground border-border",
     };
     return colors?.[request?.priority] || colors?.low;
   };
@@ -44,19 +44,29 @@ const RequestCard = ({ request, onApprove, onReject }) => {
               </h4>
               <div className="flex items-center gap-2 flex-wrap">
                 <div className="flex items-center gap-1">
-                  <Icon name={getTypeIcon()} size={14} className={getTypeColor()} />
-                  <span className="text-xs text-muted-foreground capitalize">{request?.mediaType}</span>
+                  <Icon
+                    name={getTypeIcon()}
+                    size={14}
+                    className={getTypeColor()}
+                  />
+                  <span className="text-xs text-muted-foreground capitalize">
+                    {request?.mediaType}
+                  </span>
                 </div>
                 {request?.year && (
                   <>
                     <span className="text-xs text-muted-foreground">•</span>
-                    <span className="text-xs text-muted-foreground">{request?.year}</span>
+                    <span className="text-xs text-muted-foreground">
+                      {request?.year}
+                    </span>
                   </>
                 )}
               </div>
             </div>
             {request?.priority && (
-              <div className={`px-2 py-1 rounded-md text-xs font-medium ${getPriorityColor()}`}>
+              <div
+                className={`px-2 py-1 rounded-md text-xs font-medium ${getPriorityColor()}`}
+              >
                 {request?.priority}
               </div>
             )}
@@ -83,8 +93,14 @@ const RequestCard = ({ request, onApprove, onReject }) => {
           </div>
           {request?.quality && (
             <div className="flex items-center gap-2 mb-3 text-xs">
-              <Icon name="Settings" size={12} className="text-muted-foreground" />
-              <span className="text-muted-foreground">Quality: {request?.quality}</span>
+              <Icon
+                name="Settings"
+                size={12}
+                className="text-muted-foreground"
+              />
+              <span className="text-muted-foreground">
+                Quality: {request?.quality}
+              </span>
             </div>
           )}
           {!isApproved && !isRequested && (
@@ -120,7 +136,9 @@ const RequestCard = ({ request, onApprove, onReject }) => {
           {isRequested && (
             <div className="flex items-center gap-2 text-xs text-yellow-400">
               <Icon name="Hourglass" size={14} />
-              <span className="font-medium">Requested / Partially Available</span>
+              <span className="font-medium">
+                Requested / Partially Available
+              </span>
             </div>
           )}
         </div>

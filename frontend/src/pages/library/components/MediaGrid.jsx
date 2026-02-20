@@ -1,6 +1,6 @@
-import React from 'react';
-import MediaCard from './MediaCard';
-import Icon from '../../../components/AppIcon';
+import React from "react";
+import MediaCard from "./MediaCard";
+import Icon from "../../../components/AppIcon";
 
 const MediaGrid = ({ media }) => {
   if (!media || media?.length === 0) {
@@ -11,8 +11,12 @@ const MediaGrid = ({ media }) => {
             <Icon name="Search" size={32} className="text-muted-foreground" />
           </div>
           <div>
-            <h3 className="text-lg font-semibold text-foreground mb-1">No media found</h3>
-            <p className="text-sm text-muted-foreground">Try adjusting your search or filters</p>
+            <h3 className="text-lg font-semibold text-foreground mb-1">
+              No media found
+            </h3>
+            <p className="text-sm text-muted-foreground">
+              Try adjusting your search or filters
+            </p>
           </div>
         </div>
       </div>

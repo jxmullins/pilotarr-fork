@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
-import CalendarEvent from './CalendarEvent';
+import React, { useState } from "react";
+import Icon from "../../../components/AppIcon";
+import Button from "../../../components/ui/Button";
+import CalendarEvent from "./CalendarEvent";
 
 const MiniCalendar = ({ events }) => {
   const [selectedDate, setSelectedDate] = useState(new Date());
-  const [viewMode, setViewMode] = useState('week'); // 'week' or 'month'
+  const [viewMode, setViewMode] = useState("week"); // 'week' or 'month'
 
   const getDaysInMonth = (date) => {
     const year = date?.getFullYear();
@@ -14,7 +14,7 @@ const MiniCalendar = ({ events }) => {
     const lastDay = new Date(year, month + 1, 0);
     const daysInMonth = lastDay?.getDate();
     const startingDayOfWeek = firstDay?.getDay();
-    
+
     return { daysInMonth, startingDayOfWeek, year, month };
   };
 
@@ -22,12 +22,12 @@ const MiniCalendar = ({ events }) => {
     const days = [];
     const currentDay = new Date(date);
     currentDay?.setDate(currentDay?.getDate() - currentDay?.getDay());
-    
+
     for (let i = 0; i < 7; i++) {
       days?.push(new Date(currentDay));
       currentDay?.setDate(currentDay?.getDate() + 1);
     }
-    
+
     return days;
   };
 
@@ -39,40 +39,59 @@ const MiniCalendar = ({ events }) => {
 
   const navigateWeek = (direction) => {
     const newDate = new Date(selectedDate);
-    newDate?.setDate(newDate?.getDate() + (direction * 7));
+    newDate?.setDate(newDate?.getDate() + direction * 7);
     setSelectedDate(newDate);
   };
 
   const isToday = (date) => {
     const today = new Date();
-    return date?.getDate() === today?.getDate() &&
-           date?.getMonth() === today?.getMonth() &&
-           date?.getFullYear() === today?.getFullYear();
+    return (
+      date?.getDate() === today?.getDate() &&
+      date?.getMonth() === today?.getMonth() &&
+      date?.getFullYear() === today?.getFullYear()
+    );
   };
 
   const hasEvents = (date) => {
-    return events?.some(event => {
+    return events?.some((event) => {
       const eventDate = new Date(event.releaseDate);
-      return eventDate?.getDate() === date?.getDate() &&
-             eventDate?.getMonth() === date?.getMonth() &&
-             eventDate?.getFullYear() === date?.getFullYear();
+      return (
+        eventDate?.getDate() === date?.getDate() &&
+        eventDate?.getMonth() === date?.getMonth() &&
+        eventDate?.getFullYear() === date?.getFullYear()
+      );
     });
   };
 
   const getEventsForDate = (date) => {
-    return events?.filter(event => {
+    return events?.filter((event) => {
       const eventDate = new Date(event.releaseDate);
-      return eventDate?.getDate() === date?.getDate() &&
-             eventDate?.getMonth() === date?.getMonth() &&
-             eventDate?.getFullYear() === date?.getFullYear();
+      return (
+        eventDate?.getDate() === date?.getDate() &&
+        eventDate?.getMonth() === date?.getMonth() &&
+        eventDate?.getFullYear() === date?.getFullYear()
+      );
     });
   };
 
-  const monthNames = ["January", "February", "March", "April", "May", "June",
-    "July", "August", "September", "October", "November", "December"];
+  const monthNames = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+  ];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
+  const { daysInMonth, startingDayOfWeek, year, month } =
+    getDaysInMonth(selectedDate);
   const weekDays = getWeekDays(selectedDate);
   const selectedDateEvents = getEventsForDate(selectedDate);
 
@@ -85,16 +104,16 @@ const MiniCalendar = ({ events }) => {
           </h2>
           <div className="flex items-center gap-2">
             <Button
-              variant={viewMode === 'week' ? 'default' : 'outline'}
+              variant={viewMode === "week" ? "default" : "outline"}
               size="xs"
-              onClick={() => setViewMode('week')}
+              onClick={() => setViewMode("week")}
             >
               Week
             </Button>
             <Button
-              variant={viewMode === 'month' ? 'default' : 'outline'}
+              variant={viewMode === "month" ? "default" : "outline"}
               size="xs"
-              onClick={() => setViewMode('month')}
+              onClick={() => setViewMode("month")}
             >
               Month
             </Button>
@@ -109,7 +128,9 @@ const MiniCalendar = ({ events }) => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => viewMode === 'week' ? navigateWeek(-1) : navigateMonth(-1)}
+              onClick={() =>
+                viewMode === "week" ? navigateWeek(-1) : navigateMonth(-1)
+              }
               iconName="ChevronLeft"
               iconSize={20}
             />
@@ -123,25 +144,31 @@ const MiniCalendar = ({ events }) => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() => viewMode === 'week' ? navigateWeek(1) : navigateMonth(1)}
+              onClick={() =>
+                viewMode === "week" ? navigateWeek(1) : navigateMonth(1)
+              }
               iconName="ChevronRight"
               iconSize={20}
             />
           </div>
         </div>
 
-        {viewMode === 'week' ? (
+        {viewMode === "week" ? (
           <div className="grid grid-cols-7 gap-1 md:gap-2">
             {dayNames?.map((day) => (
-              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+              <div
+                key={day}
+                className="text-center text-xs font-medium text-muted-foreground py-2"
+              >
                 {day}
               </div>
             ))}
             {weekDays?.map((date, index) => {
               const dayEvents = getEventsForDate(date);
-              const isSelected = date?.getDate() === selectedDate?.getDate() &&
-                               date?.getMonth() === selectedDate?.getMonth();
-              
+              const isSelected =
+                date?.getDate() === selectedDate?.getDate() &&
+                date?.getMonth() === selectedDate?.getMonth();
+
               return (
                 <button
                   key={index}
@@ -149,16 +176,19 @@ const MiniCalendar = ({ events }) => {
                   className={`
                     aspect-square rounded-lg p-1 md:p-2 text-sm md:text-base font-medium
                     transition-smooth relative
-                    ${isToday(date) ? 'bg-primary text-primary-foreground' : ''}
-                    ${isSelected && !isToday(date) ? 'bg-muted text-foreground' : ''}
-                    ${!isSelected && !isToday(date) ? 'text-foreground hover:bg-muted/50' : ''}
+                    ${isToday(date) ? "bg-primary text-primary-foreground" : ""}
+                    ${isSelected && !isToday(date) ? "bg-muted text-foreground" : ""}
+                    ${!isSelected && !isToday(date) ? "text-foreground hover:bg-muted/50" : ""}
                   `}
                 >
                   {date?.getDate()}
                   {dayEvents?.length > 0 && (
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
                       {dayEvents?.slice(0, 3)?.map((_, i) => (
-                        <div key={i} className="w-1 h-1 rounded-full bg-accent"></div>
+                        <div
+                          key={i}
+                          className="w-1 h-1 rounded-full bg-accent"
+                        ></div>
                       ))}
                     </div>
                   )}
@@ -169,7 +199,10 @@ const MiniCalendar = ({ events }) => {
         ) : (
           <div className="grid grid-cols-7 gap-1 md:gap-2">
             {dayNames?.map((day) => (
-              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
+              <div
+                key={day}
+                className="text-center text-xs font-medium text-muted-foreground py-2"
+              >
                 {day}
               </div>
             ))}
@@ -179,9 +212,10 @@ const MiniCalendar = ({ events }) => {
             {Array.from({ length: daysInMonth })?.map((_, index) => {
               const date = new Date(year, month, index + 1);
               const dayEvents = getEventsForDate(date);
-              const isSelected = date?.getDate() === selectedDate?.getDate() &&
-                               date?.getMonth() === selectedDate?.getMonth();
-              
+              const isSelected =
+                date?.getDate() === selectedDate?.getDate() &&
+                date?.getMonth() === selectedDate?.getMonth();
+
               return (
                 <button
                   key={index}
@@ -189,16 +223,19 @@ const MiniCalendar = ({ events }) => {
                   className={`
                     aspect-square rounded-lg p-1 md:p-2 text-sm md:text-base font-medium
                     transition-smooth relative
-                    ${isToday(date) ? 'bg-primary text-primary-foreground' : ''}
-                    ${isSelected && !isToday(date) ? 'bg-muted text-foreground' : ''}
-                    ${!isSelected && !isToday(date) ? 'text-foreground hover:bg-muted/50' : ''}
+                    ${isToday(date) ? "bg-primary text-primary-foreground" : ""}
+                    ${isSelected && !isToday(date) ? "bg-muted text-foreground" : ""}
+                    ${!isSelected && !isToday(date) ? "text-foreground hover:bg-muted/50" : ""}
                   `}
                 >
                   {index + 1}
                   {dayEvents?.length > 0 && (
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
                       {dayEvents?.slice(0, 3)?.map((_, i) => (
-                        <div key={i} className="w-1 h-1 rounded-full bg-accent"></div>
+                        <div
+                          key={i}
+                          className="w-1 h-1 rounded-full bg-accent"
+                        ></div>
                       ))}
                     </div>
                   )}
@@ -210,10 +247,9 @@ const MiniCalendar = ({ events }) => {
       </div>
       <div className="p-4 md:p-6">
         <h3 className="text-sm font-semibold text-foreground mb-3">
-          {selectedDateEvents?.length > 0 
-            ? `${selectedDateEvents?.length} Release${selectedDateEvents?.length > 1 ? 's' : ''} on ${selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-            : `No releases on ${selectedDate?.toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-          }
+          {selectedDateEvents?.length > 0
+            ? `${selectedDateEvents?.length} Release${selectedDateEvents?.length > 1 ? "s" : ""} on ${selectedDate?.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`
+            : `No releases on ${selectedDate?.toLocaleDateString("en-US", { month: "short", day: "numeric" })}`}
         </h3>
         {selectedDateEvents?.length > 0 ? (
           <div className="space-y-3">
@@ -223,8 +259,14 @@ const MiniCalendar = ({ events }) => {
           </div>
         ) : (
           <div className="text-center py-8">
-            <Icon name="Calendar" size={48} className="text-muted-foreground mx-auto mb-3 opacity-50" />
-            <p className="text-sm text-muted-foreground">No releases scheduled for this date</p>
+            <Icon
+              name="Calendar"
+              size={48}
+              className="text-muted-foreground mx-auto mb-3 opacity-50"
+            />
+            <p className="text-sm text-muted-foreground">
+              No releases scheduled for this date
+            </p>
           </div>
         )}
       </div>

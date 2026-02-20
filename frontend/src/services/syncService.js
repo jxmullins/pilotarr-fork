@@ -1,4 +1,4 @@
-import pilotarrClient from '../lib/pilotarrClient';
+import pilotarrClient from "../lib/pilotarrClient";
 
 /**
  * Sync Metadata Operations
@@ -7,10 +7,10 @@ import pilotarrClient from '../lib/pilotarrClient';
 // Get all sync metadata
 export const getAllSyncMetadata = async () => {
   try {
-    const response = await pilotarrClient?.get('/sync/metadata');
+    const response = await pilotarrClient?.get("/sync/metadata");
     return response?.data || [];
   } catch (error) {
-    console.error('Error fetching sync metadata:', error?.message);
+    console.error("Error fetching sync metadata:", error?.message);
     return [];
   }
 };
@@ -21,39 +21,52 @@ export const getSyncMetadata = async (serviceName) => {
     const response = await pilotarrClient?.get(`/sync/metadata/${serviceName}`);
     return response?.data || null;
   } catch (error) {
-    console.error(`Error fetching sync metadata for ${serviceName}:`, error?.message);
+    console.error(
+      `Error fetching sync metadata for ${serviceName}:`,
+      error?.message,
+    );
     return null;
   }
 };
 
 // Update sync status
-export const updateSyncStatus = async (serviceName, status, errorMessage = null) => {
+export const updateSyncStatus = async (
+  serviceName,
+  status,
+  errorMessage = null,
+) => {
   try {
-    const response = await pilotarrClient?.post('/sync/status', {
+    const response = await pilotarrClient?.post("/sync/status", {
       serviceName,
       status,
       errorMessage,
-      lastSyncTime: status === 'in_progress' ? new Date()?.toISOString() : undefined
+      lastSyncTime:
+        status === "in_progress" ? new Date()?.toISOString() : undefined,
     });
     return response?.data || null;
   } catch (error) {
-    console.error('Error updating sync status:', error?.message);
+    console.error("Error updating sync status:", error?.message);
     throw error;
   }
 };
 
 // Complete sync with results
-export const completeSyncMetadata = async (serviceName, recordsSynced, durationMs, nextSyncTime) => {
+export const completeSyncMetadata = async (
+  serviceName,
+  recordsSynced,
+  durationMs,
+  nextSyncTime,
+) => {
   try {
-    const response = await pilotarrClient?.post('/sync/complete', {
+    const response = await pilotarrClient?.post("/sync/complete", {
       serviceName,
       recordsSynced,
       durationMs,
-      nextSyncTime
+      nextSyncTime,
     });
     return response?.data || null;
   } catch (error) {
-    console.error('Error completing sync metadata:', error?.message);
+    console.error("Error completing sync metadata:", error?.message);
     throw error;
   }
 };
@@ -61,10 +74,10 @@ export const completeSyncMetadata = async (serviceName, recordsSynced, durationM
 // Get services that need syncing
 export const getServicesNeedingSync = async () => {
   try {
-    const response = await pilotarrClient?.get('/sync/pending');
+    const response = await pilotarrClient?.get("/sync/pending");
     return response?.data || [];
   } catch (error) {
-    console.error('Error fetching services needing sync:', error?.message);
+    console.error("Error fetching services needing sync:", error?.message);
     return [];
   }
 };
@@ -72,10 +85,10 @@ export const getServicesNeedingSync = async () => {
 // Trigger manual sync for all services
 export const triggerSync = async () => {
   try {
-    const response = await pilotarrClient?.post('/sync/trigger');
+    const response = await pilotarrClient?.post("/sync/trigger");
     return response?.data || { success: false };
   } catch (error) {
-    console.error('Error triggering sync:', error?.message);
+    console.error("Error triggering sync:", error?.message);
     return { success: false, error: error?.message };
   }
 };
@@ -86,5 +99,5 @@ export default {
   updateSyncStatus,
   completeSyncMetadata,
   getServicesNeedingSync,
-  triggerSync
+  triggerSync,
 };

@@ -1,27 +1,34 @@
-import React from 'react';
-import Select from '../../../components/ui/Select';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
+import React from "react";
+import Select from "../../../components/ui/Select";
+import Icon from "../../../components/AppIcon";
+import Button from "../../../components/ui/Button";
 
-const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, totalResults, uniqueUsers }) => {
+const FilterToolbar = ({
+  searchQuery,
+  onSearchChange,
+  filters,
+  onFilterChange,
+  totalResults,
+  uniqueUsers,
+}) => {
   const statusOptions = [
-    { label: 'All Status', value: 'all' },
-    { label: 'Pending', value: 'pending' },
-    { label: 'Approved', value: 'approved' },
-    { label: 'Processing', value: 'processing' },
-    { label: 'Declined', value: 'declined' },
-    { label: 'Available', value: 'available' }
+    { label: "All Status", value: "all" },
+    { label: "Pending", value: "pending" },
+    { label: "Approved", value: "approved" },
+    { label: "Processing", value: "processing" },
+    { label: "Declined", value: "declined" },
+    { label: "Available", value: "available" },
   ];
 
   const typeOptions = [
-    { label: 'All Types', value: 'all' },
-    { label: 'Movies', value: 'movie' },
-    { label: 'TV Shows', value: 'tv' }
+    { label: "All Types", value: "all" },
+    { label: "Movies", value: "movie" },
+    { label: "TV Shows", value: "tv" },
   ];
 
-  const userOptions = uniqueUsers?.map(user => ({
-    label: user === 'all' ? 'All Users' : user,
-    value: user
+  const userOptions = uniqueUsers?.map((user) => ({
+    label: user === "all" ? "All Users" : user,
+    value: user,
   }));
 
   return (
@@ -29,10 +36,10 @@ const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, t
       {/* Search Bar */}
       <div className="mb-4">
         <div className="relative">
-          <Icon 
-            name="Search" 
-            size={18} 
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" 
+          <Icon
+            name="Search"
+            size={18}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground"
           />
           <input
             type="text"
@@ -49,21 +56,21 @@ const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, t
         <Select
           options={statusOptions}
           value={filters?.status}
-          onChange={(value) => onFilterChange('status', value)}
+          onChange={(value) => onFilterChange("status", value)}
           placeholder="Status"
         />
-        
+
         <Select
           options={typeOptions}
           value={filters?.type}
-          onChange={(value) => onFilterChange('type', value)}
+          onChange={(value) => onFilterChange("type", value)}
           placeholder="Request Type"
         />
-        
+
         <Select
           options={userOptions}
           value={filters?.user}
-          onChange={(value) => onFilterChange('user', value)}
+          onChange={(value) => onFilterChange("user", value)}
           placeholder="Requested By"
         />
       </div>
@@ -71,19 +78,24 @@ const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, t
       {/* Results Count */}
       <div className="flex items-center justify-between text-sm">
         <p className="text-muted-foreground">
-          Showing <span className="font-semibold text-foreground">{totalResults}</span> {totalResults === 1 ? 'request' : 'requests'}
+          Showing{" "}
+          <span className="font-semibold text-foreground">{totalResults}</span>{" "}
+          {totalResults === 1 ? "request" : "requests"}
         </p>
-        
-        {(searchQuery || filters?.status !== 'all' || filters?.type !== 'all' || filters?.user !== 'all') && (
+
+        {(searchQuery ||
+          filters?.status !== "all" ||
+          filters?.type !== "all" ||
+          filters?.user !== "all") && (
           <Button
             variant="ghost"
             size="sm"
             iconName="X"
             onClick={() => {
-              onSearchChange('');
-              onFilterChange('status', 'all');
-              onFilterChange('type', 'all');
-              onFilterChange('user', 'all');
+              onSearchChange("");
+              onFilterChange("status", "all");
+              onFilterChange("type", "all");
+              onFilterChange("user", "all");
             }}
           >
             Clear Filters

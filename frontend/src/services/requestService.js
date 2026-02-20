@@ -1,29 +1,32 @@
-import pilotarrClient from '../lib/pilotarrClient';
+import pilotarrClient from "../lib/pilotarrClient";
 
 /**
  * Get all Jellyseerr requests
  * @returns {Promise<Array>} Array of requests
  */
-export const getJellyseerrRequests = async (status = 'pending', limit = 10) => {
+export const getJellyseerrRequests = async (status = "pending", limit = 10) => {
   try {
-    const response = await pilotarrClient?.get(`/dashboard/requests?status=${status}&limit=${limit}`);
-    
+    const response = await pilotarrClient?.get(
+      `/dashboard/requests?status=${status}&limit=${limit}`,
+    );
+
     // Map snake_case API response to camelCase for frontend
-    const requests = response?.data?.map(request => ({
-      id: request?.id,
-      title: request?.title,
-      mediaType: request?.media_type, // 'movie' or 'tv'
-      requestedBy: request?.requested_by,
-      requestedDate: request?.requested_date,
-      status: request?.status, // 1 = approved, 0 = pending
-      imageUrl: request?.image_url,
-      imageAlt: request?.image_alt,
-      year: request?.year,
-      description: request?.description,
-      priority: request?.priority,
-      quality: request?.quality
-    })) || [];
-    
+    const requests =
+      response?.data?.map((request) => ({
+        id: request?.id,
+        title: request?.title,
+        mediaType: request?.media_type, // 'movie' or 'tv'
+        requestedBy: request?.requested_by,
+        requestedDate: request?.requested_date,
+        status: request?.status, // 1 = approved, 0 = pending
+        imageUrl: request?.image_url,
+        imageAlt: request?.image_alt,
+        year: request?.year,
+        description: request?.description,
+        priority: request?.priority,
+        quality: request?.quality,
+      })) || [];
+
     return requests;
   } catch (error) {
     return [];
@@ -37,7 +40,10 @@ export const getJellyseerrRequests = async (status = 'pending', limit = 10) => {
  */
 export const addJellyseerrRequest = async (request) => {
   try {
-    const response = await pilotarrClient?.post('/jellyseerr/requests', request);
+    const response = await pilotarrClient?.post(
+      "/jellyseerr/requests",
+      request,
+    );
     return response?.data || null;
   } catch (error) {
     return null;

@@ -1,4 +1,4 @@
-import pilotarrClient from '../lib/pilotarrClient';
+import pilotarrClient from "../lib/pilotarrClient";
 
 /**
  * Service Configuration Operations
@@ -7,7 +7,7 @@ import pilotarrClient from '../lib/pilotarrClient';
 // Helper function to convert API response to camelCase
 const mapServiceResponse = (data) => {
   if (!data) return null;
-  
+
   return {
     serviceName: data?.service_name,
     url: data?.url,
@@ -21,7 +21,7 @@ const mapServiceResponse = (data) => {
     testStatus: data?.test_status,
     testMessage: data?.test_message,
     createdAt: data?.created_at,
-    updatedAt: data?.updated_at
+    updatedAt: data?.updated_at,
   };
 };
 
@@ -29,21 +29,30 @@ const mapServiceResponse = (data) => {
 export const getServiceConfigurations = async () => {
   try {
     // Fetch all services individually since the API uses /api/services/{service_name}
-    const serviceNames = ['jellyfin', 'jellyseerr', 'radarr', 'sonarr', 'qbittorrent'];
-    const promises = serviceNames?.map(name => 
-      pilotarrClient?.get(`/services/${name}`)?.then(response => mapServiceResponse(response?.data))?.catch(error => {
+    const serviceNames = [
+      "jellyfin",
+      "jellyseerr",
+      "radarr",
+      "sonarr",
+      "qbittorrent",
+    ];
+    const promises = serviceNames?.map((name) =>
+      pilotarrClient
+        ?.get(`/services/${name}`)
+        ?.then((response) => mapServiceResponse(response?.data))
+        ?.catch((error) => {
           // If service not found (404), return null
           if (error?.response?.status === 404) {
             return null;
           }
           throw error;
-        })
+        }),
     );
-    
+
     const results = await Promise?.all(promises);
-    return results?.filter(config => config !== null);
+    return results?.filter((config) => config !== null);
   } catch (error) {
-    console.error('Error fetching service configurations:', error?.message);
+    console.error("Error fetching service configurations:", error?.message);
     return [];
   }
 };
@@ -54,7 +63,10 @@ export const getServiceConfiguration = async (serviceName) => {
     const response = await pilotarrClient?.get(`/services/${serviceName}`);
     return mapServiceResponse(response?.data);
   } catch (error) {
-    console.error(`Error fetching ${serviceName} configuration:`, error?.message);
+    console.error(
+      `Error fetching ${serviceName} configuration:`,
+      error?.message,
+    );
     return null;
   }
 };
@@ -71,7 +83,7 @@ export const saveServiceConfiguration = async (serviceName, config) => {
       is_active: config?.isActive !== undefined ? config?.isActive : false,
       last_tested_at: config?.lastTestedAt || null,
       test_status: config?.testStatus || null,
-      test_message: config?.testMessage || null
+      test_message: config?.testMessage || null,
     });
     return mapServiceResponse(response?.data);
   } catch (error) {
@@ -80,15 +92,17 @@ export const saveServiceConfiguration = async (serviceName, config) => {
   }
 };
 
-
 // Test service connection
 export const testServiceConnection = async (serviceName) => {
   try {
-    const response = await pilotarrClient?.post(`/services/${serviceName}/test`, {});
+    const response = await pilotarrClient?.post(
+      `/services/${serviceName}/test`,
+      {},
+    );
     return {
       success: response?.data?.success,
       message: response?.data?.message,
-      testedAt: response?.data?.tested_at
+      testedAt: response?.data?.tested_at,
     };
   } catch (error) {
     console.error(`Error testing ${serviceName} connection:`, error?.message);
@@ -97,16 +111,23 @@ export const testServiceConnection = async (serviceName) => {
 };
 
 // Update test status for a service
-export const updateServiceTestStatus = async (serviceName, testStatus, testMessage) => {
+export const updateServiceTestStatus = async (
+  serviceName,
+  testStatus,
+  testMessage,
+) => {
   try {
-    const response = await pilotarrClient?.patch(`/services/${serviceName}/test`, {
-      test_status: testStatus,
-      test_message: testMessage,
-      last_tested_at: new Date()?.toISOString()
-    });
+    const response = await pilotarrClient?.patch(
+      `/services/${serviceName}/test`,
+      {
+        test_status: testStatus,
+        test_message: testMessage,
+        last_tested_at: new Date()?.toISOString(),
+      },
+    );
     return mapServiceResponse(response?.data);
   } catch (error) {
-    console.error('Error updating test status:', error?.message);
+    console.error("Error updating test status:", error?.message);
     throw error;
   }
 };
@@ -117,7 +138,7 @@ export const deleteServiceConfiguration = async (serviceName) => {
     await pilotarrClient?.delete(`/services/${serviceName}`);
     return true;
   } catch (error) {
-    console.error('Error deleting service configuration:', error?.message);
+    console.error("Error deleting service configuration:", error?.message);
     return false;
   }
 };
@@ -128,5 +149,5 @@ export default {
   saveServiceConfiguration,
   testServiceConnection,
   updateServiceTestStatus,
-  deleteServiceConfiguration
+  deleteServiceConfiguration,
 };

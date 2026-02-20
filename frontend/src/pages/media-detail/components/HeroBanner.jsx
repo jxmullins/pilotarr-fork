@@ -1,17 +1,17 @@
-import React, { useState } from 'react';
-import Image from '../../../components/AppImage';
-import Icon from '../../../components/AppIcon';
-import Button from '../../../components/ui/Button';
+import React, { useState } from "react";
+import Image from "../../../components/AppImage";
+import Icon from "../../../components/AppIcon";
+import Button from "../../../components/ui/Button";
 
 const HeroBanner = ({ media }) => {
   const [isMonitored, setIsMonitored] = useState(media?.monitored || false);
 
   const getTypeIcon = () => {
-    return media?.mediaType === 'movie' ? 'Film' : 'Tv';
+    return media?.mediaType === "movie" ? "Film" : "Tv";
   };
 
   const getTypeColor = () => {
-    return media?.mediaType === 'movie' ? 'text-blue-400' : 'text-purple-400';
+    return media?.mediaType === "movie" ? "text-blue-400" : "text-purple-400";
   };
 
   const handleMonitorToggle = () => {
@@ -50,7 +50,11 @@ const HeroBanner = ({ media }) => {
             {/* Title and Year */}
             <div>
               <div className="flex items-center gap-3 mb-2">
-                <Icon name={getTypeIcon()} size={24} className={getTypeColor()} />
+                <Icon
+                  name={getTypeIcon()}
+                  size={24}
+                  className={getTypeColor()}
+                />
                 <span className="text-sm font-medium text-muted-foreground uppercase">
                   {media?.mediaType}
                 </span>
@@ -62,8 +66,14 @@ const HeroBanner = ({ media }) => {
                 <span className="text-lg">{media?.year}</span>
                 {media?.rating && (
                   <div className="flex items-center gap-1">
-                    <Icon name="Star" size={18} className="text-warning fill-warning" />
-                    <span className="text-lg font-semibold text-foreground">{media?.rating}</span>
+                    <Icon
+                      name="Star"
+                      size={18}
+                      className="text-warning fill-warning"
+                    />
+                    <span className="text-lg font-semibold text-foreground">
+                      {media?.rating}
+                    </span>
                   </div>
                 )}
                 {media?.runtime && (
@@ -97,11 +107,11 @@ const HeroBanner = ({ media }) => {
             {/* Actions */}
             <div className="flex flex-wrap gap-3">
               <Button
-                variant={isMonitored ? 'success' : 'outline'}
-                iconName={isMonitored ? 'Eye' : 'EyeOff'}
+                variant={isMonitored ? "success" : "outline"}
+                iconName={isMonitored ? "Eye" : "EyeOff"}
                 onClick={handleMonitorToggle}
               >
-                {isMonitored ? 'Monitored' : 'Unmonitored'}
+                {isMonitored ? "Monitored" : "Unmonitored"}
               </Button>
               <Button variant="outline" iconName="Search">
                 Manual Search
