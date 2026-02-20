@@ -57,6 +57,7 @@ const MediaDetail = () => {
           nbMedia: data.nb_media,
 
           fileInfo: {
+            quality: data.quality,
             size: data.size,
             torrentInfo: { seedRatio: torrent.ratio, status: torrent.status },
             subtitles: data.media_streams?.subtitles || [],
@@ -71,6 +72,7 @@ const MediaDetail = () => {
             }, {}),
           },
 
+          viewCount: data.view_count || 0,
           monitored: seasonsData.some((s) => s.is_monitored),
           downloadedEpisodes,
           totalEpisodes,

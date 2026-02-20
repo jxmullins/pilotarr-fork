@@ -12,6 +12,7 @@ from app.api.schemas import (
 from app.db import get_db
 from app.models import Episode, LibraryItem, MediaType, Season
 from app.models.enums import ItemSortBy
+from app.models.models import PlaybackSession
 
 router = APIRouter(prefix="/library", tags=["Library"])
 
@@ -99,6 +100,24 @@ async def get_library_item(
     if not item:
         raise HTTPException(status_code=404, detail="Library item not found")
 
+    # Count views from PlaybackSession
+    if item.media_type == MediaType.TV:
+        # Distinct episodes watched
+        view_count = (
+            db.query(func.count(func.distinct(PlaybackSession.episode_info)))
+            .filter(PlaybackSession.library_item_id == id, PlaybackSession.is_active.is_(False))
+            .scalar()
+            or 0
+        )
+    else:
+        # Number of completed sessions for movies
+        view_count = (
+            db.query(func.count(PlaybackSession.id))
+            .filter(PlaybackSession.library_item_id == id, PlaybackSession.is_active.is_(False))
+            .scalar()
+            or 0
+        )
+
     data = {
         "id": item.id,
         "title": item.title,
@@ -112,6 +131,7 @@ async def get_library_item(
         "added_date": item.added_date,
         "size": item.size,
         "nb_media": item.nb_media,
+        "view_count": view_count,
         "media_streams": item.media_streams,
         "created_at": item.created_at,
         "torrent_info": _build_torrent_info_array(item),

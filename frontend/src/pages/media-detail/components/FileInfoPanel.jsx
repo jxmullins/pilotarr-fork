@@ -279,7 +279,9 @@ const FileInfoPanel = ({ media }) => {
         <div className="flex items-center justify-between">
           <span className="text-sm text-muted-foreground">Views</span>
           <span className="text-sm text-foreground font-medium">
-            {media?.viewCount || 0}
+            {media?.mediaType === "tv" && media?.nbMedia > 0
+              ? `${media?.viewCount || 0} / ${media?.nbMedia}`
+              : media?.viewCount || 0}
           </span>
         </div>
 

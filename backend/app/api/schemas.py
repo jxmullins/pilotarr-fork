@@ -189,6 +189,7 @@ class LibraryItemResponse(BaseModel):
     torrent_info: list[dict[str, Any]] = []
     torrent_count: int = 0
     nb_media: int = 0
+    view_count: int = 0
     media_streams: dict[str, Any] | None = None  # {"subtitles": [...], "audio": [...]}
     created_at: datetime
 
