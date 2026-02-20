@@ -10,8 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 class MetricsService:
-    """Service pour gérer les métriques serveur"""
-
     @staticmethod
     def get_cpu_usage() -> float:
         """Récupère l'utilisation CPU en pourcentage"""

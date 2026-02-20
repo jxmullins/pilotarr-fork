@@ -13,19 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 class QBittorrentConnector(BaseConnector):
-    """Connecteur pour interagir avec l'API qBittorrent"""
-
     def __init__(self, base_url: str, username: str, password: str, port: int | None = None):
-        """
-        Initialise le connecteur qBittorrent
-
-        Args:
-            base_url: URL de base de qBittorrent (ex: http://192.168.1.58)
-            username: Nom d'utilisateur
-            password: Mot de passe
-            port: Port (optionnel, ex: 8090)
-        """
-        # Construire l'URL complète
         if port:
             full_url = f"{base_url}:{port}"
         else:
@@ -52,12 +40,6 @@ class QBittorrentConnector(BaseConnector):
             await self.login()
 
     async def login(self) -> bool:
-        """
-        qBittorrent Auth
-
-        Returns:
-            True or False
-        """
         try:
             await self._ensure_session()
 
