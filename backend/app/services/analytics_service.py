@@ -185,7 +185,9 @@ class AnalyticsService:
                 session.watched_seconds = watched_seconds
             else:
                 # Fallback : calculer la durée à partir du temps écoulé
-                elapsed = int((session.end_time - session.start_time).total_seconds())
+                end = session.end_time if session.end_time.tzinfo else session.end_time.replace(tzinfo=UTC)
+                start = session.start_time if session.start_time.tzinfo else session.start_time.replace(tzinfo=UTC)
+                elapsed = int((end - start).total_seconds())
                 # Plafonner au maximum à la durée du média si connue
                 if session.duration_seconds and elapsed > session.duration_seconds:
                     elapsed = session.duration_seconds
