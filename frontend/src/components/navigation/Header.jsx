@@ -38,6 +38,12 @@ const Header = () => {
       tooltip: "Detailed usage statistics",
     },
     {
+      label: "Torrents",
+      path: "/torrents",
+      icon: "Download",
+      tooltip: "Torrent client management",
+    },
+    {
       label: "Calendar",
       path: "/calendar",
       icon: "Calendar",

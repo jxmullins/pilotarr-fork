@@ -11,6 +11,7 @@ import Monitoring from "./pages/monitoring";
 import MediaDetail from "./pages/media-detail";
 import JellyseerrRequests from "./pages/jellyseerr-requests";
 import Calendar from "./pages/calendar";
+import Torrents from "./pages/torrents";
 
 const Routes = () => {
   return (
@@ -28,6 +29,7 @@ const Routes = () => {
           <Route path="/monitoring" element={<Monitoring />} />
           <Route path="/jellyseerr-requests" element={<JellyseerrRequests />} />
           <Route path="/calendar" element={<Calendar />} />
+          <Route path="/torrents" element={<Torrents />} />
           <Route path="*" element={<NotFound />} />
         </RouterRoutes>
       </ErrorBoundary>
