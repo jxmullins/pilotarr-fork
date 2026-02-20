@@ -1,15 +1,30 @@
-import React, { useState, useEffect } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect, useRef } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../AppIcon";
+import { useAuth } from "../../contexts/AuthContext";
 
 const Header = () => {
   const location = useLocation();
+  const navigate = useNavigate();
+  const auth = useAuth();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [configProgress, setConfigProgress] = useState(false);
+  const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const userMenuRef = useRef(null);
 
   useEffect(() => {
     const configComplete = localStorage.getItem("pilotarr_config_complete");
     setConfigProgress(!configComplete);
+  }, []);
+
+  useEffect(() => {
+    const handler = (e) => {
+      if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
+        setUserMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
   }, []);
 
   const navigationItems = [
@@ -62,6 +77,19 @@ const Header = () => {
   const toggleMobileMenu = () => setIsMobileMenuOpen((prev) => !prev);
   const closeMobileMenu = () => setIsMobileMenuOpen(false);
 
+  const handleLogout = () => {
+    setUserMenuOpen(false);
+    closeMobileMenu();
+    auth.logout();
+    navigate("/login");
+  };
+
+  const handleChangePassword = () => {
+    setUserMenuOpen(false);
+    closeMobileMenu();
+    navigate("/change-password");
+  };
+
   useEffect(() => {
     document.body.style.overflow = isMobileMenuOpen ? "hidden" : "unset";
     return () => {
@@ -96,6 +124,45 @@ const Header = () => {
               </Link>
             ))}
           </nav>
+
+          {/* User pill + dropdown (desktop) */}
+          {auth.user && (
+            <div className="relative hidden lg:block" ref={userMenuRef}>
+              <button
+                onClick={() => setUserMenuOpen((v) => !v)}
+                className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-muted hover:bg-muted/80 transition-colors text-sm font-medium"
+                aria-expanded={userMenuOpen}
+                aria-haspopup="true"
+              >
+                <Icon name="User" size={16} />
+                <span>{auth.user.username}</span>
+                <Icon name={userMenuOpen ? "ChevronUp" : "ChevronDown"} size={14} />
+              </button>
+
+              {userMenuOpen && (
+                <div className="absolute right-0 top-full mt-2 w-48 bg-card border border-border rounded-xl shadow-lg py-1 z-50">
+                  <div className="px-4 py-2 text-sm font-medium text-foreground border-b border-border">
+                    {auth.user.username}
+                  </div>
+                  <button
+                    onClick={handleChangePassword}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Icon name="KeyRound" size={15} />
+                    Change password
+                  </button>
+                  <div className="border-t border-border my-1" />
+                  <button
+                    onClick={handleLogout}
+                    className="w-full flex items-center gap-2 px-4 py-2 text-sm text-foreground hover:bg-muted transition-colors"
+                  >
+                    <Icon name="LogOut" size={15} />
+                    Sign out
+                  </button>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* Mobile hamburger — hidden on lg+ */}
           <button
@@ -135,6 +202,23 @@ const Header = () => {
               )}
             </Link>
           ))}
+
+          {auth.user && (
+            <>
+              <div className="border-t border-border my-2" />
+              <button
+                onClick={handleChangePassword}
+                className="nav-mobile-menu-item w-full text-left"
+              >
+                <Icon name="KeyRound" size={20} className="mr-3" />
+                Change password
+              </button>
+              <button onClick={handleLogout} className="nav-mobile-menu-item w-full text-left">
+                <Icon name="LogOut" size={20} className="mr-3" />
+                Sign out
+              </button>
+            </>
+          )}
         </nav>
       </div>
     </>

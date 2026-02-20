@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes as RouterRoutes, Route } from "react-router-dom";
+import { BrowserRouter, Routes as RouterRoutes, Route, Navigate } from "react-router-dom";
 import ScrollToTop from "components/ScrollToTop";
 import ErrorBoundary from "components/ErrorBoundary";
 import NotFound from "pages/NotFound";
@@ -12,27 +12,115 @@ import MediaDetail from "./pages/media-detail";
 import JellyseerrRequests from "./pages/jellyseerr-requests";
 import Calendar from "./pages/calendar";
 import Torrents from "./pages/torrents";
+import Login from "./pages/login";
+import ChangePassword from "./pages/change-password";
+import { AuthProvider, useAuth } from "./contexts/AuthContext";
+
+const ProtectedRoute = ({ children }) => {
+  const { user } = useAuth();
+  return user ? children : <Navigate to="/login" replace />;
+};
 
 const Routes = () => {
   return (
     <BrowserRouter>
-      <ErrorBoundary>
-        <ScrollToTop />
-        <RouterRoutes>
-          {/* Define your route here */}
-          <Route path="/" element={<InitialConfiguration />} />
-          <Route path="/main-dashboard" element={<MainDashboard />} />
-          <Route path="/jellyfin-statistics" element={<JellyfinStatistics />} />
-          <Route path="/initial-configuration" element={<InitialConfiguration />} />
-          <Route path="/library" element={<Library />} />
-          <Route path="/library/:id" element={<MediaDetail />} />
-          <Route path="/monitoring" element={<Monitoring />} />
-          <Route path="/jellyseerr-requests" element={<JellyseerrRequests />} />
-          <Route path="/calendar" element={<Calendar />} />
-          <Route path="/torrents" element={<Torrents />} />
-          <Route path="*" element={<NotFound />} />
-        </RouterRoutes>
-      </ErrorBoundary>
+      <AuthProvider>
+        <ErrorBoundary>
+          <ScrollToTop />
+          <RouterRoutes>
+            <Route path="/login" element={<Login />} />
+            <Route
+              path="/"
+              element={
+                <ProtectedRoute>
+                  <InitialConfiguration />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/main-dashboard"
+              element={
+                <ProtectedRoute>
+                  <MainDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jellyfin-statistics"
+              element={
+                <ProtectedRoute>
+                  <JellyfinStatistics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/initial-configuration"
+              element={
+                <ProtectedRoute>
+                  <InitialConfiguration />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/library"
+              element={
+                <ProtectedRoute>
+                  <Library />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/library/:id"
+              element={
+                <ProtectedRoute>
+                  <MediaDetail />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/monitoring"
+              element={
+                <ProtectedRoute>
+                  <Monitoring />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/jellyseerr-requests"
+              element={
+                <ProtectedRoute>
+                  <JellyseerrRequests />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/calendar"
+              element={
+                <ProtectedRoute>
+                  <Calendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/torrents"
+              element={
+                <ProtectedRoute>
+                  <Torrents />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/change-password"
+              element={
+                <ProtectedRoute>
+                  <ChangePassword />
+                </ProtectedRoute>
+              }
+            />
+            <Route path="*" element={<NotFound />} />
+          </RouterRoutes>
+        </ErrorBoundary>
+      </AuthProvider>
     </BrowserRouter>
   );
 };
