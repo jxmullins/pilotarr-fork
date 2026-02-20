@@ -10,12 +10,9 @@ const buttonVariants = cva(
     variants: {
       variant: {
         default: "bg-primary text-primary-foreground hover:bg-primary/90",
-        destructive:
-          "bg-destructive text-destructive-foreground hover:bg-destructive/90",
-        outline:
-          "border border-input hover:bg-accent hover:text-accent-foreground",
-        secondary:
-          "bg-secondary text-secondary-foreground hover:bg-secondary/80",
+        destructive: "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        outline: "border border-input hover:bg-accent hover:text-accent-foreground",
+        secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
         success: "bg-success text-success-foreground hover:bg-success/90",
@@ -72,11 +69,7 @@ const Button = React.forwardRef(
 
     // Loading spinner
     const LoadingSpinner = () => (
-      <svg
-        className="animate-spin -ml-1 mr-2 h-4 w-4"
-        fill="none"
-        viewBox="0 0 24 24"
-      >
+      <svg className="animate-spin -ml-1 mr-2 h-4 w-4" fill="none" viewBox="0 0 24 24">
         <circle
           className="opacity-25"
           cx="12"
@@ -113,10 +106,7 @@ const Button = React.forwardRef(
 
     const renderFallbackButton = () => (
       <button
-        className={cn(
-          buttonVariants({ variant, size, className }),
-          fullWidth && "w-full",
-        )}
+        className={cn(buttonVariants({ variant, size, className }), fullWidth && "w-full")}
         ref={ref}
         disabled={disabled || loading}
         {...props}
@@ -171,10 +161,7 @@ const Button = React.forwardRef(
 
     return (
       <Comp
-        className={cn(
-          buttonVariants({ variant, size, className }),
-          fullWidth && "w-full",
-        )}
+        className={cn(buttonVariants({ variant, size, className }), fullWidth && "w-full")}
         ref={ref}
         disabled={disabled || loading}
         {...props}

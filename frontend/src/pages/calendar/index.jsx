@@ -29,26 +29,25 @@ const Calendar = () => {
     const end = `${year}-${String(month + 1).padStart(2, "0")}-${String(lastDay).padStart(2, "0")}`;
 
     setIsLoading(true);
-    Promise.all([
-      getCalendarEvents(start, end),
-      getPlaybackSessions(start, end),
-    ]).then(([releases, sessions]) => {
-      // Map playback sessions to calendar event shape
-      const viewEvents = sessions.map((s) => ({
-        id: `session-${s.id}`,
-        title: s.media_title,
-        type: s.media_type,
-        eventType: "view",
-        releaseDate: s.start_time.split("T")[0],
-        imageUrl: s.poster_url || "",
-        imageAlt: `${s.media_title} poster`,
-        episode: s.episode_info || null,
-        status: "available",
-        viewedBy: s.user_name,
-      }));
-      setEvents([...releases, ...viewEvents]);
-      setIsLoading(false);
-    });
+    Promise.all([getCalendarEvents(start, end), getPlaybackSessions(start, end)]).then(
+      ([releases, sessions]) => {
+        // Map playback sessions to calendar event shape
+        const viewEvents = sessions.map((s) => ({
+          id: `session-${s.id}`,
+          title: s.media_title,
+          type: s.media_type,
+          eventType: "view",
+          releaseDate: s.start_time.split("T")[0],
+          imageUrl: s.poster_url || "",
+          imageAlt: `${s.media_title} poster`,
+          episode: s.episode_info || null,
+          status: "available",
+          viewedBy: s.user_name,
+        }));
+        setEvents([...releases, ...viewEvents]);
+        setIsLoading(false);
+      },
+    );
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [selectedDate.getFullYear() * 100 + selectedDate.getMonth()]);
 
@@ -68,17 +67,9 @@ const Calendar = () => {
 
       if (!matchesDate) return false;
 
-      if (
-        event?.eventType === "release" &&
-        event?.type === "tv" &&
-        !eventFilters?.tvReleases
-      )
+      if (event?.eventType === "release" && event?.type === "tv" && !eventFilters?.tvReleases)
         return false;
-      if (
-        event?.eventType === "release" &&
-        event?.type === "movie" &&
-        !eventFilters?.movieReleases
-      )
+      if (event?.eventType === "release" && event?.type === "movie" && !eventFilters?.movieReleases)
         return false;
       if (event?.eventType === "view" && !eventFilters?.views) return false;
 
@@ -122,9 +113,7 @@ const Calendar = () => {
               <Icon name="Calendar" size={20} color="var(--color-primary)" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                Media Calendar
-              </h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Media Calendar</h1>
               <p className="text-sm text-muted-foreground">
                 Track TV show and movie releases from Sonarr and Radarr
               </p>

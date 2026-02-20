@@ -53,12 +53,9 @@ class ErrorBoundary extends React.Component {
               </svg>
             </div>
             <div className="flex flex-col gap-1 text-center">
-              <h1 className="text-2xl font-medium text-neutral-800">
-                Something went wrong
-              </h1>
+              <h1 className="text-2xl font-medium text-neutral-800">Something went wrong</h1>
               <p className="text-neutral-600 text-base w w-8/12 mx-auto">
-                We encountered an unexpected error while processing your
-                request.
+                We encountered an unexpected error while processing your request.
               </p>
             </div>
             <div className="flex justify-center items-center mt-6">

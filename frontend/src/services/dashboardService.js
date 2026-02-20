@@ -18,9 +18,7 @@ export const getDashboardStatistics = async () => {
 // Get single statistic by type
 export const getDashboardStatistic = async (statType) => {
   try {
-    const response = await pilotarrClient?.get(
-      `/dashboard/statistics/${statType}`,
-    );
+    const response = await pilotarrClient?.get(`/dashboard/statistics/${statType}`);
     return response?.data || null;
   } catch (error) {
     return null;
@@ -30,9 +28,7 @@ export const getDashboardStatistic = async (statType) => {
 // Get recent library additions
 export const getRecentItems = async (limit = 20) => {
   try {
-    const response = await pilotarrClient?.get(
-      `/dashboard/recent-items?limit=${limit}`,
-    );
+    const response = await pilotarrClient?.get(`/dashboard/recent-items?limit=${limit}`);
     return response?.data || [];
   } catch (error) {
     return [];

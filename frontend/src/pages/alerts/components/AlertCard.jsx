@@ -68,10 +68,7 @@ const AlertCard = ({ alert, selected, onSelect, onDismiss }) => {
         <div className="flex items-start gap-4">
           {/* Checkbox */}
           <div className="pt-1">
-            <Checkbox
-              checked={selected}
-              onChange={(e) => onSelect(e?.target?.checked)}
-            />
+            <Checkbox checked={selected} onChange={(e) => onSelect(e?.target?.checked)} />
           </div>
 
           {/* Severity Icon */}
@@ -85,10 +82,7 @@ const AlertCard = ({ alert, selected, onSelect, onDismiss }) => {
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-1">
                   <span
-                    className={cn(
-                      "px-2 py-1 text-xs font-semibold rounded",
-                      config?.badgeColor,
-                    )}
+                    className={cn("px-2 py-1 text-xs font-semibold rounded", config?.badgeColor)}
                   >
                     {alert?.severity?.toUpperCase()}
                   </span>
@@ -99,12 +93,8 @@ const AlertCard = ({ alert, selected, onSelect, onDismiss }) => {
                     {alert?.service}
                   </span>
                 </div>
-                <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                  {alert?.message}
-                </h3>
-                <p className="text-sm text-gray-600">
-                  {formatTimestamp(alert?.timestamp)}
-                </p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-1">{alert?.message}</h3>
+                <p className="text-sm text-gray-600">{formatTimestamp(alert?.timestamp)}</p>
               </div>
 
               {/* Actions */}
@@ -117,12 +107,7 @@ const AlertCard = ({ alert, selected, onSelect, onDismiss }) => {
                 >
                   {expanded ? "Less" : "More"}
                 </Button>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  iconName="X"
-                  onClick={onDismiss}
-                >
+                <Button variant="destructive" size="sm" iconName="X" onClick={onDismiss}>
                   Dismiss
                 </Button>
               </div>
@@ -134,9 +119,7 @@ const AlertCard = ({ alert, selected, onSelect, onDismiss }) => {
             {/* Expanded Details */}
             {expanded && (
               <div className={cn("mt-4 p-4 rounded-lg", config?.bgColor)}>
-                <h4 className="text-sm font-semibold text-gray-900 mb-2">
-                  Full Error Log
-                </h4>
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">Full Error Log</h4>
                 <pre className="text-xs text-gray-700 bg-white p-3 rounded border border-gray-200 overflow-x-auto mb-4">
                   {`[${alert?.timestamp?.toISOString()}] ${alert?.severity?.toUpperCase()}: ${alert?.service}
 ${alert?.message}
@@ -157,10 +140,7 @@ Timestamp: ${alert?.timestamp?.toISOString()}`}
                     </h4>
                     <ul className="space-y-2">
                       {alert?.suggestions?.map((suggestion, index) => (
-                        <li
-                          key={index}
-                          className="flex items-start gap-2 text-sm text-gray-700"
-                        >
+                        <li key={index} className="flex items-start gap-2 text-sm text-gray-700">
                           <Icon
                             name="CheckCircle"
                             size={16}

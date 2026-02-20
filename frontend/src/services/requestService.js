@@ -40,10 +40,7 @@ export const getJellyseerrRequests = async (status = "pending", limit = 10) => {
  */
 export const addJellyseerrRequest = async (request) => {
   try {
-    const response = await pilotarrClient?.post(
-      "/jellyseerr/requests",
-      request,
-    );
+    const response = await pilotarrClient?.post("/jellyseerr/requests", request);
     return response?.data || null;
   } catch (error) {
     return null;

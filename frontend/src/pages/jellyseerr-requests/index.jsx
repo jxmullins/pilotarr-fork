@@ -5,10 +5,7 @@ import FilterToolbar from "./components/FilterToolbar";
 import RequestCard from "../main-dashboard/components/RequestCard";
 import Icon from "../../components/AppIcon";
 import Button from "../../components/ui/Button";
-import {
-  getJellyseerrRequests,
-  deleteJellyseerrRequest,
-} from "../../services/requestService";
+import { getJellyseerrRequests, deleteJellyseerrRequest } from "../../services/requestService";
 
 const JellyseerrRequests = () => {
   const navigate = useNavigate();
@@ -63,23 +60,17 @@ const JellyseerrRequests = () => {
         available: 4,
       };
       const numericStatus = statusMap?.[filters?.status];
-      filtered = filtered?.filter(
-        (request) => request?.status === numericStatus,
-      );
+      filtered = filtered?.filter((request) => request?.status === numericStatus);
     }
 
     // Type filter
     if (filters?.type !== "all") {
-      filtered = filtered?.filter(
-        (request) => request?.mediaType === filters?.type,
-      );
+      filtered = filtered?.filter((request) => request?.mediaType === filters?.type);
     }
 
     // User filter
     if (filters?.user !== "all") {
-      filtered = filtered?.filter(
-        (request) => request?.requestedBy === filters?.user,
-      );
+      filtered = filtered?.filter((request) => request?.requestedBy === filters?.user);
     }
 
     setFilteredRequests(filtered);
@@ -95,18 +86,14 @@ const JellyseerrRequests = () => {
   const handleApproveRequest = async (id) => {
     const success = await deleteJellyseerrRequest(id);
     if (success) {
-      setRequests((prev) =>
-        prev?.map((req) => (req?.id === id ? { ...req, status: 1 } : req)),
-      );
+      setRequests((prev) => prev?.map((req) => (req?.id === id ? { ...req, status: 1 } : req)));
     }
   };
 
   const handleRejectRequest = async (id) => {
     const success = await deleteJellyseerrRequest(id);
     if (success) {
-      setRequests((prev) =>
-        prev?.map((req) => (req?.id === id ? { ...req, status: 3 } : req)),
-      );
+      setRequests((prev) => prev?.map((req) => (req?.id === id ? { ...req, status: 3 } : req)));
     }
   };
 
@@ -161,8 +148,7 @@ const JellyseerrRequests = () => {
                 Jellyseerr Requests
               </h1>
               <p className="text-sm text-muted-foreground">
-                Manage all media requests with comprehensive filtering and
-                status tracking
+                Manage all media requests with comprehensive filtering and status tracking
               </p>
             </div>
           </div>
@@ -181,9 +167,7 @@ const JellyseerrRequests = () => {
         {/* Status Summary */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
           {[0, 1, 2, 3, 4]?.map((statusNum) => {
-            const count = requests?.filter(
-              (r) => r?.status === statusNum,
-            )?.length;
+            const count = requests?.filter((r) => r?.status === statusNum)?.length;
             const statusLabel = getStatusLabel(statusNum);
             return (
               <div
@@ -210,11 +194,7 @@ const JellyseerrRequests = () => {
         {/* Requests Grid */}
         {loading ? (
           <div className="flex items-center justify-center py-12">
-            <Icon
-              name="Loader"
-              size={32}
-              className="animate-spin text-muted-foreground"
-            />
+            <Icon name="Loader" size={32} className="animate-spin text-muted-foreground" />
           </div>
         ) : filteredRequests?.length > 0 ? (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
@@ -229,14 +209,8 @@ const JellyseerrRequests = () => {
           </div>
         ) : (
           <div className="bg-card border border-border rounded-lg p-12 text-center">
-            <Icon
-              name="Search"
-              size={48}
-              className="mx-auto mb-4 text-muted-foreground"
-            />
-            <h3 className="text-lg font-semibold text-foreground mb-2">
-              No requests found
-            </h3>
+            <Icon name="Search" size={48} className="mx-auto mb-4 text-muted-foreground" />
+            <h3 className="text-lg font-semibold text-foreground mb-2">No requests found</h3>
             <p className="text-muted-foreground mb-4">
               {searchQuery ||
               filters?.status !== "all" ||

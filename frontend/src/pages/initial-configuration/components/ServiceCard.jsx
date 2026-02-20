@@ -25,13 +25,7 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
       password: service?.password || "",
       port: service?.port || "",
     });
-  }, [
-    service?.url,
-    service?.apiKey,
-    service?.username,
-    service?.password,
-    service?.port,
-  ]);
+  }, [service?.url, service?.apiKey, service?.username, service?.password, service?.port]);
 
   const handleInputChange = (field, value) => {
     const updatedConfig = { ...config, [field]: value };
@@ -84,12 +78,8 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
             />
           </div>
           <div>
-            <h3 className="text-base md:text-lg font-semibold text-foreground">
-              {service?.name}
-            </h3>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              {service?.description}
-            </p>
+            <h3 className="text-base md:text-lg font-semibold text-foreground">{service?.name}</h3>
+            <p className="text-xs md:text-sm text-muted-foreground">{service?.description}</p>
           </div>
         </div>
         <div className={`flex items-center gap-2 ${getStatusColor()}`}>
@@ -135,9 +125,7 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
                 type={showPassword ? "text" : "password"}
                 placeholder="Enter your password"
                 value={config?.password}
-                onChange={(e) =>
-                  handleInputChange("password", e?.target?.value)
-                }
+                onChange={(e) => handleInputChange("password", e?.target?.value)}
                 required
                 description="qBittorrent Web UI password"
               />
@@ -214,10 +202,7 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
       {(config?.apiKey || config?.password) && (
         <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
           <Icon name="Shield" size={14} />
-          <span>
-            {isQBittorrent ? "Credentials" : "API key"} will be encrypted before
-            storage
-          </span>
+          <span>{isQBittorrent ? "Credentials" : "API key"} will be encrypted before storage</span>
         </div>
       )}
     </div>

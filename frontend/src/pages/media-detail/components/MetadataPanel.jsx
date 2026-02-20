@@ -11,9 +11,7 @@ const MetadataPanel = ({ media }) => {
 
       {/* Overview */}
       <div>
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-2">
-          Overview
-        </h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-2">Overview</h3>
         <p className="text-foreground">{media?.description}</p>
       </div>
 
@@ -32,9 +30,7 @@ const MetadataPanel = ({ media }) => {
         {/* Status */}
         {media?.status && (
           <div>
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">
-              Status
-            </h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">Status</h3>
             <p className="text-foreground">{media?.status}</p>
           </div>
         )}
@@ -62,9 +58,7 @@ const MetadataPanel = ({ media }) => {
         {/* Path */}
         {media?.path && (
           <div className="md:col-span-2">
-            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">
-              Path
-            </h3>
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-1">Path</h3>
             <p className="text-foreground text-sm font-mono bg-muted px-3 py-2 rounded break-all">
               {media?.path}
             </p>
@@ -75,15 +69,10 @@ const MetadataPanel = ({ media }) => {
       {/* Cast */}
       {media?.cast && media?.cast?.length > 0 && (
         <div>
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-3">
-            Cast
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase mb-3">Cast</h3>
           <div className="flex flex-wrap gap-2">
             {media?.cast?.map((actor, index) => (
-              <span
-                key={index}
-                className="px-3 py-1 bg-muted text-foreground text-sm rounded-md"
-              >
+              <span key={index} className="px-3 py-1 bg-muted text-foreground text-sm rounded-md">
                 {actor}
               </span>
             ))}

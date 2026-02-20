@@ -30,10 +30,7 @@ PilotarrClient?.interceptors?.response?.use(
     if (error?.response?.status !== 404) {
       // Only log if it's not a network error (API might be down)
       if (error?.code !== "ERR_NETWORK" && error?.message !== "Network Error") {
-        console.error(
-          "Pilotarr API Error:",
-          error?.response?.data || error?.message,
-        );
+        console.error("Pilotarr API Error:", error?.response?.data || error?.message);
       }
     }
     return Promise.reject(error);

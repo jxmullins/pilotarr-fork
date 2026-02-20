@@ -81,13 +81,9 @@ const StatusIndicator = ({ status, type }) => {
   const config = getStatusConfig();
 
   return (
-    <div
-      className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${config?.bgColor}`}
-    >
+    <div className={`inline-flex items-center gap-1.5 px-2 py-1 rounded-md ${config?.bgColor}`}>
       <Icon name={config?.icon} size={12} className={config?.iconColor} />
-      <span className={`text-xs font-medium ${config?.textColor}`}>
-        {config?.label}
-      </span>
+      <span className={`text-xs font-medium ${config?.textColor}`}>{config?.label}</span>
     </div>
   );
 };

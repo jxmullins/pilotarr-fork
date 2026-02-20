@@ -21,10 +21,7 @@ const MediaAnalyticsTable = ({ data, isLoading }) => {
   const handleSort = (key) => {
     setSortConfig({
       key,
-      direction:
-        sortConfig?.key === key && sortConfig?.direction === "desc"
-          ? "asc"
-          : "desc",
+      direction: sortConfig?.key === key && sortConfig?.direction === "desc" ? "asc" : "desc",
     });
   };
 
@@ -63,16 +60,12 @@ const MediaAnalyticsTable = ({ data, isLoading }) => {
           <div className="flex items-center justify-center py-12">
             <div className="flex flex-col items-center gap-3">
               <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
-              <p className="text-sm text-muted-foreground">
-                Loading media analytics...
-              </p>
+              <p className="text-sm text-muted-foreground">Loading media analytics...</p>
             </div>
           </div>
         ) : data?.length === 0 ? (
           <div className="flex items-center justify-center py-12">
-            <p className="text-sm text-muted-foreground">
-              No media analytics data available
-            </p>
+            <p className="text-sm text-muted-foreground">No media analytics data available</p>
           </div>
         ) : (
           <table className="w-full">
@@ -124,9 +117,7 @@ const MediaAnalyticsTable = ({ data, isLoading }) => {
                   </button>
                 </th>
                 <th className="px-4 py-3 text-left">
-                  <span className="text-xs font-semibold text-muted-foreground">
-                    Status
-                  </span>
+                  <span className="text-xs font-semibold text-muted-foreground">Status</span>
                 </th>
               </tr>
             </thead>
@@ -162,22 +153,15 @@ const MediaAnalyticsTable = ({ data, isLoading }) => {
                   </td>
                   <td className="px-4 py-3 hidden md:table-cell">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-muted text-xs font-medium text-foreground">
-                      <Icon
-                        name={item?.type === "Movie" ? "Film" : "Tv"}
-                        size={12}
-                      />
+                      <Icon name={item?.type === "Movie" ? "Film" : "Tv"} size={12} />
                       {item?.type}
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-sm font-semibold text-foreground">
-                      {item?.plays}
-                    </span>
+                    <span className="text-sm font-semibold text-foreground">{item?.plays}</span>
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
-                    <span className="text-sm text-muted-foreground">
-                      {item?.duration}
-                    </span>
+                    <span className="text-sm text-muted-foreground">{item?.duration}</span>
                   </td>
                   <td className="px-4 py-3 hidden lg:table-cell">
                     <span className="inline-flex items-center gap-1 px-2 py-1 rounded-md bg-primary/10 text-xs font-medium text-primary">

@@ -52,9 +52,7 @@ const MediaCard = ({ item }) => {
         {/* Type Badge */}
         <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
           <Icon name={getTypeIcon()} size={14} className={getTypeColor()} />
-          <span className="text-xs font-medium text-foreground capitalize">
-            {item?.type}
-          </span>
+          <span className="text-xs font-medium text-foreground capitalize">{item?.type}</span>
         </div>
 
         {/* Quality Badge */}
@@ -70,25 +68,13 @@ const MediaCard = ({ item }) => {
         <div className="absolute bottom-2 left-2">
           {item?.hasSubtitles ? (
             <div className="bg-success/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
-              <Icon
-                name="Subtitles"
-                size={12}
-                className="text-success-foreground"
-              />
-              <span className="text-xs font-medium text-success-foreground">
-                Subs
-              </span>
+              <Icon name="Subtitles" size={12} className="text-success-foreground" />
+              <span className="text-xs font-medium text-success-foreground">Subs</span>
             </div>
           ) : (
             <div className="bg-muted/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
-              <Icon
-                name="Subtitles"
-                size={12}
-                className="text-muted-foreground"
-              />
-              <span className="text-xs font-medium text-muted-foreground">
-                No Subs
-              </span>
+              <Icon name="Subtitles" size={12} className="text-muted-foreground" />
+              <span className="text-xs font-medium text-muted-foreground">No Subs</span>
             </div>
           )}
         </div>
@@ -108,9 +94,7 @@ const MediaCard = ({ item }) => {
               <Icon name="Calendar" size={12} />
               <span>Added</span>
             </div>
-            <span className="font-medium text-foreground">
-              {formatDate(item?.addedDate)}
-            </span>
+            <span className="font-medium text-foreground">{formatDate(item?.addedDate)}</span>
           </div>
 
           {/* File Size */}
@@ -129,9 +113,7 @@ const MediaCard = ({ item }) => {
                   <Icon name="FileStack" size={12} />
                   <span>Files</span>
                 </div>
-                <span className="font-medium text-foreground">
-                  {item?.nbMedia}
-                </span>
+                <span className="font-medium text-foreground">{item?.nbMedia}</span>
               </div>
 
               {/* Seed Ratio */}
@@ -146,9 +128,7 @@ const MediaCard = ({ item }) => {
                       {item?.torrentCount}T
                     </span>
                   )}
-                  <span
-                    className={`font-bold ${getSeedRatioColor(item?.seedRatio)}`}
-                  >
+                  <span className={`font-bold ${getSeedRatioColor(item?.seedRatio)}`}>
                     {item?.seedRatio?.toFixed(2)}
                   </span>
                 </div>
@@ -157,9 +137,7 @@ const MediaCard = ({ item }) => {
           ) : (
             <div className="flex items-center justify-between text-xs">
               <div className="flex items-center gap-1 text-muted-foreground">
-                <span className="font-bold text-warning">
-                  No Download informations
-                </span>
+                <span className="font-bold text-warning">No Download informations</span>
               </div>
             </div>
           )}

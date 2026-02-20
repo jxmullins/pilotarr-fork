@@ -21,27 +21,19 @@ export const getSyncMetadata = async (serviceName) => {
     const response = await pilotarrClient?.get(`/sync/metadata/${serviceName}`);
     return response?.data || null;
   } catch (error) {
-    console.error(
-      `Error fetching sync metadata for ${serviceName}:`,
-      error?.message,
-    );
+    console.error(`Error fetching sync metadata for ${serviceName}:`, error?.message);
     return null;
   }
 };
 
 // Update sync status
-export const updateSyncStatus = async (
-  serviceName,
-  status,
-  errorMessage = null,
-) => {
+export const updateSyncStatus = async (serviceName, status, errorMessage = null) => {
   try {
     const response = await pilotarrClient?.post("/sync/status", {
       serviceName,
       status,
       errorMessage,
-      lastSyncTime:
-        status === "in_progress" ? new Date()?.toISOString() : undefined,
+      lastSyncTime: status === "in_progress" ? new Date()?.toISOString() : undefined,
     });
     return response?.data || null;
   } catch (error) {

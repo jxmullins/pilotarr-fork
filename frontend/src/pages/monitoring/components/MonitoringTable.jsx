@@ -5,12 +5,7 @@ import ExpandableRow from "./ExpandableRow";
 import { Checkbox } from "../../../components/ui/Checkbox";
 import Button from "../../../components/ui/Button";
 
-const MonitoringTable = ({
-  data,
-  selectedItems,
-  onSelectAll,
-  onSelectItem,
-}) => {
+const MonitoringTable = ({ data, selectedItems, onSelectAll, onSelectItem }) => {
   const [expandedRows, setExpandedRows] = useState([]);
   const [sortConfig, setSortConfig] = useState({
     key: "title",
@@ -19,17 +14,14 @@ const MonitoringTable = ({
 
   const toggleRow = (id) => {
     setExpandedRows((prev) =>
-      prev?.includes(id)
-        ? prev?.filter((rowId) => rowId !== id)
-        : [...prev, id],
+      prev?.includes(id) ? prev?.filter((rowId) => rowId !== id) : [...prev, id],
     );
   };
 
   const handleSort = (key) => {
     setSortConfig((prev) => ({
       key,
-      direction:
-        prev?.key === key && prev?.direction === "asc" ? "desc" : "asc",
+      direction: prev?.key === key && prev?.direction === "asc" ? "desc" : "asc",
     }));
   };
 
@@ -57,22 +49,14 @@ const MonitoringTable = ({
     });
   };
 
-  const allSelected =
-    data?.length > 0 && selectedItems?.length === data?.length;
-  const someSelected =
-    selectedItems?.length > 0 && selectedItems?.length < data?.length;
+  const allSelected = data?.length > 0 && selectedItems?.length === data?.length;
+  const someSelected = selectedItems?.length > 0 && selectedItems?.length < data?.length;
 
   if (data?.length === 0) {
     return (
       <div className="bg-card border border-border rounded-lg p-12 text-center">
-        <Icon
-          name="Inbox"
-          size={48}
-          className="mx-auto mb-4 text-muted-foreground"
-        />
-        <h3 className="text-lg font-semibold text-foreground mb-2">
-          No monitored media found
-        </h3>
+        <Icon name="Inbox" size={48} className="mx-auto mb-4 text-muted-foreground" />
+        <h3 className="text-lg font-semibold text-foreground mb-2">No monitored media found</h3>
         <p className="text-sm text-muted-foreground">
           Try adjusting your filters or add new media to monitor
         </p>
@@ -100,16 +84,10 @@ const MonitoringTable = ({
                 onClick={() => handleSort("title")}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">
-                    Title
-                  </span>
+                  <span className="text-sm font-semibold text-foreground">Title</span>
                   {sortConfig?.key === "title" && (
                     <Icon
-                      name={
-                        sortConfig?.direction === "asc"
-                          ? "ChevronUp"
-                          : "ChevronDown"
-                      }
+                      name={sortConfig?.direction === "asc" ? "ChevronUp" : "ChevronDown"}
                       size={14}
                       className="text-primary"
                     />
@@ -117,40 +95,26 @@ const MonitoringTable = ({
                 </div>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">
-                  Service
-                </span>
+                <span className="text-sm font-semibold text-foreground">Service</span>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">
-                  Monitoring
-                </span>
+                <span className="text-sm font-semibold text-foreground">Monitoring</span>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">
-                  Availability
-                </span>
+                <span className="text-sm font-semibold text-foreground">Availability</span>
               </th>
               <th className="px-4 py-3 text-left">
-                <span className="text-sm font-semibold text-foreground">
-                  Quality
-                </span>
+                <span className="text-sm font-semibold text-foreground">Quality</span>
               </th>
               <th
                 className="px-4 py-3 text-left cursor-pointer hover:bg-muted/50 transition-colors"
                 onClick={() => handleSort("lastUpdated")}
               >
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-semibold text-foreground">
-                    Last Updated
-                  </span>
+                  <span className="text-sm font-semibold text-foreground">Last Updated</span>
                   {sortConfig?.key === "lastUpdated" && (
                     <Icon
-                      name={
-                        sortConfig?.direction === "asc"
-                          ? "ChevronUp"
-                          : "ChevronDown"
-                      }
+                      name={sortConfig?.direction === "asc" ? "ChevronUp" : "ChevronDown"}
                       size={14}
                       className="text-primary"
                     />
@@ -158,9 +122,7 @@ const MonitoringTable = ({
                 </div>
               </th>
               <th className="px-4 py-3 text-right">
-                <span className="text-sm font-semibold text-foreground">
-                  Actions
-                </span>
+                <span className="text-sm font-semibold text-foreground">Actions</span>
               </th>
             </tr>
           </thead>
@@ -171,9 +133,7 @@ const MonitoringTable = ({
                   <td className="px-4 py-3">
                     <Checkbox
                       checked={selectedItems?.includes(item?.id)}
-                      onChange={(e) =>
-                        onSelectItem(item?.id, e?.target?.checked)
-                      }
+                      onChange={(e) => onSelectItem(item?.id, e?.target?.checked)}
                     />
                   </td>
                   <td className="px-4 py-3">
@@ -182,11 +142,7 @@ const MonitoringTable = ({
                       className="text-muted-foreground hover:text-foreground transition-colors"
                     >
                       <Icon
-                        name={
-                          expandedRows?.includes(item?.id)
-                            ? "ChevronDown"
-                            : "ChevronRight"
-                        }
+                        name={expandedRows?.includes(item?.id) ? "ChevronDown" : "ChevronRight"}
                         size={18}
                       />
                     </button>
@@ -196,15 +152,9 @@ const MonitoringTable = ({
                       <Icon
                         name={item?.service === "sonarr" ? "Tv" : "Film"}
                         size={16}
-                        className={
-                          item?.service === "sonarr"
-                            ? "text-purple-400"
-                            : "text-blue-400"
-                        }
+                        className={item?.service === "sonarr" ? "text-purple-400" : "text-blue-400"}
                       />
-                      <span className="text-sm font-medium text-foreground">
-                        {item?.title}
-                      </span>
+                      <span className="text-sm font-medium text-foreground">{item?.title}</span>
                     </div>
                   </td>
                   <td className="px-4 py-3">
@@ -213,21 +163,13 @@ const MonitoringTable = ({
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <StatusIndicator
-                      status={item?.monitoringStatus}
-                      type="monitoring"
-                    />
+                    <StatusIndicator status={item?.monitoringStatus} type="monitoring" />
                   </td>
                   <td className="px-4 py-3">
-                    <StatusIndicator
-                      status={item?.availabilityStatus}
-                      type="availability"
-                    />
+                    <StatusIndicator status={item?.availabilityStatus} type="availability" />
                   </td>
                   <td className="px-4 py-3">
-                    <span className="text-sm text-foreground">
-                      {item?.qualityProfile}
-                    </span>
+                    <span className="text-sm text-foreground">{item?.qualityProfile}</span>
                   </td>
                   <td className="px-4 py-3">
                     <span className="text-sm text-muted-foreground">
@@ -280,50 +222,28 @@ const MonitoringTable = ({
                   <Icon
                     name={item?.service === "sonarr" ? "Tv" : "Film"}
                     size={16}
-                    className={
-                      item?.service === "sonarr"
-                        ? "text-purple-400"
-                        : "text-blue-400"
-                    }
+                    className={item?.service === "sonarr" ? "text-purple-400" : "text-blue-400"}
                   />
-                  <h3 className="text-sm font-semibold text-foreground">
-                    {item?.title}
-                  </h3>
+                  <h3 className="text-sm font-semibold text-foreground">{item?.title}</h3>
                 </div>
                 <div className="grid grid-cols-2 gap-2 mb-3">
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Service
-                    </p>
+                    <p className="text-xs text-muted-foreground mb-1">Service</p>
                     <span className="inline-flex items-center px-2 py-1 rounded-md text-xs font-medium bg-primary/10 text-primary capitalize">
                       {item?.service}
                     </span>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Quality
-                    </p>
-                    <span className="text-xs text-foreground">
-                      {item?.qualityProfile}
-                    </span>
+                    <p className="text-xs text-muted-foreground mb-1">Quality</p>
+                    <span className="text-xs text-foreground">{item?.qualityProfile}</span>
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Monitoring
-                    </p>
-                    <StatusIndicator
-                      status={item?.monitoringStatus}
-                      type="monitoring"
-                    />
+                    <p className="text-xs text-muted-foreground mb-1">Monitoring</p>
+                    <StatusIndicator status={item?.monitoringStatus} type="monitoring" />
                   </div>
                   <div>
-                    <p className="text-xs text-muted-foreground mb-1">
-                      Availability
-                    </p>
-                    <StatusIndicator
-                      status={item?.availabilityStatus}
-                      type="availability"
-                    />
+                    <p className="text-xs text-muted-foreground mb-1">Availability</p>
+                    <StatusIndicator status={item?.availabilityStatus} type="availability" />
                   </div>
                 </div>
                 <p className="text-xs text-muted-foreground mb-3">
@@ -333,11 +253,7 @@ const MonitoringTable = ({
                   <Button
                     variant="outline"
                     size="sm"
-                    iconName={
-                      expandedRows?.includes(item?.id)
-                        ? "ChevronUp"
-                        : "ChevronDown"
-                    }
+                    iconName={expandedRows?.includes(item?.id) ? "ChevronUp" : "ChevronDown"}
                     onClick={() => toggleRow(item?.id)}
                     className="flex-1"
                   >

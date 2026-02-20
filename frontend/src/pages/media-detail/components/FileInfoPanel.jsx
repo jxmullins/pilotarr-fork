@@ -30,34 +30,22 @@ const FileInfoPanel = ({ media }) => {
   };
 
   // Aggregate torrent_info array into summary values
-  const torrentArray = Array.isArray(media?.torrentInfo)
-    ? media.torrentInfo
-    : [];
+  const torrentArray = Array.isArray(media?.torrentInfo) ? media.torrentInfo : [];
   const hasTorrents = torrentArray.length > 0;
 
   const aggregated = hasTorrents
     ? (() => {
-        const ratios = torrentArray
-          .map((t) => t?.ratio)
-          .filter((r) => r != null);
-        const seedingTimes = torrentArray
-          .map((t) => t?.seeding_time)
-          .filter((s) => s != null);
-        const statuses = torrentArray
-          .map((t) => t?.status)
-          .filter((s) => s != null);
+        const ratios = torrentArray.map((t) => t?.ratio).filter((r) => r != null);
+        const seedingTimes = torrentArray.map((t) => t?.seeding_time).filter((s) => s != null);
+        const statuses = torrentArray.map((t) => t?.status).filter((s) => s != null);
         const uniqueStatuses = [...new Set(statuses)];
         return {
-          ratio:
-            ratios.length > 0
-              ? ratios.reduce((a, b) => a + b, 0) / ratios.length
-              : 0,
+          ratio: ratios.length > 0 ? ratios.reduce((a, b) => a + b, 0) / ratios.length : 0,
           seedingTime:
             seedingTimes.length > 0
               ? seedingTimes.reduce((a, b) => a + b, 0) / seedingTimes.length
               : 0,
-          status:
-            uniqueStatuses.length === 1 ? uniqueStatuses[0] : "downloading",
+          status: uniqueStatuses.length === 1 ? uniqueStatuses[0] : "downloading",
           torrentCount: torrentArray.length,
         };
       })()
@@ -72,9 +60,7 @@ const FileInfoPanel = ({ media }) => {
 
       {/* Quality */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase">
-          Quality
-        </h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase">Quality</h3>
         <div className="flex items-center gap-2">
           <div className="bg-accent px-3 py-1 rounded-md">
             <span className="text-sm font-bold text-accent-foreground">
@@ -86,41 +72,27 @@ const FileInfoPanel = ({ media }) => {
 
       {/* File Size */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase">
-          File Size
-        </h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase">File Size</h3>
         <div className="flex items-center gap-2">
           <Icon name="HardDrive" size={16} className="text-muted-foreground" />
-          <span className="text-foreground font-medium">
-            {media?.fileInfo.size || "0.0 GB"}
-          </span>
+          <span className="text-foreground font-medium">{media?.fileInfo.size || "0.0 GB"}</span>
         </div>
       </div>
 
       {/* Files Count */}
       {media?.nbMedia && (
         <div className="space-y-2">
-          <h3 className="text-sm font-semibold text-muted-foreground uppercase">
-            Files
-          </h3>
+          <h3 className="text-sm font-semibold text-muted-foreground uppercase">Files</h3>
           <div className="flex items-center gap-2">
-            <Icon
-              name="FileStack"
-              size={16}
-              className="text-muted-foreground"
-            />
-            <span className="text-foreground font-medium">
-              {media?.nbMedia}
-            </span>
+            <Icon name="FileStack" size={16} className="text-muted-foreground" />
+            <span className="text-foreground font-medium">{media?.nbMedia}</span>
           </div>
         </div>
       )}
 
       {/* Subtitles */}
       <div className="space-y-2">
-        <h3 className="text-sm font-semibold text-muted-foreground uppercase">
-          Subtitles
-        </h3>
+        <h3 className="text-sm font-semibold text-muted-foreground uppercase">Subtitles</h3>
         {media?.mediaType === "tv" ? (
           Object.keys(media?.fileInfo?.subtitleCounts || {}).length > 0 ? (
             <div className="flex flex-wrap gap-2">
@@ -151,13 +123,9 @@ const FileInfoPanel = ({ media }) => {
               >
                 <div className="flex items-center gap-2">
                   <Icon name="Subtitles" size={14} className="text-success" />
-                  <span className="text-sm text-foreground">
-                    {subtitle?.language}
-                  </span>
+                  <span className="text-sm text-foreground">{subtitle?.language}</span>
                 </div>
-                <span className="text-xs text-muted-foreground">
-                  {subtitle?.codec}
-                </span>
+                <span className="text-xs text-muted-foreground">{subtitle?.codec}</span>
               </div>
             ))}
           </div>
@@ -181,9 +149,7 @@ const FileInfoPanel = ({ media }) => {
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Status</span>
             <StatusIndicator
-              status={
-                aggregated.status === "seeding" ? "available" : "downloading"
-              }
+              status={aggregated.status === "seeding" ? "available" : "downloading"}
               type="availability"
             />
           </div>
@@ -191,9 +157,7 @@ const FileInfoPanel = ({ media }) => {
           {/* Ratio */}
           <div className="flex items-center justify-between">
             <span className="text-sm text-muted-foreground">Ratio</span>
-            <span
-              className={`text-sm font-bold ${getSeedRatioColor(aggregated.ratio)}`}
-            >
+            <span className={`text-sm font-bold ${getSeedRatioColor(aggregated.ratio)}`}>
               {aggregated.ratio?.toFixed(2) || "0.00"}
             </span>
           </div>
@@ -201,9 +165,7 @@ const FileInfoPanel = ({ media }) => {
           {/* Seeding Time */}
           {aggregated.seedingTime > 0 && (
             <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">
-                Seeding Time
-              </span>
+              <span className="text-sm text-muted-foreground">Seeding Time</span>
               <span className="text-sm text-foreground">
                 {formatSecondsToTime(aggregated.seedingTime)}
               </span>
@@ -214,9 +176,7 @@ const FileInfoPanel = ({ media }) => {
           {aggregated.torrentCount > 1 && (
             <div className="flex items-center justify-between">
               <span className="text-sm text-muted-foreground">Torrents</span>
-              <span className="text-sm text-foreground font-medium">
-                {aggregated.torrentCount}
-              </span>
+              <span className="text-sm text-foreground font-medium">{aggregated.torrentCount}</span>
             </div>
           )}
 
@@ -224,39 +184,25 @@ const FileInfoPanel = ({ media }) => {
           {torrentArray.length > 1 && (
             <div className="pt-2">
               <button
-                onClick={() =>
-                  setShowIndividualTorrents(!showIndividualTorrents)
-                }
+                onClick={() => setShowIndividualTorrents(!showIndividualTorrents)}
                 className="flex items-center gap-1 text-xs text-primary hover:text-primary/80 transition-colors"
               >
-                <Icon
-                  name={showIndividualTorrents ? "ChevronDown" : "ChevronRight"}
-                  size={14}
-                />
-                <span>
-                  {showIndividualTorrents ? "Hide" : "Show"} Individual Torrents
-                </span>
+                <Icon name={showIndividualTorrents ? "ChevronDown" : "ChevronRight"} size={14} />
+                <span>{showIndividualTorrents ? "Hide" : "Show"} Individual Torrents</span>
               </button>
 
               {showIndividualTorrents && (
                 <div className="mt-2 space-y-2">
                   {torrentArray.map((torrent, index) => (
-                    <div
-                      key={index}
-                      className="bg-muted/50 rounded-md p-2 space-y-1"
-                    >
+                    <div key={index} className="bg-muted/50 rounded-md p-2 space-y-1">
                       <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                        <span
-                          className={`font-bold ${getSeedRatioColor(torrent?.ratio)}`}
-                        >
+                        <span className={`font-bold ${getSeedRatioColor(torrent?.ratio)}`}>
                           R: {torrent?.ratio?.toFixed(2) || "0.00"}
                         </span>
                         <span>{formatBytes(torrent?.size)}</span>
                         <span>{torrent?.status || "unknown"}</span>
                         {torrent?.seeding_time > 0 && (
-                          <span>
-                            {formatSecondsToTime(torrent?.seeding_time)}
-                          </span>
+                          <span>{formatSecondsToTime(torrent?.seeding_time)}</span>
                         )}
                       </div>
                     </div>

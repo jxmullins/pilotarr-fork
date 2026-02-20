@@ -29,13 +29,7 @@ const mapServiceResponse = (data) => {
 export const getServiceConfigurations = async () => {
   try {
     // Fetch all services individually since the API uses /api/services/{service_name}
-    const serviceNames = [
-      "jellyfin",
-      "jellyseerr",
-      "radarr",
-      "sonarr",
-      "qbittorrent",
-    ];
+    const serviceNames = ["jellyfin", "jellyseerr", "radarr", "sonarr", "qbittorrent"];
     const promises = serviceNames?.map((name) =>
       pilotarrClient
         ?.get(`/services/${name}`)
@@ -63,10 +57,7 @@ export const getServiceConfiguration = async (serviceName) => {
     const response = await pilotarrClient?.get(`/services/${serviceName}`);
     return mapServiceResponse(response?.data);
   } catch (error) {
-    console.error(
-      `Error fetching ${serviceName} configuration:`,
-      error?.message,
-    );
+    console.error(`Error fetching ${serviceName} configuration:`, error?.message);
     return null;
   }
 };
@@ -95,10 +86,7 @@ export const saveServiceConfiguration = async (serviceName, config) => {
 // Test service connection
 export const testServiceConnection = async (serviceName) => {
   try {
-    const response = await pilotarrClient?.post(
-      `/services/${serviceName}/test`,
-      {},
-    );
+    const response = await pilotarrClient?.post(`/services/${serviceName}/test`, {});
     return {
       success: response?.data?.success,
       message: response?.data?.message,
@@ -111,20 +99,13 @@ export const testServiceConnection = async (serviceName) => {
 };
 
 // Update test status for a service
-export const updateServiceTestStatus = async (
-  serviceName,
-  testStatus,
-  testMessage,
-) => {
+export const updateServiceTestStatus = async (serviceName, testStatus, testMessage) => {
   try {
-    const response = await pilotarrClient?.patch(
-      `/services/${serviceName}/test`,
-      {
-        test_status: testStatus,
-        test_message: testMessage,
-        last_tested_at: new Date()?.toISOString(),
-      },
-    );
+    const response = await pilotarrClient?.patch(`/services/${serviceName}/test`, {
+      test_status: testStatus,
+      test_message: testMessage,
+      last_tested_at: new Date()?.toISOString(),
+    });
     return mapServiceResponse(response?.data);
   } catch (error) {
     console.error("Error updating test status:", error?.message);

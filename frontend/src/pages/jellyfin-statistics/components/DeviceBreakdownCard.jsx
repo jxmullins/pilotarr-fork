@@ -40,9 +40,7 @@ const DeviceBreakdownCard = ({ deviceData, isLoading }) => {
     if (active && payload && payload?.length) {
       return (
         <div className="bg-popover border border-border rounded-lg p-3 shadow-lg">
-          <p className="text-sm font-semibold text-foreground mb-1">
-            {payload?.[0]?.name}
-          </p>
+          <p className="text-sm font-semibold text-foreground mb-1">{payload?.[0]?.name}</p>
           <p className="text-xs text-muted-foreground">
             {payload?.[0]?.value} sessions ({payload?.[0]?.payload?.percentage}
             %)
@@ -73,12 +71,8 @@ const DeviceBreakdownCard = ({ deviceData, isLoading }) => {
           <Icon name="Monitor" size={20} color="var(--color-secondary)" />
         </div>
         <div>
-          <h3 className="text-base md:text-lg font-semibold text-foreground">
-            Device Breakdown
-          </h3>
-          <p className="text-xs md:text-sm text-muted-foreground">
-            Playback by device type
-          </p>
+          <h3 className="text-base md:text-lg font-semibold text-foreground">Device Breakdown</h3>
+          <p className="text-xs md:text-sm text-muted-foreground">Playback by device type</p>
         </div>
       </div>
       {isLoading ? (
@@ -87,10 +81,7 @@ const DeviceBreakdownCard = ({ deviceData, isLoading }) => {
         </div>
       ) : transformedData?.length > 0 ? (
         <>
-          <div
-            className="w-full h-64 mb-6"
-            aria-label="Device Breakdown Pie Chart"
-          >
+          <div className="w-full h-64 mb-6" aria-label="Device Breakdown Pie Chart">
             <ResponsiveContainer width="100%" height="100%">
               <PieChart>
                 <Pie
@@ -103,10 +94,7 @@ const DeviceBreakdownCard = ({ deviceData, isLoading }) => {
                   dataKey="value"
                 >
                   {transformedData?.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS?.[index % COLORS?.length]}
-                    />
+                    <Cell key={`cell-${index}`} fill={COLORS?.[index % COLORS?.length]} />
                   ))}
                 </Pie>
                 <Tooltip content={<CustomTooltip />} />
@@ -133,18 +121,12 @@ const DeviceBreakdownCard = ({ deviceData, isLoading }) => {
                     />
                   </div>
                   <div>
-                    <p className="text-sm font-medium text-foreground">
-                      {device?.name}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {device?.value} sessions
-                    </p>
+                    <p className="text-sm font-medium text-foreground">{device?.name}</p>
+                    <p className="text-xs text-muted-foreground">{device?.value} sessions</p>
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="text-sm font-semibold text-foreground">
-                    {device?.percentage}%
-                  </p>
+                  <p className="text-sm font-semibold text-foreground">{device?.percentage}%</p>
                   <div className="w-16 bg-muted rounded-full h-1.5 mt-1">
                     <div
                       className="rounded-full h-1.5 transition-all duration-500"

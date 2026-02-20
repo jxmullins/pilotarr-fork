@@ -6,10 +6,7 @@ import HeroBanner from "./components/HeroBanner";
 import MetadataPanel from "./components/MetadataPanel";
 import EpisodesList from "./components/EpisodesList";
 import FileInfoPanel from "./components/FileInfoPanel";
-import {
-  getLibraryItemById,
-  getSeasonsWithEpisodes,
-} from "../../services/libraryService";
+import { getLibraryItemById, getSeasonsWithEpisodes } from "../../services/libraryService";
 
 const MediaDetail = () => {
   const navigate = useNavigate();
@@ -27,19 +24,12 @@ const MediaDetail = () => {
 
         const data = await getLibraryItemById(id);
 
-        const seasonsData =
-          data.media_type === "tv" ? await getSeasonsWithEpisodes(id) : [];
+        const seasonsData = data.media_type === "tv" ? await getSeasonsWithEpisodes(id) : [];
 
         const torrent = data.torrent_info?.[0] || {};
 
-        const downloadedEpisodes = seasonsData.reduce(
-          (s, se) => s + se.episode_file_count,
-          0,
-        );
-        const totalEpisodes = seasonsData.reduce(
-          (s, se) => s + se.total_episode_count,
-          0,
-        );
+        const downloadedEpisodes = seasonsData.reduce((s, se) => s + se.episode_file_count, 0);
+        const totalEpisodes = seasonsData.reduce((s, se) => s + se.total_episode_count, 0);
 
         const media = {
           id: data.id,
@@ -90,8 +80,7 @@ const MediaDetail = () => {
               fileSize: ep.file_size_str,
               quality: ep.quality_profile,
               hasSubtitles: (ep.media_streams?.subtitles?.length ?? 0) > 0,
-              subtitleLanguages:
-                ep.media_streams?.subtitles?.map((s) => s.language) ?? [],
+              subtitleLanguages: ep.media_streams?.subtitles?.map((s) => s.language) ?? [],
               watched: false,
             })),
           })),
@@ -135,12 +124,7 @@ const MediaDetail = () => {
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6 md:py-8 space-y-6">
         {/* Back Button */}
-        <Button
-          variant="ghost"
-          size="sm"
-          iconName="ArrowLeft"
-          onClick={() => navigate("/library")}
-        >
+        <Button variant="ghost" size="sm" iconName="ArrowLeft" onClick={() => navigate("/library")}>
           Back to Library
         </Button>
 
@@ -158,9 +142,7 @@ const MediaDetail = () => {
         </div>
 
         {/* Episodes List (TV Shows Only) */}
-        {media?.mediaType === "tv" && media?.seasons && (
-          <EpisodesList seasons={media.seasons} />
-        )}
+        {media?.mediaType === "tv" && media?.seasons && <EpisodesList seasons={media.seasons} />}
       </div>
     </div>
   );

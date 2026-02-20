@@ -34,22 +34,16 @@ const Select = React.forwardRef(
     const [searchTerm, setSearchTerm] = useState("");
 
     // Generate unique ID if not provided
-    const selectId =
-      id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
+    const selectId = id || `select-${Math.random()?.toString(36)?.substr(2, 9)}`;
 
     // Filter options based on search
     const filteredOptions =
       searchable && searchTerm
         ? options?.filter(
             (option) =>
-              option?.label
-                ?.toLowerCase()
-                ?.includes(searchTerm?.toLowerCase()) ||
+              option?.label?.toLowerCase()?.includes(searchTerm?.toLowerCase()) ||
               (option?.value &&
-                option?.value
-                  ?.toString()
-                  ?.toLowerCase()
-                  ?.includes(searchTerm?.toLowerCase())),
+                option?.value?.toString()?.toLowerCase()?.includes(searchTerm?.toLowerCase())),
           )
         : options;
 
@@ -58,9 +52,7 @@ const Select = React.forwardRef(
       if (!value) return placeholder;
 
       if (multiple) {
-        const selectedOptions = options?.filter((opt) =>
-          value?.includes(opt?.value),
-        );
+        const selectedOptions = options?.filter((opt) => value?.includes(opt?.value));
         if (selectedOptions?.length === 0) return placeholder;
         if (selectedOptions?.length === 1) return selectedOptions?.[0]?.label;
         return `${selectedOptions?.length} items selected`;
@@ -111,9 +103,7 @@ const Select = React.forwardRef(
       return value === optionValue;
     };
 
-    const hasValue = multiple
-      ? value?.length > 0
-      : value !== undefined && value !== "";
+    const hasValue = multiple ? value?.length > 0 : value !== undefined && value !== "";
 
     return (
       <div className={cn("relative", className)}>
@@ -168,22 +158,12 @@ const Select = React.forwardRef(
               )}
 
               {clearable && hasValue && !loading && (
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="h-4 w-4"
-                  onClick={handleClear}
-                >
+                <Button variant="ghost" size="icon" className="h-4 w-4" onClick={handleClear}>
                   <X className="h-3 w-3" />
                 </Button>
               )}
 
-              <ChevronDown
-                className={cn(
-                  "h-4 w-4 transition-transform",
-                  isOpen && "rotate-180",
-                )}
-              />
+              <ChevronDown className={cn("h-4 w-4 transition-transform", isOpen && "rotate-180")} />
             </div>
           </button>
 
@@ -233,18 +213,13 @@ const Select = React.forwardRef(
                       key={option?.value}
                       className={cn(
                         "relative flex cursor-pointer select-none items-center rounded-sm px-3 py-2 text-sm outline-none hover:bg-accent hover:text-accent-foreground",
-                        isSelected(option?.value) &&
-                          "bg-primary text-primary-foreground",
+                        isSelected(option?.value) && "bg-primary text-primary-foreground",
                         option?.disabled && "pointer-events-none opacity-50",
                       )}
-                      onClick={() =>
-                        !option?.disabled && handleOptionSelect(option)
-                      }
+                      onClick={() => !option?.disabled && handleOptionSelect(option)}
                     >
                       <span className="flex-1">{option?.label}</span>
-                      {multiple && isSelected(option?.value) && (
-                        <Check className="h-4 w-4" />
-                      )}
+                      {multiple && isSelected(option?.value) && <Check className="h-4 w-4" />}
                       {option?.description && (
                         <span className="text-xs text-muted-foreground ml-2">
                           {option?.description}

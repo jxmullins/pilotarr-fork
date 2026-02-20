@@ -20,8 +20,7 @@ const Checkbox = React.forwardRef(
     ref,
   ) => {
     // Generate unique ID if not provided
-    const checkboxId =
-      id || `checkbox-${Math.random()?.toString(36)?.substr(2, 9)}`;
+    const checkboxId = id || `checkbox-${Math.random()?.toString(36)?.substr(2, 9)}`;
 
     // Size variants
     const sizeClasses = {
@@ -50,8 +49,7 @@ const Checkbox = React.forwardRef(
               "peer shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground cursor-pointer transition-colors",
               sizeClasses?.[size],
               checked && "bg-primary text-primary-foreground border-primary",
-              indeterminate &&
-                "bg-primary text-primary-foreground border-primary",
+              indeterminate && "bg-primary text-primary-foreground border-primary",
               error && "border-destructive",
               disabled && "cursor-not-allowed opacity-50",
             )}
@@ -109,27 +107,17 @@ const CheckboxGroup = React.forwardRef(
     ref,
   ) => {
     return (
-      <fieldset
-        ref={ref}
-        disabled={disabled}
-        className={cn("space-y-3", className)}
-        {...props}
-      >
+      <fieldset ref={ref} disabled={disabled} className={cn("space-y-3", className)} {...props}>
         {label && (
           <legend
-            className={cn(
-              "text-sm font-medium",
-              error ? "text-destructive" : "text-foreground",
-            )}
+            className={cn("text-sm font-medium", error ? "text-destructive" : "text-foreground")}
           >
             {label}
             {required && <span className="text-destructive ml-1">*</span>}
           </legend>
         )}
 
-        {description && !error && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
+        {description && !error && <p className="text-sm text-muted-foreground">{description}</p>}
 
         <div className="space-y-2">{children}</div>
 

@@ -3,16 +3,7 @@ import { cn } from "../../utils/cn";
 
 const Input = React.forwardRef(
   (
-    {
-      className,
-      type = "text",
-      label,
-      description,
-      error,
-      required = false,
-      id,
-      ...props
-    },
+    { className, type = "text", label, description, error, required = false, id, ...props },
     ref,
   ) => {
     // Generate unique ID if not provided
@@ -82,9 +73,7 @@ const Input = React.forwardRef(
           {...props}
         />
 
-        {description && !error && (
-          <p className="text-sm text-muted-foreground">{description}</p>
-        )}
+        {description && !error && <p className="text-sm text-muted-foreground">{description}</p>}
 
         {error && <p className="text-sm text-destructive">{error}</p>}
       </div>

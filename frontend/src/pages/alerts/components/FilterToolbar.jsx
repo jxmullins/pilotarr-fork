@@ -36,9 +36,7 @@ const FilterToolbar = ({ filters, onFilterChange }) => {
   };
 
   const hasActiveFilters =
-    filters?.dateRange !== "all" ||
-    filters?.service !== "all" ||
-    filters?.severity !== "all";
+    filters?.dateRange !== "all" || filters?.service !== "all" || filters?.severity !== "all";
 
   return (
     <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-4 mb-6">
@@ -48,9 +46,7 @@ const FilterToolbar = ({ filters, onFilterChange }) => {
             label="Date Range"
             options={dateRangeOptions}
             value={filters?.dateRange}
-            onChange={(value) =>
-              onFilterChange({ ...filters, dateRange: value })
-            }
+            onChange={(value) => onFilterChange({ ...filters, dateRange: value })}
           />
         </div>
 
@@ -68,9 +64,7 @@ const FilterToolbar = ({ filters, onFilterChange }) => {
             label="Severity"
             options={severityOptions}
             value={filters?.severity}
-            onChange={(value) =>
-              onFilterChange({ ...filters, severity: value })
-            }
+            onChange={(value) => onFilterChange({ ...filters, severity: value })}
           />
         </div>
 

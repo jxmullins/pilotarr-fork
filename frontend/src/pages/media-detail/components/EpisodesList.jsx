@@ -8,9 +8,7 @@ const EpisodesList = ({ seasons }) => {
 
   const toggleSeason = (seasonIndex) => {
     setExpandedSeasons((prev) =>
-      prev?.includes(seasonIndex)
-        ? prev?.filter((i) => i !== seasonIndex)
-        : [...prev, seasonIndex],
+      prev?.includes(seasonIndex) ? prev?.filter((i) => i !== seasonIndex) : [...prev, seasonIndex],
     );
   };
 
@@ -29,9 +27,7 @@ const EpisodesList = ({ seasons }) => {
 
   const handleEpisodeMonitorToggle = (seasonIndex, episodeIndex) => {
     // TODO: API call to toggle episode monitoring
-    console.log(
-      `Toggle monitoring for S${seasonIndex + 1}E${episodeIndex + 1}`,
-    );
+    console.log(`Toggle monitoring for S${seasonIndex + 1}E${episodeIndex + 1}`);
   };
 
   const handleManualSearch = (seasonIndex, episodeIndex) => {
@@ -58,11 +54,7 @@ const EpisodesList = ({ seasons }) => {
             >
               <div className="flex items-center gap-3">
                 <Icon
-                  name={
-                    expandedSeasons?.includes(seasonIndex)
-                      ? "ChevronDown"
-                      : "ChevronRight"
-                  }
+                  name={expandedSeasons?.includes(seasonIndex) ? "ChevronDown" : "ChevronRight"}
                   size={20}
                   className="text-muted-foreground"
                 />
@@ -116,10 +108,7 @@ const EpisodesList = ({ seasons }) => {
                     </thead>
                     <tbody className="divide-y divide-border">
                       {season?.episodes?.map((episode, episodeIndex) => (
-                        <tr
-                          key={episodeIndex}
-                          className="hover:bg-muted/50 transition-colors"
-                        >
+                        <tr key={episodeIndex} className="hover:bg-muted/50 transition-colors">
                           {/* Episode Number */}
                           <td className="px-6 py-4 whitespace-nowrap">
                             <span className="text-sm font-medium text-foreground">
@@ -131,15 +120,9 @@ const EpisodesList = ({ seasons }) => {
                           <td className="px-6 py-4">
                             <div className="flex items-center gap-2">
                               {episode?.monitored && (
-                                <Icon
-                                  name="Eye"
-                                  size={14}
-                                  className="text-success"
-                                />
+                                <Icon name="Eye" size={14} className="text-success" />
                               )}
-                              <span className="text-sm text-foreground">
-                                {episode?.title}
-                              </span>
+                              <span className="text-sm text-foreground">{episode?.title}</span>
                             </div>
                           </td>
 
@@ -154,9 +137,7 @@ const EpisodesList = ({ seasons }) => {
                           <td className="px-6 py-4 text-center">
                             <div className="flex justify-center">
                               <StatusIndicator
-                                {...getDownloadStatusConfig(
-                                  episode?.downloadStatus,
-                                )}
+                                {...getDownloadStatusConfig(episode?.downloadStatus)}
                               />
                             </div>
                           </td>
@@ -165,11 +146,7 @@ const EpisodesList = ({ seasons }) => {
                           <td className="px-6 py-4 text-center">
                             {episode?.hasSubtitles ? (
                               <div className="flex justify-center items-center gap-1">
-                                <Icon
-                                  name="Subtitles"
-                                  size={14}
-                                  className="text-success"
-                                />
+                                <Icon name="Subtitles" size={14} className="text-success" />
                                 {episode?.subtitleLanguages && (
                                   <span className="text-xs text-muted-foreground">
                                     ({episode?.subtitleLanguages?.join(", ")})
@@ -177,11 +154,7 @@ const EpisodesList = ({ seasons }) => {
                                 )}
                               </div>
                             ) : (
-                              <Icon
-                                name="Subtitles"
-                                size={14}
-                                className="text-muted-foreground"
-                              />
+                              <Icon name="Subtitles" size={14} className="text-muted-foreground" />
                             )}
                           </td>
 
@@ -217,22 +190,15 @@ const EpisodesList = ({ seasons }) => {
                                 variant="ghost"
                                 iconName={episode?.monitored ? "Eye" : "EyeOff"}
                                 onClick={() =>
-                                  handleEpisodeMonitorToggle(
-                                    seasonIndex,
-                                    episodeIndex,
-                                  )
+                                  handleEpisodeMonitorToggle(seasonIndex, episodeIndex)
                                 }
-                                title={
-                                  episode?.monitored ? "Unmonitor" : "Monitor"
-                                }
+                                title={episode?.monitored ? "Unmonitor" : "Monitor"}
                               />
                               <Button
                                 size="xs"
                                 variant="ghost"
                                 iconName="Search"
-                                onClick={() =>
-                                  handleManualSearch(seasonIndex, episodeIndex)
-                                }
+                                onClick={() => handleManualSearch(seasonIndex, episodeIndex)}
                                 title="Manual Search"
                               />
                             </div>

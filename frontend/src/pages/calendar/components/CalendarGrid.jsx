@@ -48,17 +48,9 @@ const CalendarGrid = ({
       if (!matchesDate) return false;
 
       // Apply event type filters
-      if (
-        event?.eventType === "release" &&
-        event?.type === "tv" &&
-        !eventFilters?.tvReleases
-      )
+      if (event?.eventType === "release" && event?.type === "tv" && !eventFilters?.tvReleases)
         return false;
-      if (
-        event?.eventType === "release" &&
-        event?.type === "movie" &&
-        !eventFilters?.movieReleases
-      )
+      if (event?.eventType === "release" && event?.type === "movie" && !eventFilters?.movieReleases)
         return false;
       if (event?.eventType === "view" && !eventFilters?.views) return false;
 
@@ -75,8 +67,7 @@ const CalendarGrid = ({
   };
 
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-  const { daysInMonth, startingDayOfWeek, year, month } =
-    getDaysInMonth(selectedDate);
+  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
 
   const renderMonthView = () => {
     const days = [];
@@ -143,11 +134,7 @@ const CalendarGrid = ({
     return (
       <div className="bg-card border border-border rounded-lg p-8">
         <div className="flex items-center justify-center">
-          <Icon
-            name="Loader2"
-            size={32}
-            className="animate-spin text-muted-foreground"
-          />
+          <Icon name="Loader2" size={32} className="animate-spin text-muted-foreground" />
         </div>
       </div>
     );
@@ -158,10 +145,7 @@ const CalendarGrid = ({
       {/* Day Names Header */}
       <div className="grid grid-cols-7 bg-muted/50 border-b border-border">
         {dayNames?.map((day) => (
-          <div
-            key={day}
-            className="p-3 text-center text-sm font-semibold text-foreground"
-          >
+          <div key={day} className="p-3 text-center text-sm font-semibold text-foreground">
             {day}
           </div>
         ))}

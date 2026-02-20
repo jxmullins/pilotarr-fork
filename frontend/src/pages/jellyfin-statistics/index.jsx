@@ -39,11 +39,7 @@ const JellyfinStatistics = () => {
     const endDate = new Date();
     const startDate = new Date();
 
-    if (
-      filters?.dateRange === "custom" &&
-      filters?.customStartDate &&
-      filters?.customEndDate
-    ) {
+    if (filters?.dateRange === "custom" && filters?.customStartDate && filters?.customEndDate) {
       return {
         start: filters?.customStartDate,
         end: filters?.customEndDate,
@@ -125,8 +121,7 @@ const JellyfinStatistics = () => {
           episodeInfo: item?.episode_info || null,
           lastPlayedAt: item?.last_played_at || null,
           thumbnail:
-            item?.poster_url ||
-            "https://images.unsplash.com/photo-1574267432644-f610f5b7e4d1",
+            item?.poster_url || "https://images.unsplash.com/photo-1574267432644-f610f5b7e4d1",
           thumbnailAlt: `${item?.media_title || "Media"} poster`,
           type: item?.media_type === "tv" ? "TV Show" : "Movie",
           plays: item?.plays || 0,
@@ -155,9 +150,7 @@ const JellyfinStatistics = () => {
         const memoryFormatted = formatMemory(data?.memory_usage_gb || 0);
         const totalMemoryFormatted = formatMemory(data?.memory_total_gb || 0);
         const storageFormatted = formatStorage(data?.storage_used_tb || 0);
-        const totalStorageFormatted = formatStorage(
-          data?.storage_total_tb || 0,
-        );
+        const totalStorageFormatted = formatStorage(data?.storage_total_tb || 0);
 
         // Transform API response to component format
         const transformedData = {
@@ -274,8 +267,7 @@ const JellyfinStatistics = () => {
                   Jellyfin Statistics
                 </h1>
                 <p className="text-sm text-muted-foreground">
-                  Comprehensive media server analytics and performance
-                  monitoring
+                  Comprehensive media server analytics and performance monitoring
                 </p>
               </div>
             </div>
@@ -290,12 +282,7 @@ const JellyfinStatistics = () => {
                 isLoading={isLoadingUsage}
               />
             </div>
-            <UserStatsCard
-              totalUsers={156}
-              activeUsers={42}
-              newUsers={12}
-              growthRate={8.5}
-            />
+            <UserStatsCard totalUsers={156} activeUsers={42} newUsers={12} growthRate={8.5} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
@@ -303,10 +290,7 @@ const JellyfinStatistics = () => {
               performanceData={performanceData}
               isLoading={isLoadingPerformance}
             />
-            <DeviceBreakdownCard
-              deviceData={deviceData}
-              isLoading={isLoadingDevices}
-            />
+            <DeviceBreakdownCard deviceData={deviceData} isLoading={isLoadingDevices} />
           </div>
 
           <MediaAnalyticsTable data={mediaData} isLoading={isLoadingMedia} />

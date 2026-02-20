@@ -3,13 +3,7 @@ import Select from "../../../components/ui/Select";
 import Button from "../../../components/ui/Button";
 import Icon from "../../../components/AppIcon";
 
-const FilterToolbar = ({
-  filters,
-  onFilterChange,
-  onApplyFilters,
-  onResetFilters,
-  onExport,
-}) => {
+const FilterToolbar = ({ filters, onFilterChange, onApplyFilters, onResetFilters, onExport }) => {
   const contentTypeOptions = [
     { value: "all", label: "All Content" },
     { value: "movies", label: "Movies" },
@@ -56,12 +50,8 @@ const FilterToolbar = ({
             <Icon name="Filter" size={20} color="var(--color-primary)" />
           </div>
           <div>
-            <h2 className="text-lg md:text-xl font-semibold text-foreground">
-              Advanced Filters
-            </h2>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Refine your analytics view
-            </p>
+            <h2 className="text-lg md:text-xl font-semibold text-foreground">Advanced Filters</h2>
+            <p className="text-xs md:text-sm text-muted-foreground">Refine your analytics view</p>
           </div>
         </div>
 
@@ -132,28 +122,20 @@ const FilterToolbar = ({
       {filters?.dateRange === "custom" && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 pt-4 border-t border-border">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              Start Date
-            </label>
+            <label className="block text-sm font-medium text-foreground mb-2">Start Date</label>
             <input
               type="date"
               value={filters?.customStartDate || ""}
-              onChange={(e) =>
-                onFilterChange("customStartDate", e?.target?.value)
-              }
+              onChange={(e) => onFilterChange("customStartDate", e?.target?.value)}
               className="w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
           <div>
-            <label className="block text-sm font-medium text-foreground mb-2">
-              End Date
-            </label>
+            <label className="block text-sm font-medium text-foreground mb-2">End Date</label>
             <input
               type="date"
               value={filters?.customEndDate || ""}
-              onChange={(e) =>
-                onFilterChange("customEndDate", e?.target?.value)
-              }
+              onChange={(e) => onFilterChange("customEndDate", e?.target?.value)}
               className="w-full px-3 py-2 bg-background border border-input rounded-lg text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>

@@ -13,11 +13,7 @@ const ConfigurationProgress = ({ services, testStatuses, configurations }) => {
     }
 
     // Configured but not tested: Has config but no test status
-    if (
-      !testStatus ||
-      testStatus?.status === null ||
-      testStatus?.status === undefined
-    ) {
+    if (!testStatus || testStatus?.status === null || testStatus?.status === undefined) {
       return "configured";
     }
 
@@ -88,16 +84,12 @@ const ConfigurationProgress = ({ services, testStatuses, configurations }) => {
 
   // Calculate progress based on alive services
   const getCompletedCount = () => {
-    return (
-      services?.filter((service) => getServiceState(service?.id) === "alive")
-        ?.length || 0
-    );
+    return services?.filter((service) => getServiceState(service?.id) === "alive")?.length || 0;
   };
 
   const totalServices = services?.length || 0;
   const completedServices = getCompletedCount();
-  const progressPercentage =
-    totalServices > 0 ? (completedServices / totalServices) * 100 : 0;
+  const progressPercentage = totalServices > 0 ? (completedServices / totalServices) * 100 : 0;
 
   // Count services by state for summary
   const stateCounts = services?.reduce((acc, service) => {
@@ -141,11 +133,7 @@ const ConfigurationProgress = ({ services, testStatuses, configurations }) => {
           <div className="flex flex-wrap gap-3 text-xs">
             {stateCounts?.configured > 0 && (
               <div className="flex items-center gap-1.5">
-                <Icon
-                  name="AlertCircle"
-                  size={14}
-                  color="var(--color-warning)"
-                />
+                <Icon name="AlertCircle" size={14} color="var(--color-warning)" />
                 <span className="text-muted-foreground">
                   {stateCounts?.configured} configured (not tested)
                 </span>
@@ -153,14 +141,8 @@ const ConfigurationProgress = ({ services, testStatuses, configurations }) => {
             )}
             {stateCounts?.error > 0 && (
               <div className="flex items-center gap-1.5">
-                <Icon
-                  name="XCircle"
-                  size={14}
-                  color="var(--color-destructive)"
-                />
-                <span className="text-muted-foreground">
-                  {stateCounts?.error} test failed
-                </span>
+                <Icon name="XCircle" size={14} color="var(--color-destructive)" />
+                <span className="text-muted-foreground">{stateCounts?.error} test failed</span>
               </div>
             )}
           </div>
@@ -189,9 +171,7 @@ const ConfigurationProgress = ({ services, testStatuses, configurations }) => {
                   {service?.name}
                 </span>
               </div>
-              <p className={`text-xs ${stateConfig?.textClass}`}>
-                {stateConfig?.label}
-              </p>
+              <p className={`text-xs ${stateConfig?.textClass}`}>{stateConfig?.label}</p>
             </div>
           );
         })}

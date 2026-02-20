@@ -67,16 +67,12 @@ const Monitoring = () => {
 
     // Status filter
     if (filters?.status !== "all") {
-      result = result?.filter(
-        (item) => item?.availabilityStatus === filters?.status,
-      );
+      result = result?.filter((item) => item?.availabilityStatus === filters?.status);
     }
 
     // Quality filter
     if (filters?.quality !== "all") {
-      result = result?.filter((item) =>
-        item?.qualityProfile?.includes(filters?.quality),
-      );
+      result = result?.filter((item) => item?.qualityProfile?.includes(filters?.quality));
     }
 
     return result;
@@ -118,12 +114,9 @@ const Monitoring = () => {
               <Icon name="Monitor" size={20} color="var(--color-primary)" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                Media Monitoring
-              </h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Media Monitoring</h1>
               <p className="text-sm text-muted-foreground">
-                Comprehensive oversight of all Sonarr and Radarr monitored
-                content
+                Comprehensive oversight of all Sonarr and Radarr monitored content
               </p>
             </div>
           </div>
@@ -132,14 +125,8 @@ const Monitoring = () => {
         {/* Loading / Error states */}
         {isLoading && (
           <div className="flex items-center justify-center py-16">
-            <Icon
-              name="Loader"
-              size={24}
-              className="animate-spin text-primary mr-2"
-            />
-            <span className="text-muted-foreground">
-              Loading monitoring data...
-            </span>
+            <Icon name="Loader" size={24} className="animate-spin text-primary mr-2" />
+            <span className="text-muted-foreground">Loading monitoring data...</span>
           </div>
         )}
 
@@ -167,8 +154,8 @@ const Monitoring = () => {
                 <div className="flex items-center gap-2">
                   <Icon name="CheckSquare" size={18} className="text-primary" />
                   <span className="text-sm font-medium text-foreground">
-                    {selectedItems?.length}{" "}
-                    {selectedItems?.length === 1 ? "item" : "items"} selected
+                    {selectedItems?.length} {selectedItems?.length === 1 ? "item" : "items"}{" "}
+                    selected
                   </span>
                 </div>
                 <div className="flex gap-2">

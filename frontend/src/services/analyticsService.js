@@ -52,11 +52,7 @@ export const getDeviceBreakdown = async (periodDays = 365) => {
  * @param {string} order - Sort order 'asc' or 'desc' (default: 'desc')
  * @returns {Promise<Array>} Media analytics data
  */
-export const getMediaAnalytics = async (
-  limit = 10,
-  sortBy = "plays",
-  order = "desc",
-) => {
+export const getMediaAnalytics = async (limit = 10, sortBy = "plays", order = "desc") => {
   try {
     const response = await pilotarrClient?.get("/analytics/media", {
       params: {

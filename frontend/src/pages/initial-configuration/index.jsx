@@ -146,8 +146,7 @@ const InitialConfiguration = () => {
 
     // Check if service uses username/password or API key
     const usesApiKey = config?.apiKey !== undefined;
-    const usesCredentials =
-      config?.username !== undefined && config?.password !== undefined;
+    const usesCredentials = config?.username !== undefined && config?.password !== undefined;
 
     let isValid;
     if (usesApiKey) {
@@ -158,8 +157,7 @@ const InitialConfiguration = () => {
       isValid = config?.url;
     }
 
-    const hasValidUrl =
-      config?.url?.startsWith("http://") || config?.url?.startsWith("https://");
+    const hasValidUrl = config?.url?.startsWith("http://") || config?.url?.startsWith("https://");
 
     if (!isValid) {
       const errorStatus = {
@@ -222,20 +220,15 @@ const InitialConfiguration = () => {
       console.error(`${serviceId} connection test failed:`, error);
 
       let errorMessage = "Connection failed";
-      let errorDetails =
-        error?.message || "Unable to reach server. Check URL and API key.";
+      let errorDetails = error?.message || "Unable to reach server. Check URL and API key.";
 
       // Provide more specific error messages based on response
       if (error?.response?.data?.detail) {
         errorDetails = error?.response?.data?.detail;
-      } else if (
-        error?.response?.status === 401 ||
-        error?.response?.status === 403
-      ) {
+      } else if (error?.response?.status === 401 || error?.response?.status === 403) {
         errorDetails = "Authentication failed: Invalid API key for backend.";
       } else if (error?.response?.status === 404) {
-        errorDetails =
-          "Service not found: Please save the configuration first.";
+        errorDetails = "Service not found: Please save the configuration first.";
       } else if (error?.code === "ERR_NETWORK") {
         errorDetails = "Network error: Cannot reach the backend server.";
       }
@@ -297,14 +290,8 @@ const InitialConfiguration = () => {
           <div className="max-w-7xl mx-auto px-4 md:px-6 lg:px-8">
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <Icon
-                  name="Loader2"
-                  size={48}
-                  className="animate-spin text-primary mx-auto mb-4"
-                />
-                <p className="text-muted-foreground">
-                  Loading configurations...
-                </p>
+                <Icon name="Loader2" size={48} className="animate-spin text-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">Loading configurations...</p>
               </div>
             </div>
           </div>
@@ -396,9 +383,7 @@ const InitialConfiguration = () => {
                 iconPosition="left"
                 className="w-full md:w-auto min-w-[200px]"
               >
-                {saveSuccess
-                  ? "Configuration Saved!"
-                  : "Save All Configurations"}
+                {saveSuccess ? "Configuration Saved!" : "Save All Configurations"}
               </Button>
             </div>
 
@@ -407,8 +392,7 @@ const InitialConfiguration = () => {
                 <div className="flex items-center gap-2 text-success">
                   <Icon name="CheckCircle2" size={18} />
                   <p className="text-sm font-medium">
-                    Configuration saved successfully! Redirecting to
-                    dashboard...
+                    Configuration saved successfully! Redirecting to dashboard...
                   </p>
                 </div>
               </div>
@@ -428,50 +412,24 @@ const InitialConfiguration = () => {
                   Need Help?
                 </h4>
                 <p className="text-xs md:text-sm text-muted-foreground mb-3">
-                  If you&apos;re having trouble connecting to your services,
-                  check the following:
+                  If you&apos;re having trouble connecting to your services, check the following:
                 </p>
                 <ul className="space-y-1.5 text-xs md:text-sm text-muted-foreground">
                   <li className="flex items-start gap-2">
-                    <Icon
-                      name="Check"
-                      size={14}
-                      className="text-primary flex-shrink-0 mt-0.5"
-                    />
-                    <span>
-                      Verify services are running and accessible on your network
-                    </span>
+                    <Icon name="Check" size={14} className="text-primary flex-shrink-0 mt-0.5" />
+                    <span>Verify services are running and accessible on your network</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Icon
-                      name="Check"
-                      size={14}
-                      className="text-primary flex-shrink-0 mt-0.5"
-                    />
-                    <span>
-                      Ensure API keys are copied correctly without extra spaces
-                    </span>
+                    <Icon name="Check" size={14} className="text-primary flex-shrink-0 mt-0.5" />
+                    <span>Ensure API keys are copied correctly without extra spaces</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Icon
-                      name="Check"
-                      size={14}
-                      className="text-primary flex-shrink-0 mt-0.5"
-                    />
-                    <span>
-                      Check firewall settings allow connections to service ports
-                    </span>
+                    <Icon name="Check" size={14} className="text-primary flex-shrink-0 mt-0.5" />
+                    <span>Check firewall settings allow connections to service ports</span>
                   </li>
                   <li className="flex items-start gap-2">
-                    <Icon
-                      name="Check"
-                      size={14}
-                      className="text-primary flex-shrink-0 mt-0.5"
-                    />
-                    <span>
-                      Confirm URLs include the correct protocol (http:// or
-                      https://)
-                    </span>
+                    <Icon name="Check" size={14} className="text-primary flex-shrink-0 mt-0.5" />
+                    <span>Confirm URLs include the correct protocol (http:// or https://)</span>
                   </li>
                 </ul>
               </div>

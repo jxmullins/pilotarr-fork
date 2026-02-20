@@ -36,23 +36,16 @@ const StatisticsCard = ({
           </h3>
           <p className="text-xs text-muted-foreground">{title}</p>
           {subtitle && (
-            <p className="text-xs text-muted-foreground/80 font-caption mt-0.5">
-              {subtitle}
-            </p>
+            <p className="text-xs text-muted-foreground/80 font-caption mt-0.5">{subtitle}</p>
           )}
         </div>
       </div>
       {details && details?.length > 0 && (
         <div className="mt-2 pt-2 border-t border-border/50 space-y-1">
           {details?.map((detail, index) => (
-            <div
-              key={index}
-              className="flex items-center justify-between text-xs"
-            >
+            <div key={index} className="flex items-center justify-between text-xs">
               <span className="text-muted-foreground">{detail?.label}</span>
-              <span className="font-medium text-foreground">
-                {detail?.value}
-              </span>
+              <span className="font-medium text-foreground">{detail?.value}</span>
             </div>
           ))}
         </div>

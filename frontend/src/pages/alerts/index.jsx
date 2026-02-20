@@ -50,8 +50,7 @@ const Alerts = () => {
       service: "Jellyseerr",
       severity: "error",
       message: "Failed to process media request",
-      details:
-        'Request for "The Matrix Resurrections" failed due to invalid TMDB ID.',
+      details: 'Request for "The Matrix Resurrections" failed due to invalid TMDB ID.',
       timestamp: new Date(Date.now() - 900000),
       dismissed: false,
       suggestions: [
@@ -66,8 +65,7 @@ const Alerts = () => {
       service: "Jellyfin",
       severity: "warning",
       message: "High CPU usage detected",
-      details:
-        "Jellyfin server CPU usage has exceeded 80% for the last 10 minutes.",
+      details: "Jellyfin server CPU usage has exceeded 80% for the last 10 minutes.",
       timestamp: new Date(Date.now() - 1200000),
       dismissed: false,
       suggestions: [
@@ -82,8 +80,7 @@ const Alerts = () => {
       service: "Sonarr",
       severity: "error",
       message: "Database connection lost",
-      details:
-        "Lost connection to Sonarr database. Service may be unavailable.",
+      details: "Lost connection to Sonarr database. Service may be unavailable.",
       timestamp: new Date(Date.now() - 1800000),
       dismissed: false,
       suggestions: [
@@ -129,8 +126,7 @@ const Alerts = () => {
     {
       id: "connection",
       label: "Connection Failures",
-      count: alerts?.filter((a) => a?.type === "connection" && !a?.dismissed)
-        ?.length,
+      count: alerts?.filter((a) => a?.type === "connection" && !a?.dismissed)?.length,
     },
     {
       id: "api",
@@ -140,40 +136,29 @@ const Alerts = () => {
     {
       id: "request",
       label: "Failed Requests",
-      count: alerts?.filter((a) => a?.type === "request" && !a?.dismissed)
-        ?.length,
+      count: alerts?.filter((a) => a?.type === "request" && !a?.dismissed)?.length,
     },
     {
       id: "system",
       label: "System Warnings",
-      count: alerts?.filter((a) => a?.type === "system" && !a?.dismissed)
-        ?.length,
+      count: alerts?.filter((a) => a?.type === "system" && !a?.dismissed)?.length,
     },
   ];
 
   const handleDismiss = (alertId) => {
     const alert = alerts?.find((a) => a?.id === alertId);
     if (alert) {
-      setAlerts(
-        alerts?.map((a) => (a?.id === alertId ? { ...a, dismissed: true } : a)),
-      );
-      setDismissedAlerts([
-        ...dismissedAlerts,
-        { ...alert, dismissedAt: new Date() },
-      ]);
+      setAlerts(alerts?.map((a) => (a?.id === alertId ? { ...a, dismissed: true } : a)));
+      setDismissedAlerts([...dismissedAlerts, { ...alert, dismissedAt: new Date() }]);
       setSelectedAlerts(selectedAlerts?.filter((id) => id !== alertId));
     }
   };
 
   const handleDismissSelected = () => {
     const now = new Date();
-    const dismissedItems = alerts?.filter((a) =>
-      selectedAlerts?.includes(a?.id),
-    );
+    const dismissedItems = alerts?.filter((a) => selectedAlerts?.includes(a?.id));
     setAlerts(
-      alerts?.map((a) =>
-        selectedAlerts?.includes(a?.id) ? { ...a, dismissed: true } : a,
-      ),
+      alerts?.map((a) => (selectedAlerts?.includes(a?.id) ? { ...a, dismissed: true } : a)),
     );
     setDismissedAlerts([
       ...dismissedAlerts,
@@ -186,11 +171,7 @@ const Alerts = () => {
     const activeAlerts = getFilteredAlerts();
     const now = new Date();
     const idsToMark = activeAlerts?.map((a) => a?.id);
-    setAlerts(
-      alerts?.map((a) =>
-        idsToMark?.includes(a?.id) ? { ...a, dismissed: true } : a,
-      ),
-    );
+    setAlerts(alerts?.map((a) => (idsToMark?.includes(a?.id) ? { ...a, dismissed: true } : a)));
     setDismissedAlerts([
       ...dismissedAlerts,
       ...(activeAlerts?.map((item) => ({ ...item, dismissedAt: now })) || []),
@@ -251,10 +232,8 @@ const Alerts = () => {
     return alerts?.filter((alert) => {
       if (alert?.dismissed) return false;
       if (activeTab !== "all" && alert?.type !== activeTab) return false;
-      if (filters?.service !== "all" && alert?.service !== filters?.service)
-        return false;
-      if (filters?.severity !== "all" && alert?.severity !== filters?.severity)
-        return false;
+      if (filters?.service !== "all" && alert?.service !== filters?.service) return false;
+      if (filters?.severity !== "all" && alert?.severity !== filters?.severity) return false;
 
       if (filters?.dateRange !== "all") {
         const now = Date.now();
@@ -274,8 +253,7 @@ const Alerts = () => {
 
   const filteredAlerts = getFilteredAlerts();
   const allSelected =
-    filteredAlerts?.length > 0 &&
-    selectedAlerts?.length === filteredAlerts?.length;
+    filteredAlerts?.length > 0 && selectedAlerts?.length === filteredAlerts?.length;
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -287,24 +265,13 @@ const Alerts = () => {
         const newAlert = {
           id: Date.now(),
           type: randomTypes?.[Math.floor(Math.random() * randomTypes?.length)],
-          service:
-            randomServices?.[
-              Math.floor(Math.random() * randomServices?.length)
-            ],
-          severity:
-            randomSeverities?.[
-              Math.floor(Math.random() * randomSeverities?.length)
-            ],
+          service: randomServices?.[Math.floor(Math.random() * randomServices?.length)],
+          severity: randomSeverities?.[Math.floor(Math.random() * randomSeverities?.length)],
           message: "New alert detected",
-          details:
-            "This is a simulated real-time alert for demonstration purposes.",
+          details: "This is a simulated real-time alert for demonstration purposes.",
           timestamp: new Date(),
           dismissed: false,
-          suggestions: [
-            "Check service status",
-            "Review logs",
-            "Contact support if issue persists",
-          ],
+          suggestions: ["Check service status", "Review logs", "Contact support if issue persists"],
         };
 
         setAlerts((prev) => [newAlert, ...prev]);
@@ -333,12 +300,9 @@ const Alerts = () => {
                 <Icon name="Bell" size={20} color="var(--color-primary)" />
               </div>
               <div>
-                <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                  System Alerts
-                </h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-foreground">System Alerts</h1>
                 <p className="text-sm text-muted-foreground">
-                  Monitor and manage system notifications across all Pilotarr
-                  services
+                  Monitor and manage system notifications across all Pilotarr services
                 </p>
               </div>
             </div>
@@ -347,17 +311,11 @@ const Alerts = () => {
                 variant="outline"
                 iconName="Bell"
                 onClick={() => setSoundEnabled(!soundEnabled)}
-                className={
-                  soundEnabled ? "border-orange-500 text-orange-600" : ""
-                }
+                className={soundEnabled ? "border-orange-500 text-orange-600" : ""}
               >
                 {soundEnabled ? "Sound On" : "Sound Off"}
               </Button>
-              <Button
-                variant="outline"
-                iconName="Download"
-                onClick={handleExportLogs}
-              >
+              <Button variant="outline" iconName="Download" onClick={handleExportLogs}>
                 Export Logs
               </Button>
               <Button
@@ -450,17 +408,9 @@ const Alerts = () => {
           <div className="space-y-4">
             {filteredAlerts?.length === 0 ? (
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-12 text-center">
-                <Icon
-                  name="CheckCircle"
-                  size={48}
-                  className="mx-auto mb-4 text-green-500"
-                />
-                <h3 className="text-xl font-semibold text-gray-900 mb-2">
-                  No Active Alerts
-                </h3>
-                <p className="text-gray-600">
-                  All systems are operating normally
-                </p>
+                <Icon name="CheckCircle" size={48} className="mx-auto mb-4 text-green-500" />
+                <h3 className="text-xl font-semibold text-gray-900 mb-2">No Active Alerts</h3>
+                <p className="text-gray-600">All systems are operating normally</p>
               </div>
             ) : (
               filteredAlerts?.map((alert) => (
@@ -475,10 +425,7 @@ const Alerts = () => {
             )}
           </div>
         ) : (
-          <AlertHistory
-            alerts={dismissedAlerts}
-            onRestore={handleRestoreAlert}
-          />
+          <AlertHistory alerts={dismissedAlerts} onRestore={handleRestoreAlert} />
         )}
       </div>
     </div>

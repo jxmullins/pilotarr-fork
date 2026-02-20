@@ -78,8 +78,7 @@ const FilterToolbar = ({
       {/* Results Count */}
       <div className="flex items-center justify-between text-sm">
         <p className="text-muted-foreground">
-          Showing{" "}
-          <span className="font-semibold text-foreground">{totalResults}</span>{" "}
+          Showing <span className="font-semibold text-foreground">{totalResults}</span>{" "}
           {totalResults === 1 ? "request" : "requests"}
         </p>
 

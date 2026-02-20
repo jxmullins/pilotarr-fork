@@ -7,11 +7,7 @@ import pilotarrClient from "../lib/pilotarrClient";
  * @param {string} sortOrder - Sort order (asc, desc)
  * @returns {Promise<Array>} Array of recent items
  */
-export const getRecentItems = async (
-  limit = 10,
-  sortBy = "added_date",
-  sortOrder = "desc",
-) => {
+export const getRecentItems = async (limit = 10, sortBy = "added_date", sortOrder = "desc") => {
   try {
     const response = await pilotarrClient?.get(
       `/dashboard/recent-items?limit=${limit}&sort_by=${sortBy}&sort_order=${sortOrder}`,
@@ -30,11 +26,7 @@ export const getRecentItems = async (
  * @param {string} sortOrder - Sort order (asc, desc)
  * @returns {Promise<Array>} Array item
  */
-export const getLibraryItems = async (
-  limit = 20,
-  sortBy = "added_date",
-  sortOrder = "desc",
-) => {
+export const getLibraryItems = async (limit = 20, sortBy = "added_date", sortOrder = "desc") => {
   try {
     const response = await pilotarrClient?.get(
       `/library?limit=${limit}&sort_by=${sortBy}&sort_order=${sortOrder}`,
@@ -68,9 +60,7 @@ export const getLibraryItemById = async (id) => {
  */
 export const getSeasonsWithEpisodes = async (id) => {
   try {
-    const response = await pilotarrClient?.get(
-      `/library/${id}/seasons-with-episodes`,
-    );
+    const response = await pilotarrClient?.get(`/library/${id}/seasons-with-episodes`);
     return response?.data || [];
   } catch (error) {
     console.error("Error fetching seasons with episodes:", error?.message);

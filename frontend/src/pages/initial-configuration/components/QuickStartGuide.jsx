@@ -67,9 +67,7 @@ const QuickStartGuide = () => {
           <Icon name="BookOpen" size={20} color="var(--color-secondary)" />
         </div>
         <div>
-          <h3 className="text-base md:text-lg font-semibold text-foreground">
-            Quick Start Guide
-          </h3>
+          <h3 className="text-base md:text-lg font-semibold text-foreground">Quick Start Guide</h3>
           <p className="text-xs md:text-sm text-muted-foreground">
             Follow these steps to configure your services
           </p>
@@ -87,24 +85,14 @@ const QuickStartGuide = () => {
             >
               <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-primary/10 flex-shrink-0">
-                  <Icon
-                    name={step?.icon}
-                    size={16}
-                    color="var(--color-primary)"
-                  />
+                  <Icon name={step?.icon} size={16} color="var(--color-primary)" />
                 </div>
                 <div className="text-left">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-primary">
-                      Step {index + 1}
-                    </span>
-                    <h4 className="text-sm font-semibold text-foreground">
-                      {step?.title}
-                    </h4>
+                    <span className="text-xs font-bold text-primary">Step {index + 1}</span>
+                    <h4 className="text-sm font-semibold text-foreground">{step?.title}</h4>
                   </div>
-                  <p className="text-xs text-muted-foreground mt-0.5">
-                    {step?.description}
-                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">{step?.description}</p>
                 </div>
               </div>
               <Icon
@@ -122,11 +110,7 @@ const QuickStartGuide = () => {
                       key={detailIndex}
                       className="flex items-start gap-2 text-xs md:text-sm text-muted-foreground"
                     >
-                      <Icon
-                        name="Check"
-                        size={14}
-                        className="text-success flex-shrink-0 mt-0.5"
-                      />
+                      <Icon name="Check" size={14} className="text-success flex-shrink-0 mt-0.5" />
                       <span>{detail}</span>
                     </li>
                   ))}
@@ -146,8 +130,8 @@ const QuickStartGuide = () => {
           />
           <div className="flex-1 min-w-0">
             <p className="text-xs md:text-sm text-foreground mb-2">
-              <strong>Pro Tip:</strong> Test each service individually before
-              saving. This helps identify configuration issues early.
+              <strong>Pro Tip:</strong> Test each service individually before saving. This helps
+              identify configuration issues early.
             </p>
             <Button
               variant="link"

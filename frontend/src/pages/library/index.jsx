@@ -60,29 +60,18 @@ const aggregateTorrentInfo = (torrentInfoArray) => {
   const count = torrentInfoArray.length;
 
   const ratios = torrentInfoArray.map((t) => t?.ratio).filter((r) => r != null);
-  const seedingTimes = torrentInfoArray
-    .map((t) => t?.seeding_time)
-    .filter((s) => s != null);
+  const seedingTimes = torrentInfoArray.map((t) => t?.seeding_time).filter((s) => s != null);
   const sizes = torrentInfoArray.map((t) => t?.size).filter((s) => s != null);
-  const dates = torrentInfoArray
-    .map((t) => t?.download_date)
-    .filter((d) => d != null);
-  const statuses = torrentInfoArray
-    .map((t) => t?.status)
-    .filter((s) => s != null);
+  const dates = torrentInfoArray.map((t) => t?.download_date).filter((d) => d != null);
+  const statuses = torrentInfoArray.map((t) => t?.status).filter((s) => s != null);
 
-  const avgRatio =
-    ratios.length > 0 ? ratios.reduce((a, b) => a + b, 0) / ratios.length : 0;
+  const avgRatio = ratios.length > 0 ? ratios.reduce((a, b) => a + b, 0) / ratios.length : 0;
   const avgSeedingTime =
-    seedingTimes.length > 0
-      ? seedingTimes.reduce((a, b) => a + b, 0) / seedingTimes.length
-      : 0;
+    seedingTimes.length > 0 ? seedingTimes.reduce((a, b) => a + b, 0) / seedingTimes.length : 0;
   const totalSize = sizes.reduce((a, b) => a + b, 0);
-  const latestDate =
-    dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null;
+  const latestDate = dates.length > 0 ? dates.reduce((a, b) => (a > b ? a : b)) : null;
   const uniqueStatuses = [...new Set(statuses)];
-  const status =
-    uniqueStatuses.length === 1 ? uniqueStatuses[0] : "downloading";
+  const status = uniqueStatuses.length === 1 ? uniqueStatuses[0] : "downloading";
 
   return {
     ratio: avgRatio,
@@ -111,11 +100,7 @@ const Library = () => {
     const fetchMediaData = async () => {
       setLoading(true);
       try {
-        const data = await getLibraryItems(
-          limit,
-          filters?.sortBy,
-          filters?.order,
-        );
+        const data = await getLibraryItems(limit, filters?.sortBy, filters?.order);
         // Transform API response to match component structure
         const transformedData =
           data?.map((item) => {
@@ -167,9 +152,7 @@ const Library = () => {
 
     // Apply quality filter
     if (filters?.quality !== "all") {
-      result = result?.filter((item) =>
-        item?.quality?.includes(filters?.quality),
-      );
+      result = result?.filter((item) => item?.quality?.includes(filters?.quality));
     }
 
     return result;
@@ -190,9 +173,7 @@ const Library = () => {
               <Icon name="Library" size={20} color="var(--color-primary)" />
             </div>
             <div>
-              <h1 className="text-2xl md:text-3xl font-bold text-foreground">
-                Media Library
-              </h1>
+              <h1 className="text-2xl md:text-3xl font-bold text-foreground">Media Library</h1>
               <p className="text-sm text-muted-foreground">
                 Browse and manage your complete Jellyfin collection
               </p>

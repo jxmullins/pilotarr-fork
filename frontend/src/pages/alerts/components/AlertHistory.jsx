@@ -58,9 +58,7 @@ const AlertHistory = ({ alerts, onRestore }) => {
       <div className="p-6 border-b border-gray-200">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="text-xl font-semibold text-gray-900">
-              Alert History
-            </h2>
+            <h2 className="text-xl font-semibold text-gray-900">Alert History</h2>
             <p className="text-sm text-gray-600 mt-1">
               {alerts?.length} dismissed alert{alerts?.length !== 1 ? "s" : ""}
             </p>
@@ -84,37 +82,23 @@ const AlertHistory = ({ alerts, onRestore }) => {
       <div className="divide-y divide-gray-200">
         {filteredAlerts?.length === 0 ? (
           <div className="p-12 text-center">
-            <Icon
-              name="Archive"
-              size={48}
-              className="mx-auto mb-4 text-gray-400"
-            />
+            <Icon name="Archive" size={48} className="mx-auto mb-4 text-gray-400" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">
               {searchTerm ? "No Results Found" : "No Dismissed Alerts"}
             </h3>
             <p className="text-gray-600">
-              {searchTerm
-                ? "Try adjusting your search terms"
-                : "Dismissed alerts will appear here"}
+              {searchTerm ? "Try adjusting your search terms" : "Dismissed alerts will appear here"}
             </p>
           </div>
         ) : (
           filteredAlerts?.map((alert) => {
-            const config =
-              severityConfig?.[alert?.severity] || severityConfig?.info;
+            const config = severityConfig?.[alert?.severity] || severityConfig?.info;
 
             return (
-              <div
-                key={alert?.id}
-                className="p-6 hover:bg-gray-50 transition-colors"
-              >
+              <div key={alert?.id} className="p-6 hover:bg-gray-50 transition-colors">
                 <div className="flex items-start gap-4">
                   <div className="p-2 rounded-lg bg-gray-100">
-                    <Icon
-                      name={config?.icon}
-                      size={20}
-                      className={config?.iconColor}
-                    />
+                    <Icon name={config?.icon} size={20} className={config?.iconColor} />
                   </div>
 
                   <div className="flex-1 min-w-0">
@@ -139,17 +123,11 @@ const AlertHistory = ({ alerts, onRestore }) => {
                         <h3 className="text-base font-semibold text-gray-900 mb-1">
                           {alert?.message}
                         </h3>
-                        <p className="text-sm text-gray-600 mb-1">
-                          {alert?.details}
-                        </p>
+                        <p className="text-sm text-gray-600 mb-1">{alert?.details}</p>
                         <div className="flex items-center gap-4 text-xs text-gray-500">
-                          <span>
-                            Occurred: {formatTimestamp(alert?.timestamp)}
-                          </span>
+                          <span>Occurred: {formatTimestamp(alert?.timestamp)}</span>
                           {alert?.dismissedAt && (
-                            <span>
-                              Dismissed: {formatTimestamp(alert?.dismissedAt)}
-                            </span>
+                            <span>Dismissed: {formatTimestamp(alert?.dismissedAt)}</span>
                           )}
                         </div>
                       </div>

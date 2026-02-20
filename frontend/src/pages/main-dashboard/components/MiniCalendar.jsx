@@ -90,8 +90,7 @@ const MiniCalendar = ({ events }) => {
   ];
   const dayNames = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
 
-  const { daysInMonth, startingDayOfWeek, year, month } =
-    getDaysInMonth(selectedDate);
+  const { daysInMonth, startingDayOfWeek, year, month } = getDaysInMonth(selectedDate);
   const weekDays = getWeekDays(selectedDate);
   const selectedDateEvents = getEventsForDate(selectedDate);
 
@@ -99,9 +98,7 @@ const MiniCalendar = ({ events }) => {
     <div className="bg-card border border-border rounded-lg overflow-hidden">
       <div className="p-4 md:p-6 border-b border-border">
         <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg md:text-xl font-semibold text-foreground">
-            Upcoming Releases
-          </h2>
+          <h2 className="text-lg md:text-xl font-semibold text-foreground">Upcoming Releases</h2>
           <div className="flex items-center gap-2">
             <Button
               variant={viewMode === "week" ? "default" : "outline"}
@@ -128,25 +125,17 @@ const MiniCalendar = ({ events }) => {
             <Button
               variant="ghost"
               size="icon"
-              onClick={() =>
-                viewMode === "week" ? navigateWeek(-1) : navigateMonth(-1)
-              }
+              onClick={() => (viewMode === "week" ? navigateWeek(-1) : navigateMonth(-1))}
               iconName="ChevronLeft"
               iconSize={20}
             />
-            <Button
-              variant="ghost"
-              size="xs"
-              onClick={() => setSelectedDate(new Date())}
-            >
+            <Button variant="ghost" size="xs" onClick={() => setSelectedDate(new Date())}>
               Today
             </Button>
             <Button
               variant="ghost"
               size="icon"
-              onClick={() =>
-                viewMode === "week" ? navigateWeek(1) : navigateMonth(1)
-              }
+              onClick={() => (viewMode === "week" ? navigateWeek(1) : navigateMonth(1))}
               iconName="ChevronRight"
               iconSize={20}
             />
@@ -156,10 +145,7 @@ const MiniCalendar = ({ events }) => {
         {viewMode === "week" ? (
           <div className="grid grid-cols-7 gap-1 md:gap-2">
             {dayNames?.map((day) => (
-              <div
-                key={day}
-                className="text-center text-xs font-medium text-muted-foreground py-2"
-              >
+              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
                 {day}
               </div>
             ))}
@@ -185,10 +171,7 @@ const MiniCalendar = ({ events }) => {
                   {dayEvents?.length > 0 && (
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
                       {dayEvents?.slice(0, 3)?.map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-1 h-1 rounded-full bg-accent"
-                        ></div>
+                        <div key={i} className="w-1 h-1 rounded-full bg-accent"></div>
                       ))}
                     </div>
                   )}
@@ -199,10 +182,7 @@ const MiniCalendar = ({ events }) => {
         ) : (
           <div className="grid grid-cols-7 gap-1 md:gap-2">
             {dayNames?.map((day) => (
-              <div
-                key={day}
-                className="text-center text-xs font-medium text-muted-foreground py-2"
-              >
+              <div key={day} className="text-center text-xs font-medium text-muted-foreground py-2">
                 {day}
               </div>
             ))}
@@ -232,10 +212,7 @@ const MiniCalendar = ({ events }) => {
                   {dayEvents?.length > 0 && (
                     <div className="absolute bottom-1 left-1/2 transform -translate-x-1/2 flex gap-0.5">
                       {dayEvents?.slice(0, 3)?.map((_, i) => (
-                        <div
-                          key={i}
-                          className="w-1 h-1 rounded-full bg-accent"
-                        ></div>
+                        <div key={i} className="w-1 h-1 rounded-full bg-accent"></div>
                       ))}
                     </div>
                   )}
@@ -264,9 +241,7 @@ const MiniCalendar = ({ events }) => {
               size={48}
               className="text-muted-foreground mx-auto mb-3 opacity-50"
             />
-            <p className="text-sm text-muted-foreground">
-              No releases scheduled for this date
-            </p>
+            <p className="text-sm text-muted-foreground">No releases scheduled for this date</p>
           </div>
         )}
       </div>

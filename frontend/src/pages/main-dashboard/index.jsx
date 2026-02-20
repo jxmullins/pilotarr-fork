@@ -7,15 +7,9 @@ import RecentAdditionsCard from "./components/RecentAdditionsCard";
 import StatisticsCard from "./components/StatisticsCard";
 import MiniCalendar from "./components/MiniCalendar";
 import RequestCard from "./components/RequestCard";
-import {
-  getDashboardStatistics,
-  getRecentItems,
-} from "../../services/dashboardService";
+import { getDashboardStatistics, getRecentItems } from "../../services/dashboardService";
 import { getCalendarEvents } from "../../services/calendarService";
-import {
-  getJellyseerrRequests,
-  deleteJellyseerrRequest,
-} from "../../services/requestService";
+import { getJellyseerrRequests, deleteJellyseerrRequest } from "../../services/requestService";
 import { triggerSync } from "../../services/syncService";
 
 const MainDashboard = () => {
@@ -76,10 +70,7 @@ const MainDashboard = () => {
           baseData.details = [
             {
               label: "Active Users",
-              value:
-                details?.active_users?.toString() ||
-                totalCount?.toString() ||
-                "0",
+              value: details?.active_users?.toString() || totalCount?.toString() || "0",
             },
             {
               label: "Total Watch Hours",
@@ -314,11 +305,7 @@ const MainDashboard = () => {
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4 mb-6 md:mb-8">
             <div className="flex items-center gap-3 mb-2">
               <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center">
-                <Icon
-                  name="LayoutDashboard"
-                  size={20}
-                  color="var(--color-primary)"
-                />
+                <Icon name="LayoutDashboard" size={20} color="var(--color-primary)" />
               </div>
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold text-foreground">
@@ -350,14 +337,8 @@ const MainDashboard = () => {
           {isLoading ? (
             <div className="flex items-center justify-center py-12">
               <div className="text-center">
-                <Icon
-                  name="Loader"
-                  size={48}
-                  className="animate-spin text-primary mx-auto mb-4"
-                />
-                <p className="text-muted-foreground">
-                  Loading dashboard data...
-                </p>
+                <Icon name="Loader" size={48} className="animate-spin text-primary mx-auto mb-4" />
+                <p className="text-muted-foreground">Loading dashboard data...</p>
               </div>
             </div>
           ) : (
@@ -393,9 +374,7 @@ const MainDashboard = () => {
                         ))}
                       </div>
                     ) : (
-                      <p className="text-center text-muted-foreground py-8">
-                        No recent additions
-                      </p>
+                      <p className="text-center text-muted-foreground py-8">No recent additions</p>
                     )}
                   </div>
                 </div>
@@ -413,8 +392,7 @@ const MainDashboard = () => {
                     </h2>
                     <p className="text-sm text-muted-foreground">
                       {pendingRequests?.length} pending request
-                      {pendingRequests?.length !== 1 ? "s" : ""} awaiting
-                      approval
+                      {pendingRequests?.length !== 1 ? "s" : ""} awaiting approval
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -426,12 +404,7 @@ const MainDashboard = () => {
                     >
                       See All
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      iconName="Filter"
-                      iconSize={16}
-                    >
+                    <Button variant="outline" size="sm" iconName="Filter" iconSize={16}>
                       Filter
                     </Button>
                   </div>
@@ -448,9 +421,7 @@ const MainDashboard = () => {
                     ))}
                   </div>
                 ) : (
-                  <p className="text-center text-muted-foreground py-8">
-                    No pending requests
-                  </p>
+                  <p className="text-center text-muted-foreground py-8">No pending requests</p>
                 )}
               </div>
             </>

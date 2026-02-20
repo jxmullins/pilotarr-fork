@@ -3,13 +3,7 @@ import Select from "../../../components/ui/Select";
 import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
 
-const FilterToolbar = ({
-  searchQuery,
-  onSearchChange,
-  filters,
-  onFilterChange,
-  totalResults,
-}) => {
+const FilterToolbar = ({ searchQuery, onSearchChange, filters, onFilterChange, totalResults }) => {
   const serviceOptions = [
     { label: "All Services", value: "all" },
     { label: "Sonarr (TV Shows)", value: "sonarr" },
@@ -80,8 +74,7 @@ const FilterToolbar = ({
       {/* Results Count */}
       <div className="flex items-center justify-between text-sm">
         <p className="text-muted-foreground">
-          Showing{" "}
-          <span className="font-semibold text-foreground">{totalResults}</span>{" "}
+          Showing <span className="font-semibold text-foreground">{totalResults}</span>{" "}
           {totalResults === 1 ? "item" : "items"}
         </p>
 

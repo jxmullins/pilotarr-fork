@@ -50,9 +50,7 @@ const RecentAdditionsCard = ({ item }) => {
         />
         <div className="absolute top-2 right-2 bg-background/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
           <Icon name={getTypeIcon()} size={14} className={getTypeColor()} />
-          <span className="text-xs font-medium text-foreground capitalize">
-            {item?.type}
-          </span>
+          <span className="text-xs font-medium text-foreground capitalize">{item?.type}</span>
         </div>
         {formatQuality(item?.quality) && (
           <div className="absolute top-2 left-2 bg-accent/90 backdrop-blur-sm px-2 py-1 rounded-md">
@@ -70,22 +68,14 @@ const RecentAdditionsCard = ({ item }) => {
           <span>{item?.year}</span>
           {item?.rating && (
             <div className="flex items-center gap-1">
-              <Icon
-                name="Star"
-                size={12}
-                className="text-warning fill-warning"
-              />
+              <Icon name="Star" size={12} className="text-warning fill-warning" />
               <span>{item?.rating}</span>
             </div>
           )}
         </div>
-        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">
-          {item?.description}
-        </p>
+        <p className="text-xs text-muted-foreground line-clamp-2 mb-3">{item?.description}</p>
         <div className="flex items-center justify-between text-xs">
-          <span className="text-muted-foreground">
-            Added {formatTimeAgo(item?.addedDate)}
-          </span>
+          <span className="text-muted-foreground">Added {formatTimeAgo(item?.addedDate)}</span>
           <div className="flex items-center gap-1 text-success">
             <Icon name="Download" size={12} />
             <span className="font-medium">{item?.size}</span>

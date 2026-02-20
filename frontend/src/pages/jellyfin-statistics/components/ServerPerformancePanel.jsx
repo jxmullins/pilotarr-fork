@@ -16,9 +16,7 @@ const ServerPerformancePanel = ({ performanceData, isLoading }) => {
         </span>
       </div>
       <div className="flex items-baseline gap-2">
-        <span className="text-xl md:text-2xl font-bold text-foreground">
-          {value}
-        </span>
+        <span className="text-xl md:text-2xl font-bold text-foreground">{value}</span>
         <span className="text-sm text-muted-foreground">{unit}</span>
       </div>
       {percentage !== undefined && (
@@ -45,9 +43,7 @@ const ServerPerformancePanel = ({ performanceData, isLoading }) => {
             <h3 className="text-base md:text-lg font-semibold text-foreground">
               Server Performance
             </h3>
-            <p className="text-xs md:text-sm text-muted-foreground">
-              Real-time system metrics
-            </p>
+            <p className="text-xs md:text-sm text-muted-foreground">Real-time system metrics</p>
           </div>
         </div>
         <div className="flex items-center justify-center py-12">
@@ -64,12 +60,8 @@ const ServerPerformancePanel = ({ performanceData, isLoading }) => {
           <Icon name="Server" size={20} color="var(--color-accent)" />
         </div>
         <div>
-          <h3 className="text-base md:text-lg font-semibold text-foreground">
-            Server Performance
-          </h3>
-          <p className="text-xs md:text-sm text-muted-foreground">
-            Real-time system metrics
-          </p>
+          <h3 className="text-base md:text-lg font-semibold text-foreground">Server Performance</h3>
+          <p className="text-xs md:text-sm text-muted-foreground">Real-time system metrics</p>
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
@@ -109,9 +101,7 @@ const ServerPerformancePanel = ({ performanceData, isLoading }) => {
           value={performanceData?.bandwidth}
           unit="Mbps"
           status={performanceData?.bandwidthStatus || "success"}
-          percentage={
-            (performanceData?.bandwidth / performanceData?.maxBandwidth) * 100
-          }
+          percentage={(performanceData?.bandwidth / performanceData?.maxBandwidth) * 100}
         />
         <MetricCard
           icon="Database"
@@ -137,9 +127,7 @@ const ServerPerformancePanel = ({ performanceData, isLoading }) => {
       </div>
       <div className="bg-muted/30 rounded-lg p-4">
         <div className="flex items-center justify-between mb-3">
-          <h4 className="text-sm font-semibold text-foreground">
-            Active Transcoding Sessions
-          </h4>
+          <h4 className="text-sm font-semibold text-foreground">Active Transcoding Sessions</h4>
           <span className="text-xs font-semibold px-2 py-1 rounded bg-primary/10 text-primary">
             {performanceData?.activeTranscodes} Active
           </span>
@@ -152,22 +140,15 @@ const ServerPerformancePanel = ({ performanceData, isLoading }) => {
               className="flex items-center justify-between p-2 bg-background rounded-lg"
             >
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">
-                  {session?.title}
-                </p>
+                <p className="text-sm font-medium text-foreground truncate">{session?.title}</p>
                 <p className="text-xs text-muted-foreground">
-                  {session?.user} • {session?.quality} →{" "}
-                  {session?.targetQuality}
+                  {session?.user} • {session?.quality} → {session?.targetQuality}
                 </p>
               </div>
               <div className="flex items-center gap-2 ml-3">
                 <div className="text-right">
-                  <p className="text-xs font-semibold text-foreground">
-                    {session?.progress}%
-                  </p>
-                  <p className="text-xs text-muted-foreground">
-                    {session?.speed}x
-                  </p>
+                  <p className="text-xs font-semibold text-foreground">{session?.progress}%</p>
+                  <p className="text-xs text-muted-foreground">{session?.speed}x</p>
                 </div>
                 <div className="w-12 h-12 rounded-lg bg-muted flex items-center justify-center">
                   <Icon name="Film" size={20} color="var(--color-primary)" />
