@@ -76,6 +76,14 @@ def create_analytics_tables():
             print(f"❌ Erreur lors de la migration de added_date : {e}")
             return False
 
+    # Add jellyfin_id column to library_items
+    if "library_items" in get_existing_tables():
+        try:
+            migrate_add_jellyfin_id_to_library_items()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de jellyfin_id sur library_items : {e}")
+            return False
+
     # Add media_streams column to library_items (movies)
     if "library_items" in get_existing_tables():
         try:
@@ -181,6 +189,32 @@ def migrate_added_date_column():
         db.execute(text("ALTER TABLE library_items MODIFY COLUMN added_date DATETIME NULL"))
         db.commit()
         print("✅ added_date column migrated to DATETIME NULL (existing rows nulled — re-sync to repopulate)")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_add_jellyfin_id_to_library_items():
+    """Add jellyfin_id VARCHAR(255) column to library_items if it doesn't exist."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("library_items")}
+    if "jellyfin_id" in columns:
+        print("✅ jellyfin_id already exists on library_items, skipping")
+        return
+
+    print("🔄 Adding jellyfin_id column to library_items...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE library_items ADD COLUMN jellyfin_id VARCHAR(255) NULL"))
+        db.execute(text("CREATE INDEX idx_library_items_jellyfin_id ON library_items (jellyfin_id)"))
+        db.commit()
+        print("✅ jellyfin_id column added to library_items")
     except Exception as e:
         db.rollback()
         raise e

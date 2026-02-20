@@ -73,13 +73,13 @@ class JellyfinStreamsService:
         jellyfin_movies = await connector.get_movies_with_streams()
         print(f"   → {len(jellyfin_movies)} films trouvés sur Jellyfin")
 
-        # Build a lookup: (normalized_title, year) → parsed streams
-        jf_index: dict[tuple[str, int | None], dict] = {}
+        # Build a lookup: (normalized_title, year) → {streams, jellyfin_id}
+        jf_index: dict[tuple[str, int | None], tuple[dict, str | None]] = {}
         for jf in jellyfin_movies:
             name = (jf.get("Name") or "").strip().lower()
             year = jf.get("ProductionYear")
             streams = _parse_streams(jf.get("MediaStreams") or [])
-            jf_index[(name, year)] = streams
+            jf_index[(name, year)] = (streams, jf.get("Id"))
 
         # Load all movie LibraryItems
         movies = self.db.query(LibraryItem).filter(LibraryItem.media_type == MediaType.MOVIE).all()
@@ -88,16 +88,19 @@ class JellyfinStreamsService:
         skipped = 0
         for item in movies:
             title_norm = item.title.strip().lower()
-            streams = jf_index.get((title_norm, item.year))
-            if streams is None:
+            entry = jf_index.get((title_norm, item.year))
+            if entry is None:
                 # Try without year as fallback
-                streams = next(
+                entry = next(
                     (v for (t, _y), v in jf_index.items() if t == title_norm),
                     None,
                 )
 
-            if streams is not None:
+            if entry is not None:
+                streams, jf_id = entry
                 item.media_streams = streams
+                if jf_id and not item.jellyfin_id:
+                    item.jellyfin_id = jf_id
                 updated += 1
             else:
                 skipped += 1
@@ -126,6 +129,10 @@ class JellyfinStreamsService:
             if not jf_series_id:
                 print(f"   ⚠️  Série non trouvée sur Jellyfin : {item.title}")
                 continue
+
+            # Store Jellyfin series ID for future webhook matching
+            if jf_series_id and not item.jellyfin_id:
+                item.jellyfin_id = jf_series_id
 
             # Fetch all episodes with streams for this series
             jf_episodes = await connector.get_episodes_with_streams(jf_series_id)

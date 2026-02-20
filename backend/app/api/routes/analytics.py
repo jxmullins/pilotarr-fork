@@ -195,21 +195,59 @@ async def receive_playback_webhook(request: Request, db: Session = Depends(get_d
             # Recherche du LibraryItem correspondant
             library_item = None
             if media_type == "movie":
+                # Primary: match by stored Jellyfin ID
                 library_item = (
                     db.query(LibraryItem)
                     .filter(
-                        LibraryItem.title == item.get("Name"),
+                        LibraryItem.jellyfin_id == media_id,
                         LibraryItem.media_type == MediaType.MOVIE,
-                        LibraryItem.year == item.get("ProductionYear"),
                     )
                     .first()
                 )
-            elif media_type == "tv":
-                series_name = item.get("SeriesName")
-                if series_name:
+                if not library_item:
+                    # Fallback: case-insensitive title + year
+                    movie_name = item.get("Name", "")
+                    movie_year = item.get("ProductionYear")
                     library_item = (
                         db.query(LibraryItem)
-                        .filter(LibraryItem.title == series_name, LibraryItem.media_type == MediaType.TV)
+                        .filter(
+                            func.lower(LibraryItem.title) == movie_name.lower(),
+                            LibraryItem.media_type == MediaType.MOVIE,
+                            LibraryItem.year == movie_year,
+                        )
+                        .first()
+                    )
+                if not library_item:
+                    # Year-relaxed fallback: case-insensitive title only
+                    library_item = (
+                        db.query(LibraryItem)
+                        .filter(
+                            func.lower(LibraryItem.title) == movie_name.lower(),
+                            LibraryItem.media_type == MediaType.MOVIE,
+                        )
+                        .first()
+                    )
+            elif media_type == "tv":
+                series_id = item.get("SeriesId")
+                series_name = item.get("SeriesName")
+                # Primary: match by stored Jellyfin series ID
+                if series_id:
+                    library_item = (
+                        db.query(LibraryItem)
+                        .filter(
+                            LibraryItem.jellyfin_id == series_id,
+                            LibraryItem.media_type == MediaType.TV,
+                        )
+                        .first()
+                    )
+                if not library_item and series_name:
+                    # Fallback: case-insensitive series name
+                    library_item = (
+                        db.query(LibraryItem)
+                        .filter(
+                            func.lower(LibraryItem.title) == series_name.lower(),
+                            LibraryItem.media_type == MediaType.TV,
+                        )
                         .first()
                     )
 

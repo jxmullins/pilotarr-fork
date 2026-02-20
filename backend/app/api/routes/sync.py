@@ -80,6 +80,78 @@ async def trigger_jellyfin_streams_sync(background_tasks: BackgroundTasks):
     return {"message": "Synchronisation MediaStreams Jellyfin lancée en arrière-plan", "status": "started"}
 
 
+@router.post("/trigger/relink-sessions")
+async def trigger_relink_sessions(background_tasks: BackgroundTasks):
+    """Re-link PlaybackSessions with NULL library_item_id using improved matching."""
+
+    async def run_relink():
+        from sqlalchemy import func
+
+        from app.db import SessionLocal
+        from app.models.enums import MediaType
+        from app.models.models import LibraryItem, PlaybackSession
+
+        db = SessionLocal()
+        try:
+            print("🔗 Starting session re-linking...")
+            unlinked = db.query(PlaybackSession).filter(PlaybackSession.library_item_id.is_(None)).all()
+            print(f"   → {len(unlinked)} unlinked sessions found")
+
+            linked = 0
+            for session in unlinked:
+                library_item = None
+                media_type_str = session.media_type.value if session.media_type else None
+
+                if media_type_str == "movie":
+                    # Case-insensitive title + year
+                    library_item = (
+                        db.query(LibraryItem)
+                        .filter(
+                            func.lower(LibraryItem.title) == session.media_title.lower(),
+                            LibraryItem.media_type == MediaType.MOVIE,
+                            LibraryItem.year == session.media_year,
+                        )
+                        .first()
+                    )
+                    if not library_item:
+                        # Year-relaxed fallback
+                        library_item = (
+                            db.query(LibraryItem)
+                            .filter(
+                                func.lower(LibraryItem.title) == session.media_title.lower(),
+                                LibraryItem.media_type == MediaType.MOVIE,
+                            )
+                            .first()
+                        )
+                elif media_type_str == "tv":
+                    library_item = (
+                        db.query(LibraryItem)
+                        .filter(
+                            func.lower(LibraryItem.title) == session.media_title.lower(),
+                            LibraryItem.media_type == MediaType.TV,
+                        )
+                        .first()
+                    )
+
+                if library_item:
+                    session.library_item_id = library_item.id
+                    linked += 1
+
+            db.commit()
+            print(f"✅ Re-linking complete: {linked}/{len(unlinked)} sessions linked")
+        except Exception as e:
+            db.rollback()
+            print(f"❌ Error during re-linking: {e}")
+            import traceback
+
+            traceback.print_exc()
+        finally:
+            db.close()
+
+    background_tasks.add_task(run_relink)
+    return {"message": "Session re-linking started in background", "status": "started"}
+
+
 @router.post("/trigger/{service_name}")
 async def trigger_service_sync(service_name: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
     """Déclencher la synchronisation d'un service spécifique"""

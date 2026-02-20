@@ -103,6 +103,7 @@ class LibraryItem(Base):
     description = Column(Text)
     added_date = Column(DateTime(timezone=True), nullable=True)
     size = Column(Text, nullable=False)
+    jellyfin_id = Column(String(255), nullable=True, index=True)  # Jellyfin item/series UUID
     torrent_hash = Column(String(255), nullable=True, index=True)
     torrent_info = Column(JSON, nullable=True)
     media_streams = Column(JSON, nullable=True)  # Subtitle + audio tracks from Jellyfin (movies)
