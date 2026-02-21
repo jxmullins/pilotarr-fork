@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from typing import Any
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from app.models.enums import (
     CalendarStatus,
@@ -16,6 +16,46 @@ from app.models.enums import (
     SyncStatus,
     VideoQuality,
 )
+
+# ---------------------------------------------------------------------------
+# Auth schemas
+# ---------------------------------------------------------------------------
+
+
+class LoginRequest(BaseModel):
+    username: str
+    password: str
+
+
+class TokenResponse(BaseModel):
+    access_token: str
+    token_type: str
+    username: str
+
+
+class UserResponse(BaseModel):
+    username: str
+    is_active: bool
+
+    class Config:
+        from_attributes = True
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+    confirm_password: str
+
+    @model_validator(mode="after")
+    def passwords_match(self) -> "ChangePasswordRequest":
+        if self.new_password != self.confirm_password:
+            raise ValueError("new_password and confirm_password do not match")
+        return self
+
+
+# ---------------------------------------------------------------------------
+# Service configuration schemas
+# ---------------------------------------------------------------------------
 
 
 class ServiceConfigurationBase(BaseModel):

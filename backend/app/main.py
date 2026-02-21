@@ -3,10 +3,10 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import analytics, dashboard, jellyseerr, library, monitoring, services, sync, torrents
+from app.api.routes import analytics, auth, dashboard, jellyseerr, library, monitoring, services, sync, torrents
 from app.core.config import settings
 from app.core.security import verify_api_key
-from app.db import check_db_connection, init_db
+from app.db import SessionLocal, check_db_connection, init_db
 from app.db_migrations import create_analytics_tables
 from app.schedulers.analytics_scheduler import analytics_scheduler
 from app.schedulers.scheduler import app_scheduler
@@ -24,6 +24,15 @@ async def lifespan(app: FastAPI):
         print("✅ Tables initialisées")
         create_analytics_tables()
         print("✅ Migrations appliquées")
+
+        # Seed default user if it doesn't exist
+        from app.services.auth_service import init_default_user
+
+        db = SessionLocal()
+        try:
+            init_default_user(db)
+        finally:
+            db.close()
     else:
         print("❌ Échec de connexion à la base de données")
 
@@ -51,7 +60,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Include routers
+# Auth routes — public (no API key), JWT handled per-endpoint
+app.include_router(auth.router)
+
+# Protected routes — require X-API-Key header
 app.include_router(services.router, prefix="/api", dependencies=[Depends(verify_api_key)])
 app.include_router(dashboard.router, prefix="/api", dependencies=[Depends(verify_api_key)])
 app.include_router(jellyseerr.router, prefix="/api", dependencies=[Depends(verify_api_key)])

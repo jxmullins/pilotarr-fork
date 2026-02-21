@@ -20,6 +20,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     API_KEY: str
     WEBHOOK_SECRET: str = ""
+    ACCESS_TOKEN_EXPIRE_HOURS: int = 720  # 30 days
 
     # App Info
     APP_NAME: str = "Pilotarr"

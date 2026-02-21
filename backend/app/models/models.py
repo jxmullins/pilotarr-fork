@@ -40,6 +40,18 @@ def generate_uuid():
     return str(uuid.uuid4())
 
 
+# Table 0: Users (authentication)
+class User(Base):
+    __tablename__ = "users"
+
+    id = Column(String(36), primary_key=True, default=generate_uuid)
+    username = Column(String(100), unique=True, nullable=False, index=True)
+    hashed_password = Column(String(255), nullable=False)
+    is_active = Column(Boolean, default=True, nullable=False)
+    created_at = Column(DateTime(timezone=True), server_default=func.now())
+    updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
+
+
 # Table 1: Service Configurations
 class ServiceConfiguration(Base):
     __tablename__ = "service_configurations"
