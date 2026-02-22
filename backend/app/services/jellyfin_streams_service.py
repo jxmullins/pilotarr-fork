@@ -5,6 +5,7 @@ Service de synchronisation des MediaStreams (sous-titres, audio) depuis Jellyfin
 - Movies   : info au niveau item (LibraryItem.media_streams)
 """
 
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -73,13 +74,20 @@ class JellyfinStreamsService:
         jellyfin_movies = await connector.get_movies_with_streams()
         print(f"   → {len(jellyfin_movies)} films trouvés sur Jellyfin")
 
-        # Build a lookup: (normalized_title, year) → {streams, jellyfin_id}
+        # Build lookup indexes
         jf_index: dict[tuple[str, int | None], tuple[dict, str | None]] = {}
+        path_index: dict[str, tuple[dict, str | None]] = {}
         for jf in jellyfin_movies:
             name = (jf.get("Name") or "").strip().lower()
             year = jf.get("ProductionYear")
             streams = _parse_streams(jf.get("MediaStreams") or [])
-            jf_index[(name, year)] = (streams, jf.get("Id"))
+            jf_id = jf.get("Id")
+            jf_index[(name, year)] = (streams, jf_id)
+            # Index by parent folder of the Jellyfin file path
+            raw_path = jf.get("Path") or ""
+            if raw_path:
+                folder = str(Path(raw_path).parent)
+                path_index[folder] = (streams, jf_id)
 
         # Load all movie LibraryItems
         movies = self.db.query(LibraryItem).filter(LibraryItem.media_type == MediaType.MOVIE).all()
@@ -88,13 +96,20 @@ class JellyfinStreamsService:
         skipped = 0
         for item in movies:
             title_norm = item.title.strip().lower()
-            entry = jf_index.get((title_norm, item.year))
-            if entry is None:
-                # Try without year as fallback
-                entry = next(
-                    (v for (t, _y), v in jf_index.items() if t == title_norm),
-                    None,
-                )
+
+            # 1. Path-based match (primary)
+            entry = path_index.get(item.media_path) if item.media_path else None
+            if entry is not None:
+                print(f"   🗂️  Path match: {item.title}")
+            else:
+                # 2. Title+year match (fallback)
+                entry = jf_index.get((title_norm, item.year))
+                if entry is None:
+                    # 3. Title-only match (last resort)
+                    entry = next(
+                        (v for (t, _y), v in jf_index.items() if t == title_norm),
+                        None,
+                    )
 
             if entry is not None:
                 streams, jf_id = entry
@@ -119,13 +134,26 @@ class JellyfinStreamsService:
         tv_items = self.db.query(LibraryItem).filter(LibraryItem.media_type == MediaType.TV).all()
         print(f"📺 Sync streams pour {len(tv_items)} séries TV...")
 
+        # Fetch all Jellyfin series with paths once, build path index
+        jf_series_list = await connector.get_series_with_path()
+        series_path_index: dict[str, str] = {
+            jf.get("Path"): jf.get("Id") for jf in jf_series_list if jf.get("Path") and jf.get("Id")
+        }
+        print(f"   → {len(series_path_index)} séries Jellyfin indexées par path")
+
         total_episodes = 0
         total_updated = 0
         total_skipped = 0
 
         for item in tv_items:
-            # Find Jellyfin series ID by title
-            jf_series_id = await connector.get_series_id_by_title(item.title)
+            # 1. Path-based match (primary)
+            jf_series_id = series_path_index.get(item.media_path) if item.media_path else None
+            if jf_series_id:
+                print(f"   🗂️  Path match: {item.title}")
+            else:
+                # 2. Title search fallback
+                jf_series_id = await connector.get_series_id_by_title(item.title)
+
             if not jf_series_id:
                 print(f"   ⚠️  Série non trouvée sur Jellyfin : {item.title}")
                 continue

@@ -84,6 +84,14 @@ def create_analytics_tables():
             print(f"❌ Erreur lors de l'ajout de jellyfin_id sur library_items : {e}")
             return False
 
+    # Add media_path column to library_items
+    if "library_items" in get_existing_tables():
+        try:
+            migrate_add_media_path_to_library_items()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de media_path sur library_items : {e}")
+            return False
+
     # Add media_streams column to library_items (movies)
     if "library_items" in get_existing_tables():
         try:
@@ -215,6 +223,31 @@ def migrate_add_jellyfin_id_to_library_items():
         db.execute(text("CREATE INDEX idx_library_items_jellyfin_id ON library_items (jellyfin_id)"))
         db.commit()
         print("✅ jellyfin_id column added to library_items")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_add_media_path_to_library_items():
+    """Add media_path TEXT column to library_items if it doesn't exist."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("library_items")}
+    if "media_path" in columns:
+        print("✅ media_path already exists on library_items, skipping")
+        return
+
+    print("🔄 Adding media_path column to library_items...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE library_items ADD COLUMN media_path TEXT NULL"))
+        db.commit()
+        print("✅ media_path column added to library_items")
     except Exception as e:
         db.rollback()
         raise e

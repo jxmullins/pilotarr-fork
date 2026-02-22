@@ -293,11 +293,31 @@ class JellyfinConnector(BaseConnector):
             params = {
                 "Recursive": True,
                 "IncludeItemTypes": "Movie",
-                "Fields": "MediaStreams,ProductionYear",
+                "Fields": "MediaStreams,ProductionYear,Path",
                 "EnableTotalRecordCount": False,
             }
             response = await self._get("/Items", params=params)
             return response.get("Items", [])
         except Exception as e:
             print(f"❌ Erreur récupération films avec streams: {e}")
+            return []
+
+    async def get_series_with_path(self) -> list[dict[str, Any]]:
+        """
+        Récupérer toutes les séries avec leur Path filesystem.
+
+        Returns:
+            Liste des séries avec leur Path
+        """
+        try:
+            params = {
+                "Recursive": True,
+                "IncludeItemTypes": "Series",
+                "Fields": "Path",
+                "EnableTotalRecordCount": False,
+            }
+            response = await self._get("/Items", params=params)
+            return response.get("Items", [])
+        except Exception as e:
+            print(f"❌ Erreur récupération séries avec path: {e}")
             return []

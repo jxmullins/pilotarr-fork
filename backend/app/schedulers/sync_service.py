@@ -1,5 +1,6 @@
 import time
 from datetime import UTC, datetime, timedelta
+from pathlib import Path
 from typing import Any
 
 from sqlalchemy.orm import Session
@@ -235,6 +236,10 @@ class SyncService:
                 profile_name = quality_profiles.get(profile_id, "") if profile_id else ""
                 resolved_quality = file_quality or profile_name or "Unknown"
 
+                # Extract media_path: parent folder of the movie file
+                movie_file_path = movie.get("movieFile", {}).get("path")
+                media_path = str(Path(movie_file_path).parent) if movie_file_path else None
+
                 if existing:
                     # Mettre à jour le hash si on en a un et qu'il n'existe pas encore
                     if torrent_hash and not existing.torrent_hash:
@@ -247,6 +252,9 @@ class SyncService:
                         self._upsert_torrent(existing.id, torrent_hash)
                     # Toujours mettre à jour nb_media
                     existing.nb_media = nb_media
+                    # Update media_path
+                    if media_path:
+                        existing.media_path = media_path
                     # Mettre à jour la taille si elle était à 0
                     size_bytes = movie.get("sizeOnDisk", 0)
                     if size_bytes > 0:
@@ -300,6 +308,7 @@ class SyncService:
                         size=f"{size_gb} GB",
                         torrent_hash=torrent_hash,
                         nb_media=nb_media,
+                        media_path=media_path,
                     )
 
                     self.db.add(item)
@@ -507,6 +516,9 @@ class SyncService:
                 profile_id = series.get("qualityProfileId")
                 resolved_quality = quality_profiles.get(profile_id, "Unknown") if profile_id else "Unknown"
 
+                # Extract media_path: Sonarr provides series.path directly
+                media_path = series.get("path")
+
                 if existing:
                     # Mettre à jour le hash si on en a un et qu'il n'existe pas encore
                     if first_hash and not existing.torrent_hash:
@@ -525,6 +537,9 @@ class SyncService:
                         )
                     # Toujours mettre à jour nb_media
                     existing.nb_media = nb_media
+                    # Update media_path
+                    if media_path:
+                        existing.media_path = media_path
                     # Mettre à jour la taille si elle était à 0
                     size_bytes = series.get("statistics", {}).get("sizeOnDisk", 0)
                     if size_bytes > 0:
@@ -576,6 +591,7 @@ class SyncService:
                         size=f"{size_gb} GB",
                         torrent_hash=first_hash,
                         nb_media=nb_media,
+                        media_path=media_path,
                     )
 
                     self.db.add(item)
