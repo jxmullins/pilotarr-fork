@@ -30,6 +30,10 @@ const MediaDetail = () => {
 
         const downloadedEpisodes = seasonsData.reduce((s, se) => s + se.episode_file_count, 0);
         const totalEpisodes = seasonsData.reduce((s, se) => s + se.total_episode_count, 0);
+        const watchedEpisodes = seasonsData.reduce(
+          (s, se) => s + se.episodes.filter((ep) => ep.watched).length,
+          0,
+        );
 
         const media = {
           id: data.id,
@@ -62,7 +66,7 @@ const MediaDetail = () => {
             }, {}),
           },
 
-          viewCount: data.view_count || 0,
+          viewCount: data.media_type === "tv" ? watchedEpisodes : data.view_count || 0,
           monitored: seasonsData.some((s) => s.is_monitored),
           downloadedEpisodes,
           totalEpisodes,
