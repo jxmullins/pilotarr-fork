@@ -67,6 +67,8 @@ DB_NAME=pilotarr
 
 # Security
 SECRET_KEY=your_secret_key
+
+#API KEY FOR Jellyfin (needed for playback session)
 API_KEY=your_api_key
 
 # Jellyfin
