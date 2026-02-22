@@ -67,3 +67,26 @@ export const getSeasonsWithEpisodes = async (id) => {
     return [];
   }
 };
+
+export const setEpisodeWatched = async (mediaId, seasonNumber, episodeNumber, watched) => {
+  try {
+    await pilotarrClient?.patch(
+      `/library/${mediaId}/seasons/${seasonNumber}/episodes/${episodeNumber}/watched`,
+      { watched },
+    );
+    return true;
+  } catch (error) {
+    console.error("Error updating episode watched:", error?.message);
+    return false;
+  }
+};
+
+export const setSeasonWatched = async (mediaId, seasonNumber, watched) => {
+  try {
+    await pilotarrClient?.patch(`/library/${mediaId}/seasons/${seasonNumber}/watched`, { watched });
+    return true;
+  } catch (error) {
+    console.error("Error updating season watched:", error?.message);
+    return false;
+  }
+};

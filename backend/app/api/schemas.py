@@ -159,6 +159,10 @@ class MonitoringItemResponse(BaseModel):
     download_history: list = []
 
 
+class WatchedUpdateRequest(BaseModel):
+    watched: bool
+
+
 # Season & Episode Schemas
 class SeasonResponse(BaseModel):
     id: str

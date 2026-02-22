@@ -142,7 +142,9 @@ const MediaDetail = () => {
         </div>
 
         {/* Episodes List (TV Shows Only) */}
-        {media?.mediaType === "tv" && media?.seasons && <EpisodesList seasons={media.seasons} />}
+        {media?.mediaType === "tv" && media?.seasons && (
+          <EpisodesList seasons={media.seasons} mediaId={id} />
+        )}
       </div>
     </div>
   );

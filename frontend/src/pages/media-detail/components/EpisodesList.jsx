@@ -2,9 +2,15 @@ import React, { useState } from "react";
 import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
 import StatusIndicator from "../../monitoring/components/StatusIndicator";
+import { setEpisodeWatched, setSeasonWatched } from "../../../services/libraryService";
 
-const EpisodesList = ({ seasons }) => {
+const EpisodesList = ({ seasons, mediaId }) => {
   const [expandedSeasons, setExpandedSeasons] = useState([0]); // First season expanded by default
+  const [watchedMap, setWatchedMap] = useState(() =>
+    Object.fromEntries(
+      seasons.flatMap((s, si) => s.episodes.map((ep, ei) => [`${si}-${ei}`, ep.watched ?? false])),
+    ),
+  );
 
   const toggleSeason = (seasonIndex) => {
     setExpandedSeasons((prev) =>
@@ -25,9 +31,21 @@ const EpisodesList = ({ seasons }) => {
     }
   };
 
-  const handleEpisodeMonitorToggle = (seasonIndex, episodeIndex) => {
-    // TODO: API call to toggle episode monitoring
-    console.log(`Toggle monitoring for S${seasonIndex + 1}E${episodeIndex + 1}`);
+  const handleEpisodeWatchedToggle = async (sIdx, eIdx, season, episode) => {
+    const key = `${sIdx}-${eIdx}`;
+    const newWatched = !watchedMap[key];
+    setWatchedMap((prev) => ({ ...prev, [key]: newWatched }));
+    await setEpisodeWatched(mediaId, season.seasonNumber, episode.episodeNumber, newWatched);
+  };
+
+  const handleSeasonWatchedToggle = async (sIdx, season) => {
+    const allWatched = season.episodes.every((_, ei) => watchedMap[`${sIdx}-${ei}`]);
+    const newWatched = !allWatched;
+    const updates = Object.fromEntries(
+      season.episodes.map((_, ei) => [`${sIdx}-${ei}`, newWatched]),
+    );
+    setWatchedMap((prev) => ({ ...prev, ...updates }));
+    await setSeasonWatched(mediaId, season.seasonNumber, newWatched);
   };
 
   const handleManualSearch = (seasonIndex, episodeIndex) => {
@@ -70,6 +88,20 @@ const EpisodesList = ({ seasons }) => {
                   {season?.episodes?.filter((ep) => ep?.downloaded)?.length} /{" "}
                   {season?.episodes?.length} downloaded
                 </div>
+                <Button
+                  size="xs"
+                  variant="ghost"
+                  iconName={
+                    season.episodes.every((_, ei) => watchedMap[`${seasonIndex}-${ei}`])
+                      ? "CheckCircle2"
+                      : "Circle"
+                  }
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleSeasonWatchedToggle(seasonIndex, season);
+                  }}
+                  title="Mark season as watched/unwatched"
+                />
               </div>
             </button>
 
@@ -167,7 +199,7 @@ const EpisodesList = ({ seasons }) => {
 
                           {/* Watched Status */}
                           <td className="px-6 py-4 text-center">
-                            {episode?.watched ? (
+                            {watchedMap[`${seasonIndex}-${episodeIndex}`] ? (
                               <Icon
                                 name="CheckCircle2"
                                 size={16}
@@ -188,11 +220,24 @@ const EpisodesList = ({ seasons }) => {
                               <Button
                                 size="xs"
                                 variant="ghost"
-                                iconName={episode?.monitored ? "Eye" : "EyeOff"}
-                                onClick={() =>
-                                  handleEpisodeMonitorToggle(seasonIndex, episodeIndex)
+                                iconName={
+                                  watchedMap[`${seasonIndex}-${episodeIndex}`]
+                                    ? "CheckCircle2"
+                                    : "Circle"
                                 }
-                                title={episode?.monitored ? "Unmonitor" : "Monitor"}
+                                onClick={() =>
+                                  handleEpisodeWatchedToggle(
+                                    seasonIndex,
+                                    episodeIndex,
+                                    season,
+                                    episode,
+                                  )
+                                }
+                                title={
+                                  watchedMap[`${seasonIndex}-${episodeIndex}`]
+                                    ? "Mark as unwatched"
+                                    : "Mark as watched"
+                                }
                               />
                               <Button
                                 size="xs"

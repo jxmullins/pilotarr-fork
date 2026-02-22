@@ -8,6 +8,7 @@ from app.api.schemas import (
     LibraryItemResponse,
     SeasonResponse,
     SeasonWithEpisodesResponse,
+    WatchedUpdateRequest,
 )
 from app.db import get_db
 from app.models import Episode, LibraryItem, MediaType, Season
@@ -27,6 +28,57 @@ def _build_torrent_info_array(item: LibraryItem) -> list[dict]:
             continue
         result.append({k: v for k, v in t.torrent_info.items() if k in TORRENT_INFO_ALLOWED_KEYS})
     return result
+
+
+@router.patch("/{id}/seasons/{season_number}/episodes/{episode_number}/watched")
+async def set_episode_watched(
+    id: str,
+    season_number: int,
+    episode_number: int,
+    body: WatchedUpdateRequest,
+    db: Session = Depends(get_db),
+):
+    item = db.query(LibraryItem).filter(LibraryItem.id == id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Library item not found")
+    ep = (
+        db.query(Episode)
+        .filter(
+            Episode.library_item_id == id,
+            Episode.season_number == season_number,
+            Episode.episode_number == episode_number,
+        )
+        .first()
+    )
+    if not ep:
+        raise HTTPException(status_code=404, detail="Episode not found")
+    ep.watched = body.watched
+    db.commit()
+    return {"watched": ep.watched}
+
+
+@router.patch("/{id}/seasons/{season_number}/watched")
+async def set_season_watched(
+    id: str,
+    season_number: int,
+    body: WatchedUpdateRequest,
+    db: Session = Depends(get_db),
+):
+    item = db.query(LibraryItem).filter(LibraryItem.id == id).first()
+    if not item:
+        raise HTTPException(status_code=404, detail="Library item not found")
+    episodes = (
+        db.query(Episode)
+        .filter(
+            Episode.library_item_id == id,
+            Episode.season_number == season_number,
+        )
+        .all()
+    )
+    for ep in episodes:
+        ep.watched = body.watched
+    db.commit()
+    return {"watched": body.watched, "updated": len(episodes)}
 
 
 @router.get("/", response_model=list[LibraryItemResponse])
