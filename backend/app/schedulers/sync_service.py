@@ -710,13 +710,13 @@ class SyncService:
         finally:
             await connector.close()
 
-    async def sync_sonarr_episodes(self, full_sync: bool = False, series_limit: int = 5) -> dict[str, Any]:
+    async def sync_sonarr_episodes(self, full_sync: bool = True, batch_size: int = 20) -> dict[str, Any]:
         """
-        Sync episodes for TV shows - separate job from series sync
+        Sync episodes for all TV shows in batches.
 
         Args:
             full_sync: If True, sync all series. If False, only monitored.
-            series_limit: Max series per run (rate limiting)
+            batch_size: Number of series processed per batch (default 20).
         """
         print("📺 Synchronisation des épisodes Sonarr...")
         start_time = time.time()
@@ -729,37 +729,42 @@ class SyncService:
         connector = SonarrConnector(base_url=service.url, api_key=service.api_key, port=service.port)
 
         try:
-            # Get series to sync (limited batch)
-            if full_sync:
-                # Sync all TV series
-                series_items = (
-                    self.db.query(LibraryItem).filter(LibraryItem.media_type == MediaType.TV).limit(series_limit).all()
-                )
-            else:
-                # Only sync series with monitored seasons (use distinct to avoid duplicates)
-                series_items = (
-                    self.db.query(LibraryItem)
-                    .join(Season, Season.library_item_id == LibraryItem.id)
-                    .filter(LibraryItem.media_type == MediaType.TV, Season.monitored)
+            # Count total series to process
+            base_query = self.db.query(LibraryItem).filter(LibraryItem.media_type == MediaType.TV)
+            if not full_sync:
+                base_query = (
+                    base_query.join(Season, Season.library_item_id == LibraryItem.id)
+                    .filter(Season.monitored)
                     .distinct()
-                    .limit(series_limit)
-                    .all()
                 )
+            total_series = base_query.count()
 
-            print(f"  📊 Found {len(series_items)} series to sync (full_sync={full_sync}, limit={series_limit})")
-
-            if not series_items:
+            if total_series == 0:
                 print("  ⚠️  No series found to sync")
                 return {"success": True, "series_processed": 0, "episodes_synced": 0, "episodes_updated": 0}
 
+            print(f"  📊 {total_series} series to sync in batches of {batch_size} (full_sync={full_sync})")
+
+            # Fetch Sonarr series list once for all batches
             series_list = await connector.get_series()
             print(f"  📡 Fetched {len(series_list)} series from Sonarr")
 
             episodes_synced = 0
             episodes_updated = 0
+            series_processed = 0
+            offset = 0
 
-            for idx, item in enumerate(series_items, 1):
-                print(f"  📺 [{idx}/{len(series_items)}] Processing: {item.title} ({item.year})")
+            while offset < total_series:
+                batch = base_query.order_by(LibraryItem.id).offset(offset).limit(batch_size).all()
+                if not batch:
+                    break
+
+                print(
+                    f"  🔄 Batch {offset // batch_size + 1}: séries {offset + 1}–{offset + len(batch)}/{total_series}"
+                )
+
+                for idx, item in enumerate(batch, offset + 1):
+                    print(f"  📺 [{idx}/{total_series}] Processing: {item.title} ({item.year})")
 
                 # Find Sonarr series
                 series_data = next(
@@ -871,19 +876,22 @@ class SyncService:
                         episodes_synced += 1
                         series_episodes_synced += 1
 
-                print(f"    ✅ {series_episodes_synced} created, {series_episodes_updated} updated")
+                    print(f"    ✅ {series_episodes_synced} created, {series_episodes_updated} updated")
+                    series_processed += 1
 
-            self.db.commit()
+                # Commit after each batch to avoid large transactions
+                self.db.commit()
+                offset += batch_size
 
             duration_ms = int((time.time() - start_time) * 1000)
 
             print(
                 f"✅ Épisodes: {episodes_synced} créés, {episodes_updated} mis à jour "
-                f"({len(series_items)} séries, {duration_ms}ms)"
+                f"({series_processed} séries, {duration_ms}ms)"
             )
             return {
                 "success": True,
-                "series_processed": len(series_items),
+                "series_processed": series_processed,
                 "episodes_synced": episodes_synced,
                 "episodes_updated": episodes_updated,
                 "duration_ms": duration_ms,

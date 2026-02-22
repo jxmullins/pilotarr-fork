@@ -28,7 +28,10 @@ class AppScheduler:
             stats = await torrent_service.enrich_all_items(limit=50)  # Limiter à 50 par run
             print(f"✅ Torrents enrichis : {stats.get('success')}/{stats.get('total')}")
 
-            # 3. Synchronisation des MediaStreams Jellyfin (sous-titres, audio)
+            # 3. Synchronisation des épisodes Sonarr (toutes les séries, par batch de 20)
+            await sync_service.sync_sonarr_episodes(full_sync=True, batch_size=20)
+
+            # 4. Synchronisation des MediaStreams Jellyfin (sous-titres, audio)
             streams_service = JellyfinStreamsService(db)
             await streams_service.sync_all()
 
