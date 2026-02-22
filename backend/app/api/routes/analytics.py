@@ -172,7 +172,14 @@ async def receive_playback_webhook(
             jellyfin_service = (
                 db.query(ServiceConfiguration).filter(ServiceConfiguration.service_name == ServiceType.JELLYFIN).first()
             )
-            jellyfin_url = jellyfin_service.url.rstrip("/") if jellyfin_service else None
+            if jellyfin_service:
+                _jf_base = jellyfin_service.url.rstrip("/")
+                _jf_port = jellyfin_service.port
+                if _jf_port and f":{_jf_port}" not in _jf_base:
+                    _jf_base = f"{_jf_base}:{_jf_port}"
+                jellyfin_url = _jf_base
+            else:
+                jellyfin_url = None
             if item.get("ImageTags", {}).get("Primary") and jellyfin_url:
                 poster_url = f"{jellyfin_url}/Items/{media_id}/Images/Primary"
 
