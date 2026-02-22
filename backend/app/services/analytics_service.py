@@ -3,6 +3,7 @@ Service de gestion des analytics et des sessions de lecture
 """
 
 import logging
+import re
 from datetime import UTC, date, datetime, timedelta
 from typing import Any
 
@@ -10,7 +11,7 @@ from sqlalchemy import desc, func
 from sqlalchemy.orm import Session
 
 from app.models.enums import DeviceType, MediaType, PlaybackMethod, SessionStatus, VideoQuality
-from app.models.models import DailyAnalytic, DeviceStatistic, PlaybackSession
+from app.models.models import DailyAnalytic, DeviceStatistic, Episode, LibraryItem, PlaybackSession
 
 logger = logging.getLogger(__name__)
 
@@ -192,6 +193,34 @@ class AnalyticsService:
                 if session.duration_seconds and elapsed > session.duration_seconds:
                     elapsed = session.duration_seconds
                 session.watched_seconds = elapsed
+
+            # Mark media as watched if >= 30% of content was played
+            watched_threshold = 0.30
+            if (
+                session.duration_seconds
+                and session.watched_seconds
+                and session.watched_seconds / session.duration_seconds >= watched_threshold
+                and session.library_item_id
+            ):
+                if session.media_type == MediaType.TV and session.episode_info:
+                    match = re.match(r"S(\d+)E(\d+)", session.episode_info, re.IGNORECASE)
+                    if match:
+                        s_num, e_num = int(match.group(1)), int(match.group(2))
+                        ep = (
+                            db.query(Episode)
+                            .filter(
+                                Episode.library_item_id == session.library_item_id,
+                                Episode.season_number == s_num,
+                                Episode.episode_number == e_num,
+                            )
+                            .first()
+                        )
+                        if ep and not ep.watched:
+                            ep.watched = True
+                elif session.media_type == MediaType.MOVIE:
+                    item = db.query(LibraryItem).filter(LibraryItem.id == session.library_item_id).first()
+                    if item and not item.watched:
+                        item.watched = True
 
             db.commit()
             db.refresh(session)

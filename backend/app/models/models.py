@@ -121,6 +121,7 @@ class LibraryItem(Base):
     torrent_info = Column(JSON, nullable=True)
     media_streams = Column(JSON, nullable=True)  # Subtitle + audio tracks from Jellyfin (movies)
     nb_media = Column(Integer, default=0)
+    watched = Column(Boolean, default=False, nullable=False, index=True)
     created_at = Column(DateTime(timezone=True), server_default=func.now(), index=True)
     updated_at = Column(DateTime(timezone=True), server_default=func.now(), onupdate=func.now())
 
@@ -207,6 +208,7 @@ class Episode(Base):
     monitored = Column(Boolean, default=True, index=True)
     has_file = Column(Boolean, default=False, index=True)
     downloaded = Column(Boolean, default=False, index=True)
+    watched = Column(Boolean, default=False, nullable=False, index=True)
 
     # File details (when downloaded)
     file_size = Column(BigInteger, nullable=True)

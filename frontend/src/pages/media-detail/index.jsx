@@ -81,7 +81,7 @@ const MediaDetail = () => {
               quality: ep.quality_profile,
               hasSubtitles: (ep.media_streams?.subtitles?.length ?? 0) > 0,
               subtitleLanguages: ep.media_streams?.subtitles?.map((s) => s.language) ?? [],
-              watched: false,
+              watched: ep.watched ?? false,
             })),
           })),
         };

@@ -108,6 +108,22 @@ def create_analytics_tables():
             print(f"❌ Erreur lors de l'ajout de media_streams sur episodes : {e}")
             return False
 
+    # Add watched column to library_items (movies)
+    if "library_items" in get_existing_tables():
+        try:
+            migrate_add_watched_to_library_items()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de watched sur library_items : {e}")
+            return False
+
+    # Add watched column to episodes (TV shows)
+    if "episodes" in get_existing_tables():
+        try:
+            migrate_add_watched_to_episodes()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de watched sur episodes : {e}")
+            return False
+
     return True
 
 
@@ -298,6 +314,58 @@ def migrate_add_media_streams_to_episodes():
         db.execute(text("ALTER TABLE episodes ADD COLUMN media_streams JSON NULL"))
         db.commit()
         print("✅ media_streams column added to episodes")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_add_watched_to_library_items():
+    """Add watched TINYINT(1) column to library_items if it doesn't exist."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("library_items")}
+    if "watched" in columns:
+        print("✅ watched already exists on library_items, skipping")
+        return
+
+    print("🔄 Adding watched column to library_items...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE library_items ADD COLUMN watched TINYINT(1) NOT NULL DEFAULT 0"))
+        db.execute(text("CREATE INDEX idx_library_items_watched ON library_items (watched)"))
+        db.commit()
+        print("✅ watched column added to library_items")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_add_watched_to_episodes():
+    """Add watched TINYINT(1) column to episodes if it doesn't exist."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"] for col in inspector.get_columns("episodes")}
+    if "watched" in columns:
+        print("✅ watched already exists on episodes, skipping")
+        return
+
+    print("🔄 Adding watched column to episodes...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE episodes ADD COLUMN watched TINYINT(1) NOT NULL DEFAULT 0"))
+        db.execute(text("CREATE INDEX idx_episodes_watched ON episodes (watched)"))
+        db.commit()
+        print("✅ watched column added to episodes")
     except Exception as e:
         db.rollback()
         raise e

@@ -199,6 +199,7 @@ class EpisodeDetailResponse(BaseModel):
     file_size_str: str | None = None  # e.g. "2.1 GB"
     quality_profile: str | None = None
     media_streams: dict[str, Any] | None = None  # {"subtitles": [...], "audio": [...]}
+    watched: bool = False
 
     class Config:
         from_attributes = True
@@ -231,6 +232,7 @@ class LibraryItemResponse(BaseModel):
     nb_media: int = 0
     view_count: int = 0
     media_streams: dict[str, Any] | None = None  # {"subtitles": [...], "audio": [...]}
+    watched: bool = False
     created_at: datetime
 
     @field_validator("torrent_count", mode="before")
