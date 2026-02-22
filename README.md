@@ -106,6 +106,55 @@ cd backend
 docker-compose up
 ```
 
+## Jellyfin Integration
+
+Pilotarr receives real-time playback events from Jellyfin via webhooks. This powers the analytics page (user leaderboard, usage charts, session history) and automatically marks episodes/movies as watched.
+
+Two Jellyfin plugins are required.
+
+### Required plugins
+
+#### 1. Jellyfin Webhook plugin
+
+Sends playback events (play, pause, resume, stop) to Pilotarr in real time.
+
+**Install:**
+1. In Jellyfin, go to **Dashboard > Plugins > Catalog**
+2. Search for **Webhook** and install it
+3. Restart Jellyfin
+
+**Configure:**
+1. Go to **Dashboard > Plugins > Webhook**
+2. Click **Add** to create a new webhook
+3. Set the following:
+   - **URL**: `http://<pilotarr-host>:8000/api/analytics/webhook/playback?apiKey=<your_api_key>`
+   - **Notification type**: check all playback events — `Play`, `Pause`, `Resume`, `Stop`
+   - **Send All Properties**: enabled
+4. Save
+
+The `apiKey` must match the `API_KEY` value in your backend `.env`.
+
+> If you configured a `WEBHOOK_SECRET` in `.env`, also add the header `X-Webhook-Secret: <your_secret>` in the webhook plugin settings.
+
+#### 2. Playback Reporting plugin
+
+Stores detailed playback history on the Jellyfin side (used to compute watched duration, enabling the 30%-threshold auto-mark-as-watched logic in Pilotarr).
+
+**Install:**
+1. In Jellyfin, go to **Dashboard > Plugins > Catalog**
+2. Search for **Playback Reporting** and install it
+3. Restart Jellyfin
+
+No additional configuration is needed — the plugin activates automatically and Pilotarr reads the data through the webhook events.
+
+### How it works
+
+| Event | What Pilotarr does |
+|---|---|
+| `Play` | Opens a playback session, links it to a library item |
+| `Pause` / `Resume` | Updates session state |
+| `Stop` | Closes the session; if >= 30% watched, marks the episode/movie as watched |
+
 ## Project Structure
 
 ```
