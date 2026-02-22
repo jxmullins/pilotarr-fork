@@ -100,6 +100,16 @@ export const getPlaybackSessions = async (start, end) => {
   }
 };
 
+export const getUserLeaderboard = async (limit = 10) => {
+  try {
+    const response = await pilotarrClient?.get("/analytics/users", { params: { limit } });
+    return response?.data || [];
+  } catch (error) {
+    console.error("Failed to fetch user leaderboard:", error);
+    return [];
+  }
+};
+
 export default {
   getUsageAnalytics,
   getDeviceBreakdown,

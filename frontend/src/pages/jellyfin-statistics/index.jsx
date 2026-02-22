@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import Icon from "../../components/AppIcon";
 
 import UsageChart from "./components/UsageChart";
-import UserStatsCard from "./components/UserStatsCard";
+import UserLeaderboard from "./components/UserLeaderboard";
 import ServerPerformancePanel from "./components/ServerPerformancePanel";
 import DeviceBreakdownCard from "./components/DeviceBreakdownCard";
 import MediaAnalyticsTable from "./components/MediaAnalyticsTable";
@@ -11,6 +11,7 @@ import {
   getDeviceBreakdown,
   getMediaAnalytics,
   getServerMetrics,
+  getUserLeaderboard,
 } from "../../services/analyticsService";
 import Header from "../../components/navigation/Header";
 
@@ -33,6 +34,8 @@ const JellyfinStatistics = () => {
   const [isLoadingMedia, setIsLoadingMedia] = useState(true);
   const [performanceData, setPerformanceData] = useState(null);
   const [isLoadingPerformance, setIsLoadingPerformance] = useState(true);
+  const [leaderboardData, setLeaderboardData] = useState([]);
+  const [isLoadingLeaderboard, setIsLoadingLeaderboard] = useState(true);
 
   // Calculate date range based on filter
   const getDateRange = () => {
@@ -191,6 +194,23 @@ const JellyfinStatistics = () => {
     fetchServerMetrics();
   }, []);
 
+  // Fetch user leaderboard once on mount
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      setIsLoadingLeaderboard(true);
+      try {
+        const data = await getUserLeaderboard(10);
+        setLeaderboardData(data);
+      } catch (error) {
+        console.error("Error fetching user leaderboard:", error);
+        setLeaderboardData([]);
+      } finally {
+        setIsLoadingLeaderboard(false);
+      }
+    };
+    fetchLeaderboard();
+  }, []);
+
   // Fetch data on mount and when date range changes
   useEffect(() => {
     fetchUsageAnalytics();
@@ -282,7 +302,7 @@ const JellyfinStatistics = () => {
                 isLoading={isLoadingUsage}
               />
             </div>
-            <UserStatsCard totalUsers={156} activeUsers={42} newUsers={12} growthRate={8.5} />
+            <UserLeaderboard users={leaderboardData} isLoading={isLoadingLeaderboard} />
           </div>
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">

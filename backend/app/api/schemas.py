@@ -451,6 +451,18 @@ class ServerMetricResponse(BaseModel):
 
 
 # Analytics Dashboard Schemas
+class UserLeaderboardItem(BaseModel):
+    """Per-user stats derived from PlaybackSession history"""
+
+    user_name: str
+    total_plays: int
+    hours_watched: float
+    movies_count: int
+    episodes_count: int
+    favorite_device: str | None = None
+    last_seen: datetime | None = None
+
+
 class UsageAnalyticsResponse(BaseModel):
     """Schéma pour le graphique Usage Analytics (Vue 1)"""
 

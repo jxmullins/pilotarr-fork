@@ -21,6 +21,7 @@ from app.api.schemas import (
     PlaybackSessionResponse,
     ServerPerformanceResponse,
     UsageAnalyticsResponse,
+    UserLeaderboardItem,
 )
 from app.core.config import settings
 from app.core.security import verify_webhook_api_key
@@ -597,6 +598,73 @@ async def get_server_metrics(db: Session = Depends(get_db)):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="Erreur interne du serveur"
         ) from e
+
+
+@router.get("/users", response_model=list[UserLeaderboardItem])
+async def get_user_leaderboard(
+    limit: int = Query(10, ge=1, le=50, description="Number of users to return"),
+    db: Session = Depends(get_db),
+):
+    """
+    📊 User Leaderboard — ranked by total hours watched.
+    Derived entirely from PlaybackSession history.
+    """
+    try:
+        from collections import defaultdict
+
+        rows = (
+            db.query(
+                PlaybackSession.user_name,
+                func.count(PlaybackSession.id).label("total_plays"),
+                func.coalesce(func.sum(PlaybackSession.watched_seconds), 0).label("total_seconds"),
+                func.sum(case((PlaybackSession.media_type == MediaType.MOVIE, 1), else_=0)).label("movies_count"),
+                func.sum(case((PlaybackSession.media_type == MediaType.TV, 1), else_=0)).label("episodes_count"),
+                func.max(PlaybackSession.start_time).label("last_seen"),
+            )
+            .filter(PlaybackSession.is_active.is_(False))
+            .group_by(PlaybackSession.user_name)
+            .order_by(desc(func.coalesce(func.sum(PlaybackSession.watched_seconds), 0)))
+            .limit(limit)
+            .all()
+        )
+
+        # Resolve favorite device per user via a second query
+        user_names = [r.user_name for r in rows]
+        device_map: dict[str, str] = {}
+        if user_names:
+            device_rows = (
+                db.query(
+                    PlaybackSession.user_name,
+                    PlaybackSession.device_type,
+                    func.count(PlaybackSession.id).label("cnt"),
+                )
+                .filter(PlaybackSession.user_name.in_(user_names))
+                .group_by(PlaybackSession.user_name, PlaybackSession.device_type)
+                .all()
+            )
+            counts: dict[str, dict] = defaultdict(dict)
+            for dr in device_rows:
+                counts[dr.user_name][dr.device_type] = dr.cnt
+            for uname, dcounts in counts.items():
+                best = max(dcounts, key=dcounts.__getitem__)
+                device_map[uname] = best.value if hasattr(best, "value") else str(best)
+
+        return [
+            UserLeaderboardItem(
+                user_name=row.user_name,
+                total_plays=row.total_plays,
+                hours_watched=round((row.total_seconds or 0) / 3600, 1),
+                movies_count=row.movies_count or 0,
+                episodes_count=row.episodes_count or 0,
+                favorite_device=device_map.get(row.user_name),
+                last_seen=row.last_seen,
+            )
+            for row in rows
+        ]
+
+    except Exception as e:
+        logger.error(f"❌ Error fetching user leaderboard: {e}")
+        raise HTTPException(status_code=500, detail="Internal server error") from e
 
 
 @router.get("/sessions", response_model=list[PlaybackSessionResponse])
