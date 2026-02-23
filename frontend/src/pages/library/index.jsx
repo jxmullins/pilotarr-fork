@@ -91,7 +91,7 @@ const Library = () => {
     sortBy: "added_date",
     order: "desc",
   });
-  const [limit, setLimit] = useState(20);
+  const [limit, setLimit] = useState(18);
   const [mediaData, setMediaData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -208,7 +208,11 @@ const Library = () => {
         <div className="mt-8 flex items-center justify-center gap-4">
           <span className="text-sm text-muted-foreground">Items per page:</span>
           <div className="flex gap-2">
-            {[20, 50, 100]?.map((value) => (
+            {[
+              { label: "18", value: 18 },
+              { label: "36", value: 36 },
+              { label: "All", value: 100 },
+            ].map(({ label, value }) => (
               <button
                 key={value}
                 onClick={() => setLimit(value)}
@@ -218,7 +222,7 @@ const Library = () => {
                     : "bg-card text-foreground hover:bg-primary/10"
                 }`}
               >
-                {value}
+                {label}
               </button>
             ))}
           </div>
