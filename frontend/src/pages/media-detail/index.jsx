@@ -9,6 +9,13 @@ import FileInfoPanel from "./components/FileInfoPanel";
 import { getLibraryItemById, getSeasonsWithEpisodes } from "../../services/libraryService";
 import { getServiceConfiguration } from "../../services/configService";
 
+const buildUrl = (config) => {
+  if (!config?.url) return null;
+  const base = config.url.replace(/\/$/, "");
+  if (config.port && !base.includes(`:${config.port}`)) return `${base}:${config.port}`;
+  return base;
+};
+
 const MediaDetail = () => {
   const navigate = useNavigate();
   const { id } = useParams();
@@ -59,9 +66,9 @@ const MediaDetail = () => {
           jellyfinId: data.jellyfin_id,
           sonarrSeriesId: data.sonarr_series_id,
           serviceUrls: {
-            jellyfin: jellyfinConfig?.url ?? null,
-            sonarr: sonarrConfig?.url ?? null,
-            radarr: radarrConfig?.url ?? null,
+            jellyfin: buildUrl(jellyfinConfig),
+            sonarr: buildUrl(sonarrConfig),
+            radarr: buildUrl(radarrConfig),
           },
 
           fileInfo: {
