@@ -7,6 +7,14 @@ import MetadataPanel from "./components/MetadataPanel";
 import EpisodesList from "./components/EpisodesList";
 import FileInfoPanel from "./components/FileInfoPanel";
 import { getLibraryItemById, getSeasonsWithEpisodes } from "../../services/libraryService";
+import { getServiceConfiguration } from "../../services/configService";
+
+const buildUrl = (config) => {
+  if (!config?.url) return null;
+  const base = config.url.replace(/\/$/, "");
+  if (config.port && !base.includes(`:${config.port}`)) return `${base}:${config.port}`;
+  return base;
+};
 
 const MediaDetail = () => {
   const navigate = useNavigate();
@@ -22,7 +30,12 @@ const MediaDetail = () => {
           return;
         }
 
-        const data = await getLibraryItemById(id);
+        const [data, jellyfinConfig, sonarrConfig, radarrConfig] = await Promise.all([
+          getLibraryItemById(id),
+          getServiceConfiguration("jellyfin"),
+          getServiceConfiguration("sonarr"),
+          getServiceConfiguration("radarr"),
+        ]);
 
         const seasonsData = data.media_type === "tv" ? await getSeasonsWithEpisodes(id) : [];
 
@@ -49,6 +62,14 @@ const MediaDetail = () => {
           status: null,
           network: null,
           nbMedia: data.nb_media,
+          addedDate: data.added_date,
+          jellyfinId: data.jellyfin_id,
+          sonarrSeriesId: data.sonarr_series_id,
+          serviceUrls: {
+            jellyfin: buildUrl(jellyfinConfig),
+            sonarr: buildUrl(sonarrConfig),
+            radarr: buildUrl(radarrConfig),
+          },
 
           fileInfo: {
             quality: data.quality,
@@ -74,8 +95,10 @@ const MediaDetail = () => {
 
           seasons: seasonsData.map((s) => ({
             seasonNumber: s.season_number,
+            monitored: s.is_monitored,
             episodes: s.episodes.map((ep) => ({
               episodeNumber: ep.episode_number,
+              sonarrEpisodeId: ep.sonarr_episode_id,
               title: ep.title,
               airDate: ep.air_date,
               monitored: ep.monitored,

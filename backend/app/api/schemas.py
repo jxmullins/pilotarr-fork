@@ -195,6 +195,7 @@ class EpisodeResponse(BaseModel):
 
 class EpisodeDetailResponse(BaseModel):
     episode_number: int
+    sonarr_episode_id: int | None = None
     title: str | None = None
     air_date: date | None = None
     monitored: bool
@@ -239,6 +240,8 @@ class LibraryItemResponse(BaseModel):
     watched: bool = False
     watched_count: int = 0
     created_at: datetime
+    jellyfin_id: str | None = None
+    sonarr_series_id: int | None = None
 
     @field_validator("torrent_count", mode="before")
     @classmethod

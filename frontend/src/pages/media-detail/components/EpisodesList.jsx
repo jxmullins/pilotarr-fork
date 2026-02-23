@@ -2,9 +2,15 @@ import React, { useState } from "react";
 import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
 import StatusIndicator from "../../monitoring/components/StatusIndicator";
-import { setEpisodeWatched, setSeasonWatched } from "../../../services/libraryService";
+import {
+  setEpisodeWatched,
+  setSeasonWatched,
+  monitorEpisode,
+  searchEpisode,
+} from "../../../services/libraryService";
 
 const EpisodesList = ({ seasons, mediaId }) => {
+  const [seasonsState, setSeasonsState] = useState(seasons);
   const [expandedSeasons, setExpandedSeasons] = useState([0]); // First season expanded by default
   const [watchedMap, setWatchedMap] = useState(() =>
     Object.fromEntries(
@@ -48,9 +54,25 @@ const EpisodesList = ({ seasons, mediaId }) => {
     await setSeasonWatched(mediaId, season.seasonNumber, newWatched);
   };
 
-  const handleManualSearch = (seasonIndex, episodeIndex) => {
-    // TODO: API call to trigger manual search
-    console.log(`Manual search for S${seasonIndex + 1}E${episodeIndex + 1}`);
+  const handleMonitor = async (season, episode) => {
+    await monitorEpisode(mediaId, season.seasonNumber, episode.episodeNumber);
+    // Optimistic update
+    setSeasonsState((prev) =>
+      prev.map((s) =>
+        s.seasonNumber !== season.seasonNumber
+          ? s
+          : {
+              ...s,
+              episodes: s.episodes.map((ep) =>
+                ep.episodeNumber === episode.episodeNumber ? { ...ep, monitored: true } : ep,
+              ),
+            },
+      ),
+    );
+  };
+
+  const handleSearch = async (season, episode) => {
+    await searchEpisode(mediaId, season.seasonNumber, episode.episodeNumber);
   };
 
   return (
@@ -63,7 +85,7 @@ const EpisodesList = ({ seasons, mediaId }) => {
       </div>
 
       <div className="divide-y divide-border">
-        {seasons?.map((season, seasonIndex) => (
+        {seasonsState?.map((season, seasonIndex) => (
           <div key={seasonIndex}>
             {/* Season Header */}
             <button
@@ -81,6 +103,16 @@ const EpisodesList = ({ seasons, mediaId }) => {
                 </h3>
                 <span className="text-sm text-muted-foreground">
                   {season?.episodes?.length} episodes
+                </span>
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                    season?.monitored
+                      ? "bg-success/10 border-success/20 text-success"
+                      : "bg-muted/60 border-border text-muted-foreground"
+                  }`}
+                >
+                  <Icon name={season?.monitored ? "Bell" : "BellOff"} size={11} />
+                  {season?.monitored ? "Monitored" : "Unmonitored"}
                 </span>
               </div>
               <div className="flex items-center gap-4">
@@ -125,6 +157,9 @@ const EpisodesList = ({ seasons, mediaId }) => {
                           Status
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">
+                          Monitored
+                        </th>
+                        <th className="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">
                           Subtitles
                         </th>
                         <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase">
@@ -150,12 +185,7 @@ const EpisodesList = ({ seasons, mediaId }) => {
 
                           {/* Title */}
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              {episode?.monitored && (
-                                <Icon name="Eye" size={14} className="text-success" />
-                              )}
-                              <span className="text-sm text-foreground">{episode?.title}</span>
-                            </div>
+                            <span className="text-sm text-foreground">{episode?.title}</span>
                           </td>
 
                           {/* Air Date */}
@@ -172,6 +202,20 @@ const EpisodesList = ({ seasons, mediaId }) => {
                                 {...getDownloadStatusConfig(episode?.downloadStatus)}
                               />
                             </div>
+                          </td>
+
+                          {/* Monitored */}
+                          <td className="px-6 py-4 text-center">
+                            <Icon
+                              name={episode?.monitored ? "Bell" : "BellOff"}
+                              size={15}
+                              className={
+                                episode?.monitored
+                                  ? "text-success mx-auto"
+                                  : "text-muted-foreground/40 mx-auto"
+                              }
+                              title={episode?.monitored ? "Monitored" : "Unmonitored"}
+                            />
                           </td>
 
                           {/* Subtitles */}
@@ -239,13 +283,23 @@ const EpisodesList = ({ seasons, mediaId }) => {
                                     : "Mark as watched"
                                 }
                               />
-                              <Button
-                                size="xs"
-                                variant="ghost"
-                                iconName="Search"
-                                onClick={() => handleManualSearch(seasonIndex, episodeIndex)}
-                                title="Manual Search"
-                              />
+                              {!episode?.monitored ? (
+                                <Button
+                                  size="xs"
+                                  variant="ghost"
+                                  iconName="Bell"
+                                  onClick={() => handleMonitor(season, episode)}
+                                  title="Monitor this episode"
+                                />
+                              ) : !episode?.downloaded ? (
+                                <Button
+                                  size="xs"
+                                  variant="ghost"
+                                  iconName="RefreshCw"
+                                  onClick={() => handleSearch(season, episode)}
+                                  title="Refresh search"
+                                />
+                              ) : null}
                             </div>
                           </td>
                         </tr>

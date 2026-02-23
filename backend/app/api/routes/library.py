@@ -13,7 +13,8 @@ from app.api.schemas import (
 from app.db import get_db
 from app.models import Episode, LibraryItem, MediaType, Season
 from app.models.enums import ItemSortBy
-from app.models.models import PlaybackSession
+from app.models.models import PlaybackSession, ServiceConfiguration
+from app.services.connector_factory import create_connector
 
 router = APIRouter(prefix="/library", tags=["Library"])
 
@@ -187,6 +188,12 @@ async def get_library_item(
             or 0
         )
 
+    sonarr_series_id = None
+    if item.media_type == MediaType.TV:
+        first_season = db.query(Season).filter(Season.library_item_id == id).first()
+        if first_season:
+            sonarr_series_id = first_season.sonarr_series_id
+
     data = {
         "id": item.id,
         "title": item.title,
@@ -205,6 +212,8 @@ async def get_library_item(
         "media_streams": item.media_streams,
         "created_at": item.created_at,
         "torrent_info": _build_torrent_info_array(item),
+        "jellyfin_id": item.jellyfin_id,
+        "sonarr_series_id": sonarr_series_id,
     }
 
     return data
@@ -275,6 +284,7 @@ async def get_seasons_with_episodes(id: str, db: Session = Depends(get_db)):
                 episodes=[
                     EpisodeDetailResponse(
                         episode_number=ep.episode_number,
+                        sonarr_episode_id=ep.sonarr_episode_id,
                         title=ep.title,
                         air_date=ep.air_date,
                         monitored=ep.monitored,
@@ -291,3 +301,77 @@ async def get_seasons_with_episodes(id: str, db: Session = Depends(get_db)):
         )
 
     return result
+
+
+def _get_sonarr_connector(db: Session):
+    """Helper: return an active SonarrConnector or raise 503."""
+    service = (
+        db.query(ServiceConfiguration)
+        .filter(ServiceConfiguration.service_name == "sonarr", ServiceConfiguration.is_active.is_(True))
+        .first()
+    )
+    if not service:
+        raise HTTPException(status_code=503, detail="Sonarr service not configured")
+    return create_connector(service)
+
+
+@router.post("/{id}/seasons/{season_number}/episodes/{episode_number}/monitor")
+async def monitor_episode(
+    id: str,
+    season_number: int,
+    episode_number: int,
+    db: Session = Depends(get_db),
+):
+    """Monitor an unmonitored episode in Sonarr and update the local DB."""
+    ep = (
+        db.query(Episode)
+        .filter(
+            Episode.library_item_id == id,
+            Episode.season_number == season_number,
+            Episode.episode_number == episode_number,
+        )
+        .first()
+    )
+    if not ep:
+        raise HTTPException(status_code=404, detail="Episode not found")
+
+    connector = _get_sonarr_connector(db)
+    try:
+        ok = await connector.monitor_episode(ep.sonarr_episode_id)
+        if not ok:
+            raise HTTPException(status_code=502, detail="Sonarr monitor request failed")
+        ep.monitored = True
+        db.commit()
+        return {"monitored": True}
+    finally:
+        await connector.close()
+
+
+@router.post("/{id}/seasons/{season_number}/episodes/{episode_number}/search")
+async def search_episode(
+    id: str,
+    season_number: int,
+    episode_number: int,
+    db: Session = Depends(get_db),
+):
+    """Trigger an episode search in Sonarr."""
+    ep = (
+        db.query(Episode)
+        .filter(
+            Episode.library_item_id == id,
+            Episode.season_number == season_number,
+            Episode.episode_number == episode_number,
+        )
+        .first()
+    )
+    if not ep:
+        raise HTTPException(status_code=404, detail="Episode not found")
+
+    connector = _get_sonarr_connector(db)
+    try:
+        ok = await connector.search_episode(ep.sonarr_episode_id)
+        if not ok:
+            raise HTTPException(status_code=502, detail="Sonarr search request failed")
+        return {"searching": True}
+    finally:
+        await connector.close()
