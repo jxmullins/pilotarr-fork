@@ -97,13 +97,49 @@ npm start
 
 The frontend is available at `http://localhost:5173`.
 
-### 4. Docker (alternative)
+### 4. Docker — full stack (recommended)
 
-Run the backend with Docker Compose:
+A single `docker-compose.yml` at the repo root orchestrates everything:
+MySQL + backend (FastAPI) + frontend (React served by nginx).
 
 ```bash
-cd backend
-docker-compose up
+# 1. Copy and fill in your secrets
+cp .env.example backend/.env
+
+# 2. Build and start all services
+docker-compose up -d --build
+
+# 3. Check logs
+docker-compose logs -f
+```
+
+The app is available at `http://localhost` (or the port set by `PILOTARR_PORT`).
+
+| Service | Internal address | Exposed |
+|---|---|---|
+| Frontend (nginx) | — | `:80` (configurable via `PILOTARR_PORT`) |
+| Backend (FastAPI) | `http://backend:8000` | not exposed externally |
+| MySQL | `mysql:3306` | not exposed externally |
+
+> **Note:** `VITE_PILOTARR_API_URL` is baked in as `/api` at build time. Nginx proxies
+> all `/api/*` requests to the backend container — no hardcoded IPs in the JS bundle.
+
+#### Useful commands
+
+```bash
+docker-compose down          # stop all
+docker-compose down -v       # stop + delete MySQL volume (wipes DB)
+docker-compose build --no-cache  # force full rebuild
+docker-compose logs backend  # backend logs only
+```
+
+#### Dev mode (hot-reload)
+
+For local development with file watching, use the backend-only compose:
+
+```bash
+cd backend && docker-compose up   # backend + MySQL with --reload
+cd frontend && npm start          # Vite dev server on :4028
 ```
 
 ## Jellyfin Integration
