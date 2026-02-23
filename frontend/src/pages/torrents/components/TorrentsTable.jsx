@@ -148,12 +148,10 @@ const COLUMNS = [
   { key: "status", label: "Status", sortable: true },
   { key: "size", label: "Size", sortable: true },
   { key: "progress", label: "Progress", sortable: true },
-  { key: "dlSpeed", label: "↓ DL", sortable: true },
-  { key: "ulSpeed", label: "↑ UL", sortable: true },
+  { key: "speed", label: "↓/↑ Speed", sortable: false },
   { key: "seeds", label: "Seeds", sortable: true },
   { key: "peers", label: "Peers", sortable: true },
   { key: "ratio", label: "Ratio", sortable: true },
-  { key: "eta", label: "ETA", sortable: true },
   { key: "tracker", label: "Tracker", sortable: true },
   { key: "addedOn", label: "Added", sortable: true },
   { key: "actions", label: "", sortable: false },
@@ -325,14 +323,11 @@ export default function TorrentsTable({
                     <ProgressBar progress={torrent.progress} status={torrent.status} />
                   </td>
 
-                  {/* DL Speed */}
-                  <td className="px-3 py-2.5 tabular-nums text-primary whitespace-nowrap font-medium">
-                    {formatSpeed(torrent.dlSpeed)}
-                  </td>
-
-                  {/* UL Speed */}
-                  <td className="px-3 py-2.5 tabular-nums text-success whitespace-nowrap font-medium">
-                    {formatSpeed(torrent.ulSpeed)}
+                  {/* Speed ↓/↑ */}
+                  <td className="px-3 py-2.5 tabular-nums whitespace-nowrap">
+                    <span className="text-primary font-medium">{formatSpeed(torrent.dlSpeed)}</span>
+                    <span className="text-muted-foreground/50 mx-1">/</span>
+                    <span className="text-success font-medium">{formatSpeed(torrent.ulSpeed)}</span>
                   </td>
 
                   {/* Seeds */}
@@ -356,11 +351,6 @@ export default function TorrentsTable({
                   {/* Ratio */}
                   <td className="px-3 py-2.5 tabular-nums font-medium">
                     {formatRatio(torrent.ratio)}
-                  </td>
-
-                  {/* ETA */}
-                  <td className="px-3 py-2.5 text-muted-foreground tabular-nums whitespace-nowrap">
-                    {formatEta(torrent.eta)}
                   </td>
 
                   {/* Tracker */}

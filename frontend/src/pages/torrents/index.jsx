@@ -100,7 +100,6 @@ const POLL_INTERVAL_MS = 60_000;
 const Torrents = () => {
   const [activeTab, setActiveTab] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
-  const [dateFrom, setDateFrom] = useState("");
   const [selectedItems, setSelectedItems] = useState([]);
   const [torrents, setTorrents] = useState([]);
   const [transfer, setTransfer] = useState(null);
@@ -154,12 +153,8 @@ const Torrents = () => {
       );
     }
 
-    if (dateFrom) {
-      result = result.filter((t) => t.addedOn && t.addedOn.slice(0, 10) >= dateFrom);
-    }
-
     return result;
-  }, [torrents, activeTab, searchQuery, dateFrom]);
+  }, [torrents, activeTab, searchQuery]);
 
   // Selection handlers
   const handleSelectAll = (checked) => {
@@ -294,25 +289,6 @@ const Torrents = () => {
                 </button>
               );
             })}
-          </div>
-
-          {/* Date filter */}
-          <div className="relative flex items-center gap-1">
-            <input
-              type="date"
-              value={dateFrom}
-              onChange={(e) => setDateFrom(e.target.value)}
-              className="px-3 py-1.5 bg-card border border-border rounded-lg text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-            />
-            {dateFrom && (
-              <button
-                onClick={() => setDateFrom("")}
-                className="text-muted-foreground hover:text-foreground"
-                title="Clear date filter"
-              >
-                <Icon name="X" size={14} />
-              </button>
-            )}
           </div>
 
           {/* Search */}
