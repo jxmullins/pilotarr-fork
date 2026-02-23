@@ -6,21 +6,42 @@ from app.db import SessionLocal, get_db
 from app.models import SyncMetadata
 from app.schedulers.sync_service import SyncService
 from app.services.jellyfin_streams_service import JellyfinStreamsService
+from app.services.torrent_enrichment_service import TorrentEnrichmentService
 
 router = APIRouter(prefix="/sync", tags=["Synchronization"])
 
 
 @router.post("/trigger")
-async def trigger_sync(background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
-    """Déclencher manuellement une synchronisation complète"""
+async def trigger_sync(background_tasks: BackgroundTasks):
+    """Déclencher manuellement une synchronisation complète (identique au scheduler)"""
 
     async def run_sync():
-        sync_service = SyncService(db)
-        await sync_service.sync_all()
+        db = SessionLocal()
+        try:
+            sync_service = SyncService(db)
+
+            # 1. All core services
+            await sync_service.sync_all()
+
+            # 2. Torrent enrichment from qBittorrent
+            torrent_service = TorrentEnrichmentService(db)
+            stats = await torrent_service.enrich_all_items(limit=50)
+            print(f"✅ Torrents enrichis : {stats.get('success')}/{stats.get('total')}")
+
+            # 3. Sonarr episodes (all series, batched)
+            await sync_service.sync_sonarr_episodes(full_sync=True, batch_size=20)
+
+            # 4. Jellyfin MediaStreams (subtitles, audio tracks)
+            streams_service = JellyfinStreamsService(db)
+            await streams_service.sync_all()
+
+        except Exception as e:
+            print(f"❌ Erreur lors de la synchro manuelle: {e}")
+        finally:
+            db.close()
 
     background_tasks.add_task(run_sync)
-
-    return {"message": "Synchronisation lancée en arrière-plan", "status": "started"}
+    return {"message": "Synchronisation complète lancée en arrière-plan", "status": "started"}
 
 
 @router.post("/trigger/sonarr-episodes")
@@ -32,8 +53,6 @@ async def trigger_sonarr_episodes_sync(
     """Déclencher la synchronisation des épisodes Sonarr"""
 
     async def run_episodes_sync():
-        from app.db import SessionLocal
-
         db = SessionLocal()
         try:
             print("=" * 80)
@@ -60,6 +79,25 @@ async def trigger_sonarr_episodes_sync(
     }
 
 
+@router.post("/trigger/sonarr-seasons")
+async def trigger_sonarr_seasons_sync(background_tasks: BackgroundTasks):
+    """Déclencher la synchronisation des saisons Sonarr"""
+
+    async def run_seasons_sync():
+        db = SessionLocal()
+        try:
+            sync_service = SyncService(db)
+            result = await sync_service.sync_sonarr_seasons()
+            print(f"📊 Seasons sync completed: {result}")
+        except Exception as e:
+            print(f"❌ Error in seasons sync: {e}")
+        finally:
+            db.close()
+
+    background_tasks.add_task(run_seasons_sync)
+    return {"message": "Synchronisation saisons Sonarr lancée en arrière-plan", "status": "started"}
+
+
 @router.post("/trigger/jellyfin-streams")
 async def trigger_jellyfin_streams_sync(background_tasks: BackgroundTasks):
     """Déclencher la synchronisation des MediaStreams Jellyfin (sous-titres, audio)"""
@@ -76,8 +114,45 @@ async def trigger_jellyfin_streams_sync(background_tasks: BackgroundTasks):
             db.close()
 
     background_tasks.add_task(run_streams_sync)
-
     return {"message": "Synchronisation MediaStreams Jellyfin lancée en arrière-plan", "status": "started"}
+
+
+@router.post("/trigger/torrents")
+async def trigger_torrents_sync(background_tasks: BackgroundTasks, limit: int = 50):
+    """Déclencher l'enrichissement des torrents depuis qBittorrent"""
+
+    async def run_torrents_sync():
+        db = SessionLocal()
+        try:
+            service = TorrentEnrichmentService(db)
+            result = await service.enrich_all_items(limit=limit)
+            print(f"📊 Torrent enrichment completed: {result}")
+        except Exception as e:
+            print(f"❌ Error in torrent enrichment: {e}")
+        finally:
+            db.close()
+
+    background_tasks.add_task(run_torrents_sync)
+    return {"message": f"Enrichissement torrents lancé (limit={limit})", "status": "started"}
+
+
+@router.post("/trigger/monitored-items")
+async def trigger_monitored_items_sync(background_tasks: BackgroundTasks):
+    """Déclencher la synchronisation des items monitorés (Radarr + Sonarr stats)"""
+
+    async def run_monitored_sync():
+        db = SessionLocal()
+        try:
+            sync_service = SyncService(db)
+            result = await sync_service.sync_monitored_items()
+            print(f"📊 Monitored items sync completed: {result}")
+        except Exception as e:
+            print(f"❌ Error in monitored items sync: {e}")
+        finally:
+            db.close()
+
+    background_tasks.add_task(run_monitored_sync)
+    return {"message": "Synchronisation items monitorés lancée en arrière-plan", "status": "started"}
 
 
 @router.post("/trigger/relink-sessions")
@@ -87,7 +162,6 @@ async def trigger_relink_sessions(background_tasks: BackgroundTasks):
     async def run_relink():
         from sqlalchemy import func
 
-        from app.db import SessionLocal
         from app.models.enums import MediaType
         from app.models.models import LibraryItem, PlaybackSession
 
@@ -103,7 +177,6 @@ async def trigger_relink_sessions(background_tasks: BackgroundTasks):
                 media_type_str = session.media_type.value if session.media_type else None
 
                 if media_type_str == "movie":
-                    # Case-insensitive title + year
                     library_item = (
                         db.query(LibraryItem)
                         .filter(
@@ -114,7 +187,6 @@ async def trigger_relink_sessions(background_tasks: BackgroundTasks):
                         .first()
                     )
                     if not library_item:
-                        # Year-relaxed fallback
                         library_item = (
                             db.query(LibraryItem)
                             .filter(
@@ -153,23 +225,49 @@ async def trigger_relink_sessions(background_tasks: BackgroundTasks):
 
 
 @router.post("/trigger/{service_name}")
-async def trigger_service_sync(service_name: str, background_tasks: BackgroundTasks, db: Session = Depends(get_db)):
+async def trigger_service_sync(service_name: str, background_tasks: BackgroundTasks):
     """Déclencher la synchronisation d'un service spécifique"""
 
-    async def run_service_sync():
-        sync_service = SyncService(db)
+    valid_services = {
+        "radarr",
+        "sonarr",
+        "jellyfin",
+        "jellyseerr",
+        "qbittorrent",
+        "monitored-items",
+        "sonarr-seasons",
+    }
+    if service_name not in valid_services:
+        from fastapi import HTTPException
 
-        if service_name == "radarr":
-            await sync_service.sync_radarr()
-        elif service_name == "sonarr":
-            await sync_service.sync_sonarr()
-        elif service_name == "jellyfin":
-            await sync_service.sync_jellyfin()
-        elif service_name == "jellyseerr":
-            await sync_service.sync_jellyseerr()
+        raise HTTPException(status_code=404, detail=f"Service '{service_name}' non reconnu")
+
+    async def run_service_sync():
+        db = SessionLocal()
+        try:
+            sync_service = SyncService(db)
+
+            if service_name == "radarr":
+                await sync_service.sync_radarr()
+            elif service_name == "sonarr":
+                await sync_service.sync_sonarr()
+            elif service_name == "jellyfin":
+                await sync_service.sync_jellyfin()
+            elif service_name == "jellyseerr":
+                await sync_service.sync_jellyseerr()
+            elif service_name == "monitored-items":
+                await sync_service.sync_monitored_items()
+            elif service_name == "sonarr-seasons":
+                await sync_service.sync_sonarr_seasons()
+            elif service_name == "qbittorrent":
+                torrent_service = TorrentEnrichmentService(db)
+                await torrent_service.enrich_all_items(limit=50)
+        except Exception as e:
+            print(f"❌ Error in {service_name} sync: {e}")
+        finally:
+            db.close()
 
     background_tasks.add_task(run_service_sync)
-
     return {"message": f"Synchronisation {service_name} lancée", "status": "started"}
 
 
