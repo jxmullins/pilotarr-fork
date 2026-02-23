@@ -6,7 +6,7 @@ from sqlalchemy.orm import Session
 from app.api.schemas import ServiceConfigurationCreate, ServiceConfigurationResponse, ServiceConfigurationUpdate
 from app.db import get_db
 from app.models import ServiceConfiguration, ServiceType
-from app.services import JellyfinConnector, JellyseerrConnector, RadarrConnector, SonarrConnector
+from app.services import JellyfinConnector, JellyseerrConnector, QBittorrentConnector, RadarrConnector, SonarrConnector
 
 router = APIRouter(prefix="/services", tags=["Services"])
 
@@ -95,21 +95,23 @@ async def test_service_connection(service_name: ServiceType, db: Session = Depen
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Service {service_name} non trouvé")
 
     # Créer le bon connecteur selon le type
-    connector_map = {
-        ServiceType.RADARR: RadarrConnector,
-        ServiceType.SONARR: SonarrConnector,
-        ServiceType.JELLYFIN: JellyfinConnector,
-        ServiceType.JELLYSEERR: JellyseerrConnector,
-    }
-
-    connector_class = connector_map.get(service_name)
-    if not connector_class:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=f"Type de service non supporté: {service_name}"
+    if service_name == ServiceType.QBITTORRENT:
+        connector = QBittorrentConnector(
+            base_url=service.url, username=service.username, password=service.password, port=service.port
         )
-
-    # Passer le port au connecteur si disponible
-    connector = connector_class(base_url=service.url, api_key=service.api_key, port=service.port)
+    else:
+        connector_map = {
+            ServiceType.RADARR: RadarrConnector,
+            ServiceType.SONARR: SonarrConnector,
+            ServiceType.JELLYFIN: JellyfinConnector,
+            ServiceType.JELLYSEERR: JellyseerrConnector,
+        }
+        connector_class = connector_map.get(service_name)
+        if not connector_class:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail=f"Type de service non supporté: {service_name}"
+            )
+        connector = connector_class(base_url=service.url, api_key=service.api_key, port=service.port)
 
     try:
         success, message = await connector.test_connection()
