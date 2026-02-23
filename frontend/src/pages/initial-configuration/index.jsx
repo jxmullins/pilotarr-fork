@@ -143,18 +143,8 @@ const InitialConfiguration = () => {
       [serviceId]: { status: "testing", message: "Testing connection..." },
     }));
 
-    // Check if service uses username/password or API key
-    const usesApiKey = config?.apiKey !== undefined;
-    const usesCredentials = config?.username !== undefined && config?.password !== undefined;
-
-    let isValid;
-    if (usesApiKey) {
-      isValid = config?.url && config?.apiKey;
-    } else if (usesCredentials) {
-      isValid = config?.url && config?.username;
-    } else {
-      isValid = config?.url;
-    }
+    const isQBittorrent = serviceId === "qbittorrent";
+    const isValid = isQBittorrent ? config?.url && config?.username : config?.url && config?.apiKey;
 
     const hasValidUrl = config?.url?.startsWith("http://") || config?.url?.startsWith("https://");
 
@@ -162,11 +152,9 @@ const InitialConfiguration = () => {
       const errorStatus = {
         status: "error",
         message: "Invalid configuration",
-        details: usesApiKey
-          ? "Please provide both URL and API key"
-          : usesCredentials
-            ? "Please provide URL and username"
-            : "Please provide a valid URL",
+        details: isQBittorrent
+          ? "Please provide URL and username"
+          : "Please provide both URL and API key",
       };
       setTestStatuses((prev) => ({
         ...prev,
