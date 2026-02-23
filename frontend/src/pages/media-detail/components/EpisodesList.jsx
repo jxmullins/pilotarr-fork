@@ -82,6 +82,16 @@ const EpisodesList = ({ seasons, mediaId }) => {
                 <span className="text-sm text-muted-foreground">
                   {season?.episodes?.length} episodes
                 </span>
+                <span
+                  className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${
+                    season?.monitored
+                      ? "bg-success/10 border-success/20 text-success"
+                      : "bg-muted/60 border-border text-muted-foreground"
+                  }`}
+                >
+                  <Icon name={season?.monitored ? "Bell" : "BellOff"} size={11} />
+                  {season?.monitored ? "Monitored" : "Unmonitored"}
+                </span>
               </div>
               <div className="flex items-center gap-4">
                 <div className="text-sm text-muted-foreground">
@@ -125,6 +135,9 @@ const EpisodesList = ({ seasons, mediaId }) => {
                           Status
                         </th>
                         <th className="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">
+                          Monitored
+                        </th>
+                        <th className="px-6 py-3 text-center text-xs font-semibold text-muted-foreground uppercase">
                           Subtitles
                         </th>
                         <th className="px-6 py-3 text-right text-xs font-semibold text-muted-foreground uppercase">
@@ -150,12 +163,7 @@ const EpisodesList = ({ seasons, mediaId }) => {
 
                           {/* Title */}
                           <td className="px-6 py-4">
-                            <div className="flex items-center gap-2">
-                              {episode?.monitored && (
-                                <Icon name="Eye" size={14} className="text-success" />
-                              )}
-                              <span className="text-sm text-foreground">{episode?.title}</span>
-                            </div>
+                            <span className="text-sm text-foreground">{episode?.title}</span>
                           </td>
 
                           {/* Air Date */}
@@ -172,6 +180,20 @@ const EpisodesList = ({ seasons, mediaId }) => {
                                 {...getDownloadStatusConfig(episode?.downloadStatus)}
                               />
                             </div>
+                          </td>
+
+                          {/* Monitored */}
+                          <td className="px-6 py-4 text-center">
+                            <Icon
+                              name={episode?.monitored ? "Bell" : "BellOff"}
+                              size={15}
+                              className={
+                                episode?.monitored
+                                  ? "text-success mx-auto"
+                                  : "text-muted-foreground/40 mx-auto"
+                              }
+                              title={episode?.monitored ? "Monitored" : "Unmonitored"}
+                            />
                           </td>
 
                           {/* Subtitles */}

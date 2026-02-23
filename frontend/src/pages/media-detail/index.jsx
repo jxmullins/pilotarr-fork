@@ -95,6 +95,7 @@ const MediaDetail = () => {
 
           seasons: seasonsData.map((s) => ({
             seasonNumber: s.season_number,
+            monitored: s.is_monitored,
             episodes: s.episodes.map((ep) => ({
               episodeNumber: ep.episode_number,
               title: ep.title,
