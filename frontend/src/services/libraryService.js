@@ -26,7 +26,7 @@ export const getRecentItems = async (limit = 10, sortBy = "added_date", sortOrde
  * @param {string} sortOrder - Sort order (asc, desc)
  * @returns {Promise<Array>} Array item
  */
-export const getLibraryItems = async (limit = 20, sortBy = "added_date", sortOrder = "desc") => {
+export const getLibraryItems = async (limit = 18, sortBy = "added_date", sortOrder = "desc") => {
   try {
     const params = new URLSearchParams({ sort_by: sortBy, sort_order: sortOrder });
     if (limit !== null) params.append("limit", limit);

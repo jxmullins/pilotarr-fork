@@ -83,7 +83,7 @@ async def set_season_watched(
 
 @router.get("/", response_model=list[LibraryItemResponse])
 async def get_library(
-    limit: int | None = Query(default=20, ge=1),
+    limit: int | None = Query(default=None, ge=1),
     sort_by: ItemSortBy = Query(default=ItemSortBy.ADDED_DATE),
     sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     db: Session = Depends(get_db),
