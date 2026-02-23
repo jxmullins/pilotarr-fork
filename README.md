@@ -103,8 +103,8 @@ A single `docker-compose.yml` at the repo root orchestrates everything:
 MySQL + backend (FastAPI) + frontend (React served by nginx).
 
 ```bash
-# 1. Copy and fill in your secrets
-cp .env.example backend/.env
+# 1. Copy and fill in your secrets (single file at the root)
+cp .env.example .env
 
 # 2. Build and start all services
 docker-compose up -d --build
