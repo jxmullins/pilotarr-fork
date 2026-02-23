@@ -198,8 +198,8 @@ class SyncService:
         connector = RadarrConnector(base_url=service.url, api_key=service.api_key, port=service.port)
 
         try:
-            # Récupérer les films récents
-            recent_movies = await connector.get_recent_additions(days=30)
+            # Récupérer tous les films
+            all_movies = await connector.get_movies()
 
             # Profils de qualité {id: name}
             quality_profiles = await connector.get_quality_profiles()
@@ -207,12 +207,13 @@ class SyncService:
             # Récupérer la map movieId -> torrent_hash
             movie_hash_map = await connector.get_movie_history_map()
             print(f"📥 {len(movie_hash_map)} hash de torrents récupérés depuis Radarr")
+            print(f"📽️  {len(all_movies)} films trouvés dans Radarr")
 
             # Ajouter à la DB (éviter les doublons)
             added_count = 0
             updated_count = 0
 
-            for movie in recent_movies[:20]:  # Limiter à 20 pour ne pas surcharger
+            for movie in all_movies:
                 # Vérifier si existe déjà (par titre + année)
                 existing = (
                     self.db.query(LibraryItem)
@@ -480,8 +481,8 @@ class SyncService:
         connector = SonarrConnector(base_url=service.url, api_key=service.api_key, port=service.port)
 
         try:
-            # Récupérer les séries récentes
-            recent_series = await connector.get_recent_additions(days=30)
+            # Récupérer toutes les séries
+            all_series = await connector.get_series()
 
             # Profils de qualité {id: name}
             quality_profiles = await connector.get_quality_profiles()
@@ -490,11 +491,12 @@ class SyncService:
             series_torrents_map = await connector.get_series_torrents_map()
             total_hashes = sum(len(v) for v in series_torrents_map.values())
             print(f"📥 {total_hashes} hash de torrents récupérés depuis Sonarr ({len(series_torrents_map)} séries)")
+            print(f"📺 {len(all_series)} séries trouvées dans Sonarr")
 
             added_count = 0
             updated_count = 0
 
-            for series in recent_series[:20]:
+            for series in all_series:
                 existing = (
                     self.db.query(LibraryItem)
                     .filter(
