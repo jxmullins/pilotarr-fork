@@ -187,6 +187,12 @@ async def get_library_item(
             or 0
         )
 
+    sonarr_series_id = None
+    if item.media_type == MediaType.TV:
+        first_season = db.query(Season).filter(Season.library_item_id == id).first()
+        if first_season:
+            sonarr_series_id = first_season.sonarr_series_id
+
     data = {
         "id": item.id,
         "title": item.title,
@@ -205,6 +211,8 @@ async def get_library_item(
         "media_streams": item.media_streams,
         "created_at": item.created_at,
         "torrent_info": _build_torrent_info_array(item),
+        "jellyfin_id": item.jellyfin_id,
+        "sonarr_series_id": sonarr_series_id,
     }
 
     return data

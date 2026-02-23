@@ -7,6 +7,7 @@ import MetadataPanel from "./components/MetadataPanel";
 import EpisodesList from "./components/EpisodesList";
 import FileInfoPanel from "./components/FileInfoPanel";
 import { getLibraryItemById, getSeasonsWithEpisodes } from "../../services/libraryService";
+import { getServiceConfiguration } from "../../services/configService";
 
 const MediaDetail = () => {
   const navigate = useNavigate();
@@ -22,7 +23,12 @@ const MediaDetail = () => {
           return;
         }
 
-        const data = await getLibraryItemById(id);
+        const [data, jellyfinConfig, sonarrConfig, radarrConfig] = await Promise.all([
+          getLibraryItemById(id),
+          getServiceConfiguration("jellyfin"),
+          getServiceConfiguration("sonarr"),
+          getServiceConfiguration("radarr"),
+        ]);
 
         const seasonsData = data.media_type === "tv" ? await getSeasonsWithEpisodes(id) : [];
 
@@ -49,6 +55,14 @@ const MediaDetail = () => {
           status: null,
           network: null,
           nbMedia: data.nb_media,
+          addedDate: data.added_date,
+          jellyfinId: data.jellyfin_id,
+          sonarrSeriesId: data.sonarr_series_id,
+          serviceUrls: {
+            jellyfin: jellyfinConfig?.url ?? null,
+            sonarr: sonarrConfig?.url ?? null,
+            radarr: radarrConfig?.url ?? null,
+          },
 
           fileInfo: {
             quality: data.quality,
