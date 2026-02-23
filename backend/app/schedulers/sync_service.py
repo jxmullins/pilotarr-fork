@@ -768,115 +768,114 @@ class SyncService:
                 for idx, item in enumerate(batch, offset + 1):
                     print(f"  📺 [{idx}/{total_series}] Processing: {item.title} ({item.year})")
 
-                # Find Sonarr series
-                series_data = next(
-                    (s for s in series_list if s.get("title") == item.title and s.get("year") == item.year), None
-                )
-
-                if not series_data:
-                    print("    ⚠️  Not found in Sonarr")
-                    continue
-
-                series_id = series_data["id"]
-                print(f"    🔍 Sonarr series ID: {series_id}")
-
-                # Fetch episodes + files
-                episodes = await connector.get_episodes_by_series(series_id)
-                episode_files = await connector.get_episode_files_by_series(series_id)
-                file_map = {f["id"]: f for f in episode_files}
-
-                print(f"    📥 Fetched {len(episodes)} episodes, {len(episode_files)} files")
-
-                # Upsert episodes
-                series_episodes_synced = 0
-                series_episodes_updated = 0
-
-                for ep_data in episodes:
-                    season_num = ep_data.get("seasonNumber")
-                    episode_num = ep_data.get("episodeNumber")
-
-                    if season_num is None or episode_num is None:
-                        continue
-
-                    # Find or create season
-                    season = (
-                        self.db.query(Season)
-                        .filter(Season.library_item_id == item.id, Season.season_number == season_num)
-                        .first()
+                    # Find matching Sonarr series
+                    series_data = next(
+                        (s for s in series_list if s.get("title") == item.title and s.get("year") == item.year), None
                     )
 
-                    if not season:
-                        # Create season if it doesn't exist
-                        season = Season(
-                            library_item_id=item.id,
-                            sonarr_series_id=series_id,
-                            season_number=season_num,
-                        )
-                        self.db.add(season)
-                        self.db.flush()
+                    if not series_data:
+                        print("    ⚠️  Not found in Sonarr")
+                        continue
 
-                    # Extract file info
-                    has_file = ep_data.get("hasFile", False)
-                    episode_file_id = ep_data.get("episodeFileId")
-                    file_info = file_map.get(episode_file_id) if episode_file_id else None
+                    series_id = series_data["id"]
+                    print(f"    🔍 Sonarr series ID: {series_id}")
 
-                    # Parse air date
-                    air_date = None
-                    if ep_data.get("airDate"):
-                        try:
-                            air_date = datetime.fromisoformat(ep_data["airDate"]).date()
-                        except (ValueError, TypeError):
-                            pass
+                    # Fetch episodes + files
+                    episodes = await connector.get_episodes_by_series(series_id)
+                    episode_files = await connector.get_episode_files_by_series(series_id)
+                    file_map = {f["id"]: f for f in episode_files}
 
-                    # Upsert episode
-                    existing = self.db.query(Episode).filter(Episode.sonarr_episode_id == ep_data["id"]).first()
+                    print(f"    📥 Fetched {len(episodes)} episodes, {len(episode_files)} files")
 
-                    if existing:
-                        # Update existing
-                        existing.title = ep_data.get("title")
-                        existing.overview = ep_data.get("overview")
-                        existing.air_date = air_date
-                        existing.monitored = ep_data.get("monitored", True)
-                        existing.has_file = has_file
-                        existing.downloaded = has_file
-                        existing.sonarr_episode_file_id = episode_file_id
+                    # Upsert episodes
+                    series_episodes_synced = 0
+                    series_episodes_updated = 0
 
-                        if file_info:
-                            existing.file_size = file_info.get("size")
-                            existing.quality_profile = file_info.get("quality", {}).get("quality", {}).get("name")
-                            existing.relative_path = file_info.get("relativePath")
-                            existing.episode_file_info = file_info
+                    for ep_data in episodes:
+                        season_num = ep_data.get("seasonNumber")
+                        episode_num = ep_data.get("episodeNumber")
 
-                        episodes_updated += 1
-                        series_episodes_updated += 1
-                    else:
-                        # Insert new
-                        new_episode = Episode(
-                            season_id=season.id,
-                            library_item_id=item.id,
-                            sonarr_episode_id=ep_data["id"],
-                            sonarr_series_id=series_id,
-                            season_number=season_num,
-                            episode_number=episode_num,
-                            absolute_episode_number=ep_data.get("absoluteEpisodeNumber"),
-                            title=ep_data.get("title"),
-                            overview=ep_data.get("overview"),
-                            air_date=air_date,
-                            monitored=ep_data.get("monitored", True),
-                            has_file=has_file,
-                            downloaded=has_file,
-                            sonarr_episode_file_id=episode_file_id,
+                        if season_num is None or episode_num is None:
+                            continue
+
+                        # Find or create season
+                        season = (
+                            self.db.query(Season)
+                            .filter(Season.library_item_id == item.id, Season.season_number == season_num)
+                            .first()
                         )
 
-                        if file_info:
-                            new_episode.file_size = file_info.get("size")
-                            new_episode.quality_profile = file_info.get("quality", {}).get("quality", {}).get("name")
-                            new_episode.relative_path = file_info.get("relativePath")
-                            new_episode.episode_file_info = file_info
+                        if not season:
+                            season = Season(
+                                library_item_id=item.id,
+                                sonarr_series_id=series_id,
+                                season_number=season_num,
+                            )
+                            self.db.add(season)
+                            self.db.flush()
 
-                        self.db.add(new_episode)
-                        episodes_synced += 1
-                        series_episodes_synced += 1
+                        # Extract file info
+                        has_file = ep_data.get("hasFile", False)
+                        episode_file_id = ep_data.get("episodeFileId")
+                        file_info = file_map.get(episode_file_id) if episode_file_id else None
+
+                        # Parse air date
+                        air_date = None
+                        if ep_data.get("airDate"):
+                            try:
+                                air_date = datetime.fromisoformat(ep_data["airDate"]).date()
+                            except (ValueError, TypeError):
+                                pass
+
+                        # Upsert episode
+                        existing = self.db.query(Episode).filter(Episode.sonarr_episode_id == ep_data["id"]).first()
+
+                        if existing:
+                            existing.title = ep_data.get("title")
+                            existing.overview = ep_data.get("overview")
+                            existing.air_date = air_date
+                            existing.monitored = ep_data.get("monitored", True)
+                            existing.has_file = has_file
+                            existing.downloaded = has_file
+                            existing.sonarr_episode_file_id = episode_file_id
+
+                            if file_info:
+                                existing.file_size = file_info.get("size")
+                                existing.quality_profile = file_info.get("quality", {}).get("quality", {}).get("name")
+                                existing.relative_path = file_info.get("relativePath")
+                                existing.episode_file_info = file_info
+
+                            episodes_updated += 1
+                            series_episodes_updated += 1
+                        else:
+                            new_episode = Episode(
+                                season_id=season.id,
+                                library_item_id=item.id,
+                                sonarr_episode_id=ep_data["id"],
+                                sonarr_series_id=series_id,
+                                season_number=season_num,
+                                episode_number=episode_num,
+                                absolute_episode_number=ep_data.get("absoluteEpisodeNumber"),
+                                title=ep_data.get("title"),
+                                overview=ep_data.get("overview"),
+                                air_date=air_date,
+                                monitored=ep_data.get("monitored", True),
+                                has_file=has_file,
+                                downloaded=has_file,
+                                sonarr_episode_file_id=episode_file_id,
+                            )
+
+                            if file_info:
+                                new_episode.file_size = file_info.get("size")
+                                new_episode.quality_profile = (
+                                    file_info.get("quality", {}).get("quality", {}).get("name")
+                                )
+                                new_episode.relative_path = file_info.get("relativePath")
+                                new_episode.episode_file_info = file_info
+
+                            self.db.add(new_episode)
+                            episodes_synced += 1
+                            series_episodes_synced += 1
 
                     print(f"    ✅ {series_episodes_synced} created, {series_episodes_updated} updated")
                     series_processed += 1
