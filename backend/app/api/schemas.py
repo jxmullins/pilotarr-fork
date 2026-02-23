@@ -237,6 +237,7 @@ class LibraryItemResponse(BaseModel):
     view_count: int = 0
     media_streams: dict[str, Any] | None = None  # {"subtitles": [...], "audio": [...]}
     watched: bool = False
+    watched_count: int = 0
     created_at: datetime
 
     @field_validator("torrent_count", mode="before")

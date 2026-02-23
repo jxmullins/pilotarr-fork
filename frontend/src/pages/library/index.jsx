@@ -118,6 +118,8 @@ const Library = () => {
               hasSubtitles: true,
               seedRatio: agg?.ratio || 0,
               nbMedia: item?.nb_media || 0,
+              watchedCount: item?.watched_count ?? 0,
+              watched: item?.watched ?? false,
               image: item?.image_url || "https://via.placeholder.com/300x450",
               imageAlt: item?.image_alt || `${item?.title} poster`,
             };

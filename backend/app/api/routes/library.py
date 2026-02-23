@@ -113,8 +113,24 @@ async def get_library(
         .all()
     )
 
+    # Batch-fetch watched episode counts for all TV items (avoids N+1)
+    item_ids = [item.id for item in items]
+    watched_counts: dict[str, int] = {}
+    if item_ids:
+        rows = (
+            db.query(Episode.library_item_id, func.count(Episode.id))
+            .filter(Episode.library_item_id.in_(item_ids), Episode.watched.is_(True))
+            .group_by(Episode.library_item_id)
+            .all()
+        )
+        watched_counts = {row[0]: row[1] for row in rows}
+
     results = []
     for item in items:
+        if item.media_type == MediaType.TV:
+            watched_count = watched_counts.get(item.id, 0)
+        else:
+            watched_count = 1 if item.watched else 0
         data = {
             "id": item.id,
             "title": item.title,
@@ -129,6 +145,7 @@ async def get_library(
             "size": item.size,
             "nb_media": item.nb_media,
             "watched": item.watched,
+            "watched_count": watched_count,
             "media_streams": item.media_streams,
             "created_at": item.created_at,
             "torrent_info": _build_torrent_info_array(item),

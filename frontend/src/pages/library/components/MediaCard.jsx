@@ -64,6 +64,37 @@ const MediaCard = ({ item }) => {
           </div>
         )}
 
+        {/* Watched Badge */}
+        <div className="absolute bottom-2 right-2">
+          {item?.type === "movie" ? (
+            item?.watched && (
+              <div className="bg-success/90 backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1">
+                <Icon name="CheckCircle2" size={12} className="text-success-foreground" />
+                <span className="text-xs font-medium text-success-foreground">Watched</span>
+              </div>
+            )
+          ) : item?.nbMedia > 0 ? (
+            <div
+              className={`backdrop-blur-sm px-2 py-1 rounded-md flex items-center gap-1 ${item?.watchedCount === item?.nbMedia ? "bg-success/90" : "bg-background/80"}`}
+            >
+              <Icon
+                name="CheckCircle2"
+                size={12}
+                className={
+                  item?.watchedCount === item?.nbMedia
+                    ? "text-success-foreground"
+                    : "text-muted-foreground"
+                }
+              />
+              <span
+                className={`text-xs font-medium ${item?.watchedCount === item?.nbMedia ? "text-success-foreground" : "text-foreground"}`}
+              >
+                {item?.watchedCount}/{item?.nbMedia}
+              </span>
+            </div>
+          ) : null}
+        </div>
+
         {/* Subtitle Badge */}
         <div className="absolute bottom-2 left-2">
           {item?.hasSubtitles ? (
