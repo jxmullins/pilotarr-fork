@@ -237,9 +237,10 @@ const InitialConfiguration = () => {
     setIsSaving(true);
 
     try {
-      // Save all configurations to database
+      // Only save services that have a URL configured
+      const configured = services?.filter((service) => configurations?.[service?.id]?.url?.trim());
       await Promise.all(
-        services?.map((service) => {
+        configured?.map((service) => {
           const config = configurations?.[service?.id];
           return saveServiceConfiguration(service?.id, {
             url: config?.url,

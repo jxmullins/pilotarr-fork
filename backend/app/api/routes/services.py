@@ -55,16 +55,19 @@ async def create_service(service_data: ServiceConfigurationCreate, db: Session =
 async def update_service(
     service_name: ServiceType, service_data: ServiceConfigurationUpdate, db: Session = Depends(get_db)
 ):
-    """Mettre à jour une configuration de service"""
+    """Créer ou mettre à jour une configuration de service (upsert)"""
     service = db.query(ServiceConfiguration).filter(ServiceConfiguration.service_name == service_name).first()
 
     if not service:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail=f"Service {service_name} non trouvé")
-
-    # Mettre à jour les champs fournis
-    update_data = service_data.model_dump(exclude_unset=True)
-    for field, value in update_data.items():
-        setattr(service, field, value)
+        # Fresh install: create the record
+        create_data = service_data.model_dump(exclude_unset=True)
+        create_data["service_name"] = service_name
+        service = ServiceConfiguration(**create_data)
+        db.add(service)
+    else:
+        # Update existing fields
+        for field, value in service_data.model_dump(exclude_unset=True).items():
+            setattr(service, field, value)
 
     db.commit()
     db.refresh(service)
