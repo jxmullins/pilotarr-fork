@@ -151,7 +151,7 @@ const InitialConfiguration = () => {
     if (usesApiKey) {
       isValid = config?.url && config?.apiKey;
     } else if (usesCredentials) {
-      isValid = config?.url && config?.username && config?.password;
+      isValid = config?.url && config?.username;
     } else {
       isValid = config?.url;
     }
@@ -165,7 +165,7 @@ const InitialConfiguration = () => {
         details: usesApiKey
           ? "Please provide both URL and API key"
           : usesCredentials
-            ? "Please provide URL, username, and password"
+            ? "Please provide URL and username"
             : "Please provide a valid URL",
       };
       setTestStatuses((prev) => ({
@@ -338,6 +338,8 @@ const InitialConfiguration = () => {
                   ...service,
                   url: configurations?.[service?.id]?.url || "",
                   apiKey: configurations?.[service?.id]?.apiKey || "",
+                  username: configurations?.[service?.id]?.username || "",
+                  password: configurations?.[service?.id]?.password || "",
                   port: configurations?.[service?.id]?.port || service?.port,
                 }}
                 onTest={handleTestConnection}

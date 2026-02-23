@@ -62,7 +62,7 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
   };
 
   const isConfigValid = isQBittorrent
-    ? config?.url && config?.username && config?.password
+    ? config?.url && config?.username
     : config?.url && config?.apiKey;
 
   return (
