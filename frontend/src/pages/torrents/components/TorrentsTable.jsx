@@ -155,6 +155,7 @@ const COLUMNS = [
   { key: "ratio", label: "Ratio", sortable: true },
   { key: "eta", label: "ETA", sortable: true },
   { key: "tracker", label: "Tracker", sortable: true },
+  { key: "addedOn", label: "Added", sortable: true },
   { key: "actions", label: "", sortable: false },
 ];
 
@@ -179,8 +180,8 @@ export default function TorrentsTable({
   onPauseResume,
   onRecheck,
 }) {
-  const [sortKey, setSortKey] = useState("status");
-  const [sortDir, setSortDir] = useState("asc");
+  const [sortKey, setSortKey] = useState("addedOn");
+  const [sortDir, setSortDir] = useState("desc");
 
   const handleSort = (key) => {
     if (!COLUMNS.find((c) => c.key === key)?.sortable) return;
@@ -195,6 +196,10 @@ export default function TorrentsTable({
   const sorted = [...data].sort((a, b) => {
     let aVal = a[sortKey];
     let bVal = b[sortKey];
+    // Nulls always last
+    if (aVal == null && bVal == null) return 0;
+    if (aVal == null) return 1;
+    if (bVal == null) return -1;
     if (typeof aVal === "string") aVal = aVal.toLowerCase();
     if (typeof bVal === "string") bVal = bVal.toLowerCase();
     if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
@@ -363,6 +368,17 @@ export default function TorrentsTable({
                     <span className="truncate block" title={torrent.tracker}>
                       {torrent.tracker}
                     </span>
+                  </td>
+
+                  {/* Added On */}
+                  <td className="px-3 py-2.5 text-sm text-muted-foreground whitespace-nowrap">
+                    {torrent.addedOn
+                      ? new Date(torrent.addedOn).toLocaleDateString(undefined, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })
+                      : "—"}
                   </td>
 
                   {/* Actions */}
