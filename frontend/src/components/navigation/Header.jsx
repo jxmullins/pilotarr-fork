@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import Icon from "../AppIcon";
 import { useAuth } from "../../contexts/AuthContext";
+import { getServiceConfigurations } from "../../services/configService";
 
 const Header = () => {
   const location = useLocation();
@@ -13,9 +14,17 @@ const Header = () => {
   const userMenuRef = useRef(null);
 
   useEffect(() => {
-    const configComplete = localStorage.getItem("pilotarr_config_complete");
-    setConfigProgress(!configComplete);
-  }, []);
+    const checkConfigStatus = async () => {
+      try {
+        const configs = await getServiceConfigurations();
+        const allOnline = configs?.length > 0 && configs.every((c) => c?.testStatus === "success");
+        setConfigProgress(!allOnline);
+      } catch {
+        setConfigProgress(true);
+      }
+    };
+    checkConfigStatus();
+  }, [location.pathname]);
 
   useEffect(() => {
     const handler = (e) => {
