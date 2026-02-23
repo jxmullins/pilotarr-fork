@@ -2,6 +2,9 @@
 
 A full-stack dashboard for managing your home media server stack. Pilotarr provides a unified interface to monitor and control **Radarr**, **Sonarr**, **qBittorrent**, **Jellyfin**, and **Jellyseerr** from a single place.
 
+![Pilotarr dashboard](docs/pilotarr-1.png)
+![Pilotarr library](docs/pilotarr-2.png)
+
 ## Features
 
 - **Unified Dashboard** - Overview of all services with stats, recent additions, and upcoming releases
