@@ -90,3 +90,27 @@ export const setSeasonWatched = async (mediaId, seasonNumber, watched) => {
     return false;
   }
 };
+
+export const monitorEpisode = async (mediaId, seasonNumber, episodeNumber) => {
+  try {
+    await pilotarrClient?.post(
+      `/library/${mediaId}/seasons/${seasonNumber}/episodes/${episodeNumber}/monitor`,
+    );
+    return true;
+  } catch (error) {
+    console.error("Error monitoring episode:", error?.message);
+    return false;
+  }
+};
+
+export const searchEpisode = async (mediaId, seasonNumber, episodeNumber) => {
+  try {
+    await pilotarrClient?.post(
+      `/library/${mediaId}/seasons/${seasonNumber}/episodes/${episodeNumber}/search`,
+    );
+    return true;
+  } catch (error) {
+    console.error("Error searching episode:", error?.message);
+    return false;
+  }
+};

@@ -195,6 +195,7 @@ class EpisodeResponse(BaseModel):
 
 class EpisodeDetailResponse(BaseModel):
     episode_number: int
+    sonarr_episode_id: int | None = None
     title: str | None = None
     air_date: date | None = None
     monitored: bool

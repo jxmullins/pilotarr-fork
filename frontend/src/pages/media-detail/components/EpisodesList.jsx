@@ -2,9 +2,15 @@ import React, { useState } from "react";
 import Icon from "../../../components/AppIcon";
 import Button from "../../../components/ui/Button";
 import StatusIndicator from "../../monitoring/components/StatusIndicator";
-import { setEpisodeWatched, setSeasonWatched } from "../../../services/libraryService";
+import {
+  setEpisodeWatched,
+  setSeasonWatched,
+  monitorEpisode,
+  searchEpisode,
+} from "../../../services/libraryService";
 
 const EpisodesList = ({ seasons, mediaId }) => {
+  const [seasonsState, setSeasonsState] = useState(seasons);
   const [expandedSeasons, setExpandedSeasons] = useState([0]); // First season expanded by default
   const [watchedMap, setWatchedMap] = useState(() =>
     Object.fromEntries(
@@ -48,9 +54,25 @@ const EpisodesList = ({ seasons, mediaId }) => {
     await setSeasonWatched(mediaId, season.seasonNumber, newWatched);
   };
 
-  const handleManualSearch = (seasonIndex, episodeIndex) => {
-    // TODO: API call to trigger manual search
-    console.log(`Manual search for S${seasonIndex + 1}E${episodeIndex + 1}`);
+  const handleMonitor = async (season, episode) => {
+    await monitorEpisode(mediaId, season.seasonNumber, episode.episodeNumber);
+    // Optimistic update
+    setSeasonsState((prev) =>
+      prev.map((s) =>
+        s.seasonNumber !== season.seasonNumber
+          ? s
+          : {
+              ...s,
+              episodes: s.episodes.map((ep) =>
+                ep.episodeNumber === episode.episodeNumber ? { ...ep, monitored: true } : ep,
+              ),
+            },
+      ),
+    );
+  };
+
+  const handleSearch = async (season, episode) => {
+    await searchEpisode(mediaId, season.seasonNumber, episode.episodeNumber);
   };
 
   return (
@@ -63,7 +85,7 @@ const EpisodesList = ({ seasons, mediaId }) => {
       </div>
 
       <div className="divide-y divide-border">
-        {seasons?.map((season, seasonIndex) => (
+        {seasonsState?.map((season, seasonIndex) => (
           <div key={seasonIndex}>
             {/* Season Header */}
             <button
@@ -261,13 +283,23 @@ const EpisodesList = ({ seasons, mediaId }) => {
                                     : "Mark as watched"
                                 }
                               />
-                              <Button
-                                size="xs"
-                                variant="ghost"
-                                iconName="Search"
-                                onClick={() => handleManualSearch(seasonIndex, episodeIndex)}
-                                title="Manual Search"
-                              />
+                              {!episode?.monitored ? (
+                                <Button
+                                  size="xs"
+                                  variant="ghost"
+                                  iconName="Bell"
+                                  onClick={() => handleMonitor(season, episode)}
+                                  title="Monitor this episode"
+                                />
+                              ) : !episode?.downloaded ? (
+                                <Button
+                                  size="xs"
+                                  variant="ghost"
+                                  iconName="RefreshCw"
+                                  onClick={() => handleSearch(season, episode)}
+                                  title="Refresh search"
+                                />
+                              ) : null}
                             </div>
                           </td>
                         </tr>

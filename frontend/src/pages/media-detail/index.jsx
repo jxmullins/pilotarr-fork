@@ -98,6 +98,7 @@ const MediaDetail = () => {
             monitored: s.is_monitored,
             episodes: s.episodes.map((ep) => ({
               episodeNumber: ep.episode_number,
+              sonarrEpisodeId: ep.sonarr_episode_id,
               title: ep.title,
               airDate: ep.air_date,
               monitored: ep.monitored,

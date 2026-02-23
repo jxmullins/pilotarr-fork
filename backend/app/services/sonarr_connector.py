@@ -276,6 +276,32 @@ class SonarrConnector(BaseConnector):
 
         return None
 
+    async def monitor_episode(self, sonarr_episode_id: int) -> bool:
+        """
+        Monitor a single episode via PUT /api/v3/episode/monitor.
+
+        Returns True on success.
+        """
+        try:
+            await self._put("/api/v3/episode/monitor", {"episodeIds": [sonarr_episode_id], "monitored": True})
+            return True
+        except Exception as e:
+            print(f"❌ Erreur monitor épisode {sonarr_episode_id}: {e}")
+            return False
+
+    async def search_episode(self, sonarr_episode_id: int) -> bool:
+        """
+        Trigger an episode search via POST /api/v3/command EpisodeSearch.
+
+        Returns True on success.
+        """
+        try:
+            await self._post("/api/v3/command", json={"name": "EpisodeSearch", "episodeIds": [sonarr_episode_id]})
+            return True
+        except Exception as e:
+            print(f"❌ Erreur search épisode {sonarr_episode_id}: {e}")
+            return False
+
     async def get_statistics(self) -> dict[str, Any]:
         """
         Récupérer les statistiques Sonarr
