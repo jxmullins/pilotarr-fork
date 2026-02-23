@@ -103,8 +103,9 @@ A single `docker-compose.yml` at the repo root orchestrates everything:
 MySQL + backend (FastAPI) + frontend (React served by nginx).
 
 ```bash
-# 1. Copy and fill in your secrets (single file at the root)
+# 1. Copy and fill in your secrets (single file at the root — used by all services)
 cp .env.example .env
+# Edit .env: set DB_PASSWORD, MYSQL_ROOT_PASSWORD, SECRET_KEY, API_KEY, etc.
 
 # 2. Build and start all services
 docker-compose up -d --build
@@ -112,6 +113,8 @@ docker-compose up -d --build
 # 3. Check logs
 docker-compose logs -f
 ```
+
+> **Important:** The `.env` file **must be at the repository root** (next to `docker-compose.yml`). Docker Compose reads it automatically and injects the same credentials into both MySQL and the backend — keeping them in sync. A `backend/.env` file is only used for local development (without Docker).
 
 The app is available at `http://localhost` (or the port set by `PILOTARR_PORT`).
 
