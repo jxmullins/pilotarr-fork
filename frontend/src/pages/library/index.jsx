@@ -91,7 +91,7 @@ const Library = () => {
     sortBy: "added_date",
     order: "desc",
   });
-  const [limit, setLimit] = useState(18);
+  const [limit, setLimit] = useState(18); // null = no limit (All)
   const [mediaData, setMediaData] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -211,7 +211,7 @@ const Library = () => {
             {[
               { label: "18", value: 18 },
               { label: "36", value: 36 },
-              { label: "All", value: 100 },
+              { label: "All", value: null },
             ].map(({ label, value }) => (
               <button
                 key={value}

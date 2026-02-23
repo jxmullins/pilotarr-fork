@@ -28,9 +28,9 @@ export const getRecentItems = async (limit = 10, sortBy = "added_date", sortOrde
  */
 export const getLibraryItems = async (limit = 20, sortBy = "added_date", sortOrder = "desc") => {
   try {
-    const response = await pilotarrClient?.get(
-      `/library?limit=${limit}&sort_by=${sortBy}&sort_order=${sortOrder}`,
-    );
+    const params = new URLSearchParams({ sort_by: sortBy, sort_order: sortOrder });
+    if (limit !== null) params.append("limit", limit);
+    const response = await pilotarrClient?.get(`/library?${params}`);
     return response?.data || [];
   } catch (error) {
     console.error("Error fetching library items:", error?.message);

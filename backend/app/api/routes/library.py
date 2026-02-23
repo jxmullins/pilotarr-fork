@@ -83,7 +83,7 @@ async def set_season_watched(
 
 @router.get("/", response_model=list[LibraryItemResponse])
 async def get_library(
-    limit: int = Query(default=20, ge=1, le=100),
+    limit: int | None = Query(default=20, ge=1),
     sort_by: ItemSortBy = Query(default=ItemSortBy.ADDED_DATE),
     sort_order: str = Query(default="desc", pattern="^(asc|desc)$"),
     db: Session = Depends(get_db),
@@ -104,14 +104,13 @@ async def get_library(
     else:
         sort_clause = sort_column.desc()
 
-    items = (
+    query = (
         db.query(LibraryItem)
         .where(LibraryItem.size != 0)
         .options(selectinload(LibraryItem.torrents))
         .order_by(sort_clause)
-        .limit(limit)
-        .all()
     )
+    items = query.limit(limit).all() if limit else query.all()
 
     # Batch-fetch watched episode counts for all TV items (avoids N+1)
     item_ids = [item.id for item in items]
