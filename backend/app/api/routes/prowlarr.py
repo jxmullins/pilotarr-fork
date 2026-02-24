@@ -72,6 +72,18 @@ async def search(
         await connector.close()
 
 
+@router.get("/debug/history")
+async def debug_history(db: Session = Depends(get_db)):
+    """Return first 3 raw history records directly from Prowlarr (no transformation)."""
+    connector = _get_connector(db)
+    try:
+        params = {"pageSize": 3, "sortKey": "date", "sortDirection": "descending"}
+        response = await connector._get("/api/v1/history", params=params)
+        return {"raw": response.get("records", [])[:3]}
+    finally:
+        await connector.close()
+
+
 @router.post("/grab")
 async def grab(body: ProwlarrGrabRequest, db: Session = Depends(get_db)):
     """Grab a search result (send to download client)."""
