@@ -33,8 +33,25 @@ os.environ.setdefault("WEBHOOK_SECRET", "test-webhook-secret")
 from app.core.security import get_current_user  # noqa: E402
 from app.db import Base, get_db  # noqa: E402
 from app.main import app  # noqa: E402
-from app.models.enums import MediaType, ServiceType  # noqa: E402
-from app.models.models import Episode, LibraryItem, Season, ServiceConfiguration, User  # noqa: E402
+from app.models.enums import (  # noqa: E402
+    DeviceType,
+    MediaType,
+    PlaybackMethod,
+    ServiceType,
+    SessionStatus,
+    VideoQuality,
+)
+from app.models.models import (  # noqa: E402
+    DailyAnalytic,
+    DeviceStatistic,
+    Episode,
+    LibraryItem,
+    PlaybackSession,
+    Season,
+    ServerMetric,
+    ServiceConfiguration,
+    User,
+)
 from app.services.auth_service import create_access_token, hash_password  # noqa: E402
 
 # ── SQLite in-memory engine ───────────────────────────────────────────────────
@@ -252,5 +269,176 @@ def make_tv_show(db, make_library_item):
         db.commit()
         db.refresh(show)
         return show, season, [ep1, ep2]
+
+    return _make
+
+
+@pytest.fixture()
+def make_playback_session(db):
+    """Factory: create and persist a PlaybackSession."""
+
+    def _make(
+        media_id="media_abc",
+        media_title="Test Movie",
+        media_type=MediaType.MOVIE,
+        episode_info=None,
+        user_id="user_abc",
+        user_name="testuser",
+        device_type=DeviceType.WEB_BROWSER,
+        device_name="Desktop",
+        client_name="Jellyfin Web",
+        video_quality=VideoQuality.FULL_HD,
+        playback_method=PlaybackMethod.DIRECT_PLAY,
+        video_codec_source="h264",
+        video_codec_target=None,
+        transcoding_progress=0,
+        transcoding_speed=None,
+        duration_seconds=3600,
+        watched_seconds=0,
+        status=SessionStatus.ACTIVE,
+        is_active=True,
+        library_item_id=None,
+        start_time=None,
+        end_time=None,
+    ):
+        if start_time is None:
+            start_time = datetime.utcnow()
+        session = PlaybackSession(
+            media_id=media_id,
+            media_title=media_title,
+            media_type=media_type,
+            episode_info=episode_info,
+            user_id=user_id,
+            user_name=user_name,
+            device_type=device_type,
+            device_name=device_name,
+            client_name=client_name,
+            video_quality=video_quality,
+            playback_method=playback_method,
+            video_codec_source=video_codec_source,
+            video_codec_target=video_codec_target,
+            transcoding_progress=transcoding_progress,
+            transcoding_speed=transcoding_speed,
+            duration_seconds=duration_seconds,
+            watched_seconds=watched_seconds,
+            status=status,
+            is_active=is_active,
+            library_item_id=library_item_id,
+            start_time=start_time,
+            end_time=end_time,
+        )
+        db.add(session)
+        db.commit()
+        db.refresh(session)
+        return session
+
+    return _make
+
+
+@pytest.fixture()
+def make_daily_analytic(db):
+    """Factory: create and persist a DailyAnalytic."""
+
+    def _make(
+        stat_date=None,
+        total_plays=1,
+        hours_watched=1.0,
+        unique_users=1,
+        unique_media=1,
+        movies_played=1,
+        tv_episodes_played=0,
+        direct_play_count=1,
+        transcoded_count=0,
+    ):
+        from datetime import date as date_type
+
+        if stat_date is None:
+            stat_date = date_type.today()
+        analytic = DailyAnalytic(
+            date=stat_date,
+            total_plays=total_plays,
+            hours_watched=hours_watched,
+            unique_users=unique_users,
+            unique_media=unique_media,
+            movies_played=movies_played,
+            tv_episodes_played=tv_episodes_played,
+            direct_play_count=direct_play_count,
+            transcoded_count=transcoded_count,
+        )
+        db.add(analytic)
+        db.commit()
+        db.refresh(analytic)
+        return analytic
+
+    return _make
+
+
+@pytest.fixture()
+def make_server_metric(db):
+    """Factory: create and persist a ServerMetric."""
+
+    def _make(
+        cpu_usage_percent=25.0,
+        memory_usage_gb=8.0,
+        memory_total_gb=16.0,
+        storage_used_tb=2.0,
+        storage_total_tb=10.0,
+        bandwidth_mbps=50.0,
+        cpu_status="success",
+        memory_status="success",
+        storage_status="success",
+        bandwidth_status="success",
+        active_sessions_count=0,
+        active_transcoding_count=0,
+    ):
+        metric = ServerMetric(
+            cpu_usage_percent=cpu_usage_percent,
+            memory_usage_gb=memory_usage_gb,
+            memory_total_gb=memory_total_gb,
+            storage_used_tb=storage_used_tb,
+            storage_total_tb=storage_total_tb,
+            bandwidth_mbps=bandwidth_mbps,
+            cpu_status=cpu_status,
+            memory_status=memory_status,
+            storage_status=storage_status,
+            bandwidth_status=bandwidth_status,
+            active_sessions_count=active_sessions_count,
+            active_transcoding_count=active_transcoding_count,
+        )
+        db.add(metric)
+        db.commit()
+        db.refresh(metric)
+        return metric
+
+    return _make
+
+
+@pytest.fixture()
+def make_device_statistic(db):
+    """Factory: create and persist a DeviceStatistic."""
+
+    def _make(
+        device_type=DeviceType.WEB_BROWSER,
+        period_start=None,
+        period_end=None,
+        session_count=1,
+        total_duration_seconds=3600,
+        unique_users=1,
+    ):
+        from datetime import date as date_type
+
+        today = date_type.today()
+        stat = DeviceStatistic(
+            device_type=device_type,
+            period_start=period_start or today,
+            period_end=period_end or today,
+            session_count=session_count,
+            total_duration_seconds=total_duration_seconds,
+            unique_users=unique_users,
+        )
+        db.add(stat)
+        db.commit()
+        db.refresh(stat)
+        return stat
 
     return _make
