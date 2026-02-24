@@ -99,10 +99,12 @@ const InitialConfiguration = () => {
           savedConfigs?.forEach((config) => {
             configMap[config.serviceName] = {
               url: config?.url,
-              apiKey: config?.apiKey,
-              username: config?.username,
-              password: config?.password,
+              apiKey: "", // Not returned by API — never pre-fill
+              username: config?.username || "",
+              password: "", // Not returned by API — never pre-fill
               port: config?.port?.toString() || "",
+              hasApiKey: config?.hasApiKey || false,
+              hasPassword: config?.hasPassword || false,
             };
 
             if (config?.testStatus) {
@@ -144,7 +146,9 @@ const InitialConfiguration = () => {
     }));
 
     const isQBittorrent = serviceId === "qbittorrent";
-    const isValid = isQBittorrent ? config?.url && config?.username : config?.url && config?.apiKey;
+    const isValid = isQBittorrent
+      ? config?.url && config?.username && (config?.password || config?.hasPassword)
+      : config?.url && (config?.apiKey || config?.hasApiKey);
 
     const hasValidUrl = config?.url?.startsWith("http://") || config?.url?.startsWith("https://");
 
@@ -330,6 +334,8 @@ const InitialConfiguration = () => {
                   username: configurations?.[service?.id]?.username || "",
                   password: configurations?.[service?.id]?.password || "",
                   port: configurations?.[service?.id]?.port || service?.port,
+                  hasApiKey: configurations?.[service?.id]?.hasApiKey || false,
+                  hasPassword: configurations?.[service?.id]?.hasPassword || false,
                 }}
                 onTest={handleTestConnection}
                 onConfigChange={handleConfigChange}

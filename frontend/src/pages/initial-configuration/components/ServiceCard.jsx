@@ -8,10 +8,12 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [config, setConfig] = useState({
     url: service?.url || "",
-    apiKey: service?.apiKey || "",
+    apiKey: "", // Never pre-filled — API never returns the actual key
     username: service?.username || "",
-    password: service?.password || "",
+    password: "", // Never pre-filled — API never returns the actual password
     port: service?.port || "",
+    hasApiKey: service?.hasApiKey || false,
+    hasPassword: service?.hasPassword || false,
   });
 
   const isQBittorrent = service?.id === "qbittorrent";
@@ -20,12 +22,14 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
   useEffect(() => {
     setConfig({
       url: service?.url || "",
-      apiKey: service?.apiKey || "",
+      apiKey: "",
       username: service?.username || "",
-      password: service?.password || "",
+      password: "",
       port: service?.port || "",
+      hasApiKey: service?.hasApiKey || false,
+      hasPassword: service?.hasPassword || false,
     });
-  }, [service?.url, service?.apiKey, service?.username, service?.password, service?.port]);
+  }, [service?.url, service?.username, service?.port, service?.hasApiKey, service?.hasPassword]);
 
   const handleInputChange = (field, value) => {
     const updatedConfig = { ...config, [field]: value };
@@ -62,8 +66,8 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
   };
 
   const isConfigValid = isQBittorrent
-    ? config?.url && config?.username
-    : config?.url && config?.apiKey;
+    ? config?.url && config?.username && (config?.password || config?.hasPassword)
+    : config?.url && (config?.apiKey || config?.hasApiKey);
 
   return (
     <div className="bg-card border border-border rounded-lg p-4 md:p-6 shadow-elevation-2 transition-smooth hover:shadow-elevation-3">
@@ -123,10 +127,12 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
               <Input
                 label="Password"
                 type={showPassword ? "text" : "password"}
-                placeholder="Enter your password"
+                placeholder={
+                  config?.hasPassword ? "Saved — enter new value to change" : "Enter your password"
+                }
                 value={config?.password}
                 onChange={(e) => handleInputChange("password", e?.target?.value)}
-                required
+                required={!config?.hasPassword}
                 description="qBittorrent Web UI password"
               />
               <button
@@ -144,10 +150,12 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
             <Input
               label="API Key"
               type={showApiKey ? "text" : "password"}
-              placeholder="Enter your API key"
+              placeholder={
+                config?.hasApiKey ? "Saved — enter new value to change" : "Enter your API key"
+              }
               value={config?.apiKey}
               onChange={(e) => handleInputChange("apiKey", e?.target?.value)}
-              required
+              required={!config?.hasApiKey}
               description="Found in service settings under API section"
             />
             <button
@@ -199,7 +207,7 @@ const ServiceCard = ({ service, onTest, onConfigChange, testStatus }) => {
           Test Connection
         </Button>
       </div>
-      {(config?.apiKey || config?.password) && (
+      {(config?.apiKey || config?.hasApiKey || config?.password || config?.hasPassword) && (
         <div className="mt-4 flex items-center gap-2 text-xs text-muted-foreground">
           <Icon name="Shield" size={14} />
           <span>{isQBittorrent ? "Credentials" : "API key"} will be encrypted before storage</span>

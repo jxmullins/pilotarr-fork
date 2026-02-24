@@ -42,6 +42,21 @@ class TestGetService:
         assert data["url"] == "http://radarr"
         assert data["port"] == 7878
 
+    def test_api_key_not_returned(self, auth_client, make_service_config):
+        """Credentials must never appear in GET responses."""
+        make_service_config(service_name=ServiceType.SONARR, api_key="super-secret")
+        resp = auth_client.get("/api/services/sonarr")
+        data = resp.json()
+        assert "api_key" not in data
+        assert "password" not in data
+
+    def test_has_api_key_flag(self, auth_client, make_service_config):
+        """has_api_key should be True when an api_key is stored."""
+        make_service_config(service_name=ServiceType.SONARR, api_key="some-key")
+        data = auth_client.get("/api/services/sonarr").json()
+        assert data["has_api_key"] is True
+        assert data["has_password"] is False
+
     def test_get_nonexistent(self, auth_client):
         resp = auth_client.get("/api/services/sonarr")
         assert resp.status_code == 404
@@ -98,6 +113,36 @@ class TestUpdateService:
         )
         assert resp.status_code == 200
         assert resp.json()["service_name"] == "radarr"
+
+    def test_update_without_api_key_preserves_existing(self, auth_client, make_service_config, db):
+        """Omitting api_key in PUT must not wipe the stored credential."""
+        make_service_config(service_name=ServiceType.SONARR, api_key="original-key")
+        # Update URL only — no api_key in payload
+        auth_client.put("/api/services/sonarr", json={"url": "http://updated-url"})
+        # Verify the stored api_key is untouched
+        from app.models.models import ServiceConfiguration
+
+        stored = db.query(ServiceConfiguration).filter_by(service_name="sonarr").first()
+        assert stored.api_key == "original-key"
+        assert stored.url == "http://updated-url"
+
+    def test_update_with_empty_api_key_preserves_existing(self, auth_client, make_service_config, db):
+        """Sending api_key=null must not wipe the stored credential."""
+        make_service_config(service_name=ServiceType.SONARR, api_key="original-key")
+        auth_client.put("/api/services/sonarr", json={"url": "http://x", "api_key": None})
+        from app.models.models import ServiceConfiguration
+
+        stored = db.query(ServiceConfiguration).filter_by(service_name="sonarr").first()
+        assert stored.api_key == "original-key"
+
+    def test_update_with_new_api_key_replaces_existing(self, auth_client, make_service_config, db):
+        """Providing a non-empty api_key must replace the stored value."""
+        make_service_config(service_name=ServiceType.SONARR, api_key="old-key")
+        auth_client.put("/api/services/sonarr", json={"url": "http://x", "api_key": "brand-new-key"})
+        from app.models.models import ServiceConfiguration
+
+        stored = db.query(ServiceConfiguration).filter_by(service_name="sonarr").first()
+        assert stored.api_key == "brand-new-key"
 
 
 # ── DELETE /api/services/{name} ───────────────────────────────────────────────

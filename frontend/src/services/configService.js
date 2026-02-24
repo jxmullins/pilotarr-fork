@@ -11,9 +11,7 @@ const mapServiceResponse = (data) => {
   return {
     serviceName: data?.service_name,
     url: data?.url,
-    apiKey: data?.api_key,
-    username: data?.username,
-    password: data?.password,
+    username: data?.username, // Not sensitive — returned by API
     port: data?.port,
     isActive: data?.is_active,
     id: data?.id,
@@ -22,6 +20,9 @@ const mapServiceResponse = (data) => {
     testMessage: data?.test_message,
     createdAt: data?.created_at,
     updatedAt: data?.updated_at,
+    // Credential presence flags — the actual secrets are never returned
+    hasApiKey: data?.has_api_key ?? false,
+    hasPassword: data?.has_password ?? false,
   };
 };
 
@@ -64,18 +65,21 @@ export const getServiceConfiguration = async (serviceName) => {
 
 export const saveServiceConfiguration = async (serviceName, config) => {
   try {
-    const response = await pilotarrClient?.put(`/services/${serviceName}`, {
+    const payload = {
       service_name: serviceName,
       url: config?.url,
-      api_key: config?.apiKey,
-      username: config?.username,
-      password: config?.password,
+      username: config?.username || null,
       port: config?.port ? parseInt(config?.port) : null,
       is_active: config?.isActive !== undefined ? config?.isActive : false,
-      last_tested_at: config?.lastTestedAt || null,
-      test_status: config?.testStatus || null,
-      test_message: config?.testMessage || null,
-    });
+    };
+
+    // Only send credentials when the user explicitly provided a new value.
+    // Empty/absent values are intentionally omitted so the backend keeps the
+    // previously stored secret unchanged.
+    if (config?.apiKey) payload.api_key = config.apiKey;
+    if (config?.password) payload.password = config.password;
+
+    const response = await pilotarrClient?.put(`/services/${serviceName}`, payload);
     return mapServiceResponse(response?.data);
   } catch (error) {
     console.error(`Error saving ${serviceName} configuration:`, error?.message);
