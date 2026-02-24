@@ -95,18 +95,36 @@ class ProwlarrConnector(BaseConnector):
             params = {"pageSize": page_size, "sortKey": "date", "sortDirection": "descending"}
             response = await self._get("/api/v1/history", params=params)
             records = response.get("records", [])
-            return [
-                {
-                    "id": r.get("id"),
-                    "date": r.get("date"),
-                    "indexer": r.get("indexer", ""),
-                    "query": r.get("query", ""),
-                    "categories": [c.get("name", "") for c in r.get("categories", [])],
-                    "eventType": r.get("eventType", ""),
-                    "successful": r.get("successful", True),
-                }
-                for r in records
-            ]
+            result = []
+            for r in records:
+                data = r.get("data") or {}
+                # Query is in data.query for indexerQuery events; top-level query is often empty
+                query = data.get("query") or r.get("query") or ""
+                # Categories are integer IDs at top-level; data.categories is a comma-separated string
+                raw_cats = r.get("categories") or []
+                if raw_cats and isinstance(raw_cats[0], int):
+                    # Convert IDs to strings (e.g. 2000 → "2000")
+                    categories = [str(c) for c in raw_cats]
+                elif raw_cats:
+                    # Objects with name property
+                    categories = [c.get("name", str(c)) if isinstance(c, dict) else str(c) for c in raw_cats]
+                elif data.get("categories"):
+                    # Fallback: comma-separated string in data
+                    categories = [s.strip() for s in str(data["categories"]).split(",") if s.strip()]
+                else:
+                    categories = []
+                result.append(
+                    {
+                        "id": r.get("id"),
+                        "date": r.get("date"),
+                        "indexer": r.get("indexer") or "",
+                        "query": query,
+                        "categories": categories,
+                        "eventType": r.get("eventType") or "",
+                        "successful": r.get("successful", True),
+                    }
+                )
+            return result
         except Exception as e:
             print(f"❌ Prowlarr get_history error: {e}")
             return []
