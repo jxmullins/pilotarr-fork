@@ -148,6 +148,11 @@ cd backend && docker-compose up   # backend + MySQL with --reload
 cd frontend && npm start          # Vite dev server on :4028
 ```
 
+#### First Login
+user : pilotarr
+
+password : rratolip
+
 ## Jellyfin Integration
 
 Pilotarr receives real-time playback events from Jellyfin via webhooks. This powers the analytics page (user leaderboard, usage charts, session history) and automatically marks episodes/movies as watched.
