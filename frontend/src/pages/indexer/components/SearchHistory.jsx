@@ -11,20 +11,44 @@ const formatTimeAgo = (dateStr) => {
   return `${Math.floor(hours / 24)}d ago`;
 };
 
+const EVENT_META = {
+  indexerQuery: {
+    label: "Search",
+    icon: "Search",
+    style: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+  },
+  indexerRss: {
+    label: "RSS",
+    icon: "Rss",
+    style: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+  },
+  grab: {
+    label: "Grabbed",
+    icon: "Download",
+    style: "bg-amber-500/10 text-amber-400 border-amber-500/20",
+  },
+};
+
 const EventBadge = ({ eventType, successful }) => {
-  const isGrab = eventType === "grab";
+  if (!successful) {
+    return (
+      <span className="inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border font-medium bg-red-500/10 text-red-400 border-red-500/20">
+        <Icon name="AlertCircle" size={11} />
+        Failed
+      </span>
+    );
+  }
+  const meta = EVENT_META[eventType] || {
+    label: eventType || "—",
+    icon: "Activity",
+    style: "bg-slate-500/10 text-slate-400 border-slate-500/20",
+  };
   return (
     <span
-      className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border font-medium ${
-        !successful
-          ? "bg-red-500/10 text-red-400 border-red-500/20"
-          : isGrab
-            ? "bg-amber-500/10 text-amber-400 border-amber-500/20"
-            : "bg-slate-500/10 text-slate-400 border-slate-500/20"
-      }`}
+      className={`inline-flex items-center gap-1 text-xs px-2 py-0.5 rounded border font-medium ${meta.style}`}
     >
-      <Icon name={!successful ? "AlertCircle" : isGrab ? "Download" : "Search"} size={11} />
-      {!successful ? "Failed" : isGrab ? "Grabbed" : "Searched"}
+      <Icon name={meta.icon} size={11} />
+      {meta.label}
     </span>
   );
 };
@@ -94,19 +118,29 @@ const SearchHistory = ({ history, onRefresh, loading }) => {
                 <td className="px-4 py-2.5 text-muted-foreground whitespace-nowrap text-xs">
                   {formatTimeAgo(entry.date)}
                 </td>
-                <td className="px-3 py-2.5 text-foreground max-w-[200px] md:max-w-xs">
-                  <span className="truncate block" title={entry.query}>
-                    {entry.query}
-                  </span>
+                <td className="px-3 py-2.5 max-w-[200px] md:max-w-xs">
+                  {entry.query ? (
+                    <span className="truncate block text-foreground" title={entry.query}>
+                      {entry.query}
+                    </span>
+                  ) : (
+                    <span className="text-xs text-muted-foreground italic">
+                      {entry.source ? `RSS · ${entry.source}` : "RSS"}
+                    </span>
+                  )}
                 </td>
                 <td className="px-3 py-2.5 hidden md:table-cell">
-                  <span className="text-xs text-muted-foreground bg-background px-1.5 py-0.5 rounded whitespace-nowrap">
-                    {entry.indexer}
-                  </span>
+                  {entry.indexer ? (
+                    <span className="text-xs text-muted-foreground bg-background px-1.5 py-0.5 rounded whitespace-nowrap">
+                      {entry.indexer}
+                    </span>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
                 </td>
                 <td className="px-3 py-2.5 hidden sm:table-cell">
                   <span className="text-xs text-muted-foreground">
-                    {entry.categories?.join(", ") || "—"}
+                    {entry.categories?.length ? entry.categories.join(", ") : "—"}
                   </span>
                 </td>
                 <td className="px-3 py-2.5 text-center">

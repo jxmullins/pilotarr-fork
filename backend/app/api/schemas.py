@@ -601,6 +601,7 @@ class ProwlarrHistoryItem(BaseModel):
     categories: list[str] = []
     eventType: str = ""  # noqa: N815
     successful: bool = True
+    source: str = ""
 
 
 class ProwlarrSearchResult(BaseModel):

@@ -92,36 +92,29 @@ class ProwlarrConnector(BaseConnector):
 
     async def get_history(self, page_size: int = 15) -> list[dict[str, Any]]:
         try:
+            # Build indexerId → name map from the indexers list
+            indexers = await self.get_indexers()
+            indexer_map = {idx["id"]: idx["name"] for idx in indexers}
+
             params = {"pageSize": page_size, "sortKey": "date", "sortDirection": "descending"}
             response = await self._get("/api/v1/history", params=params)
             records = response.get("records", [])
             result = []
             for r in records:
                 data = r.get("data") or {}
-                # Query is in data.query for indexerQuery events; top-level query is often empty
-                query = data.get("query") or r.get("query") or ""
-                # Categories are integer IDs at top-level; data.categories is a comma-separated string
-                raw_cats = r.get("categories") or []
-                if raw_cats and isinstance(raw_cats[0], int):
-                    # Convert IDs to strings (e.g. 2000 → "2000")
-                    categories = [str(c) for c in raw_cats]
-                elif raw_cats:
-                    # Objects with name property
-                    categories = [c.get("name", str(c)) if isinstance(c, dict) else str(c) for c in raw_cats]
-                elif data.get("categories"):
-                    # Fallback: comma-separated string in data
-                    categories = [s.strip() for s in str(data["categories"]).split(",") if s.strip()]
-                else:
-                    categories = []
+                query = data.get("query") or ""
+                categories = [s.strip() for s in str(data.get("categories", "")).split(",") if s.strip()]
+                indexer_id = r.get("indexerId")
                 result.append(
                     {
                         "id": r.get("id"),
                         "date": r.get("date"),
-                        "indexer": r.get("indexer") or "",
+                        "indexer": indexer_map.get(indexer_id, f"#{indexer_id}") if indexer_id else "",
                         "query": query,
                         "categories": categories,
                         "eventType": r.get("eventType") or "",
                         "successful": r.get("successful", True),
+                        "source": data.get("source") or "",
                     }
                 )
             return result
