@@ -1,9 +1,7 @@
 """
 Integration tests for /api/services routes.
 
-- GET  /api/services/
 - GET  /api/services/{name}
-- POST /api/services/
 - PUT  /api/services/{name}
 - DELETE /api/services/{name}
 - POST /api/services/{name}/test
@@ -12,22 +10,6 @@ Integration tests for /api/services routes.
 from unittest.mock import AsyncMock, patch
 
 from app.models.enums import ServiceType
-
-# ── GET /api/services/ ────────────────────────────────────────────────────────
-
-
-class TestListServices:
-    def test_empty(self, auth_client):
-        resp = auth_client.get("/api/services/")
-        assert resp.status_code == 200
-        assert resp.json() == []
-
-    def test_with_one_service(self, auth_client, make_service_config):
-        make_service_config()
-        resp = auth_client.get("/api/services/")
-        assert resp.status_code == 200
-        assert len(resp.json()) == 1
-
 
 # ── GET /api/services/{name} ──────────────────────────────────────────────────
 
@@ -60,36 +42,6 @@ class TestGetService:
     def test_get_nonexistent(self, auth_client):
         resp = auth_client.get("/api/services/sonarr")
         assert resp.status_code == 404
-
-
-# ── POST /api/services/ ───────────────────────────────────────────────────────
-
-
-class TestCreateService:
-    def test_create_new_service(self, auth_client):
-        payload = {
-            "service_name": "sonarr",
-            "url": "http://sonarr",
-            "api_key": "sonarr-key",
-            "port": 8989,
-            "is_active": True,
-        }
-        resp = auth_client.post("/api/services/", json=payload)
-        assert resp.status_code == 201
-        data = resp.json()
-        assert data["service_name"] == "sonarr"
-        assert data["url"] == "http://sonarr"
-
-    def test_create_duplicate_service(self, auth_client, make_service_config):
-        make_service_config(service_name=ServiceType.SONARR)
-        payload = {
-            "service_name": "sonarr",
-            "url": "http://sonarr2",
-            "api_key": "key2",
-            "is_active": True,
-        }
-        resp = auth_client.post("/api/services/", json=payload)
-        assert resp.status_code == 409
 
 
 # ── PUT /api/services/{name} ──────────────────────────────────────────────────
