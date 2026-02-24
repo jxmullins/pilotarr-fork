@@ -104,16 +104,47 @@ class ServiceConfigurationUpdate(BaseModel):
     is_active: bool | None = None
 
 
-class ServiceConfigurationResponse(ServiceConfigurationBase):
+class ServiceConfigurationResponse(BaseModel):
+    """Read-only response — credentials are never returned, only presence flags."""
+
+    service_name: ServiceType
+    url: str
+    port: int | None = None
+    username: str | None = None  # Not sensitive — shown in UI
+    is_active: bool = True
     id: str
     last_tested_at: datetime | None = None
     test_status: str | None = None
     test_message: str | None = None
     created_at: datetime
     updated_at: datetime
+    has_api_key: bool = False  # True when api_key is stored in DB
+    has_password: bool = False  # True when password is stored in DB
 
-    # Ne pas exposer le password dans les réponses
-    password: str | None = Field(None, exclude=True)
+    @model_validator(mode="before")
+    @classmethod
+    def compute_credential_flags(cls, data):
+        if not isinstance(data, dict):
+            # ORM object — build a safe dict without exposing secrets
+            return {
+                "service_name": data.service_name,
+                "url": data.url,
+                "port": data.port,
+                "username": data.username,
+                "is_active": data.is_active,
+                "id": data.id,
+                "last_tested_at": data.last_tested_at,
+                "test_status": data.test_status,
+                "test_message": data.test_message,
+                "created_at": data.created_at,
+                "updated_at": data.updated_at,
+                "has_api_key": bool(data.api_key),
+                "has_password": bool(data.password),
+            }
+        # Dict input (tests, manual construction) — compute flags from raw values if missing
+        data.setdefault("has_api_key", bool(data.get("api_key")))
+        data.setdefault("has_password", bool(data.get("password")))
+        return data
 
     class Config:
         from_attributes = True

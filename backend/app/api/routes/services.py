@@ -10,6 +10,9 @@ from app.services import JellyfinConnector, JellyseerrConnector, QBittorrentConn
 
 router = APIRouter(prefix="/services", tags=["Services"])
 
+# Credential fields that must never be overwritten with empty/null values
+_CREDENTIAL_FIELDS = {"api_key", "username", "password"}
+
 
 @router.get("/", response_model=list[ServiceConfigurationResponse])
 async def get_all_services(db: Session = Depends(get_db)):
@@ -65,8 +68,10 @@ async def update_service(
         service = ServiceConfiguration(**create_data)
         db.add(service)
     else:
-        # Update existing fields
+        # Update existing fields — never overwrite stored credentials with empty/null values
         for field, value in service_data.model_dump(exclude_unset=True).items():
+            if field in _CREDENTIAL_FIELDS and not value:
+                continue
             setattr(service, field, value)
 
     db.commit()
