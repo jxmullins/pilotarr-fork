@@ -12,7 +12,6 @@ from sqlalchemy.orm import Session
 from app.db import get_db
 from app.models.models import LibraryItemTorrent, ServiceConfiguration
 from app.services.connector_factory import create_connector
-from app.services.torrent_enrichment_service import TorrentEnrichmentService
 
 logger = logging.getLogger(__name__)
 
@@ -132,35 +131,3 @@ async def get_item_torrents(library_item_id: str, db: Session = Depends(get_db))
         }
         for row in rows
     ]
-
-
-@router.post("/enrich")
-async def enrich_library_items(limit: int | None = None, db: Session = Depends(get_db)) -> dict[str, Any]:
-    """
-    Enrichit les library_items avec les données qBittorrent
-
-    Args:
-        limit: Nombre maximum d'items à traiter (optionnel)
-
-    Returns:
-        Statistiques de l'enrichissement
-    """
-    service = TorrentEnrichmentService(db)
-    stats = await service.enrich_all_items(limit=limit)
-    return stats
-
-
-@router.post("/enrich/recent")
-async def enrich_recent_items(days: int = 7, db: Session = Depends(get_db)) -> dict[str, Any]:
-    """
-    Enrichit les items récents avec les données qBittorrent
-
-    Args:
-        days: Nombre de jours en arrière (défaut: 7)
-
-    Returns:
-        Statistiques de l'enrichissement
-    """
-    service = TorrentEnrichmentService(db)
-    stats = await service.enrich_recent_items(days=days)
-    return stats

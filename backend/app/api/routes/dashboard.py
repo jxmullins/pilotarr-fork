@@ -6,7 +6,6 @@ from sqlalchemy.orm import Session, selectinload
 
 from app.api.schemas import (
     CalendarEventResponse,
-    DashboardResponse,
     DashboardStatisticResponse,
     JellyseerrRequestResponse,
     LibraryItemResponse,
@@ -28,76 +27,6 @@ def _build_torrent_info_array(item: LibraryItem) -> list[dict]:
             continue
         result.append({k: v for k, v in t.torrent_info.items() if k in TORRENT_INFO_ALLOWED_KEYS})
     return result
-
-
-@router.get("/", response_model=DashboardResponse)
-async def get_dashboard(
-    recent_items_limit: int = Query(default=6, ge=1, le=50),
-    calendar_days: int = Query(default=7, ge=1, le=30),
-    recent_requests_limit: int = Query(default=4, ge=1, le=20),
-    db: Session = Depends(get_db),
-):
-    """
-    Récupérer toutes les données du dashboard
-
-    Args:
-        recent_items_limit: Nombre d'items récents à afficher
-        calendar_days: Nombre de jours de calendrier
-        recent_requests_limit: Nombre de requêtes récentes
-    """
-    # Statistiques globales
-    statistics = db.query(DashboardStatistic).all()
-
-    # Items récents
-    recent_items_query = (
-        db.query(LibraryItem)
-        .options(selectinload(LibraryItem.torrents))
-        .order_by(LibraryItem.created_at.desc())
-        .limit(recent_items_limit)
-        .all()
-    )
-    recent_items = []
-    for item in recent_items_query:
-        data = {
-            "id": item.id,
-            "title": item.title,
-            "year": item.year,
-            "media_type": item.media_type,
-            "image_url": item.image_url,
-            "image_alt": item.image_alt,
-            "quality": item.quality,
-            "rating": item.rating,
-            "description": item.description,
-            "added_date": item.added_date,
-            "size": item.size,
-            "nb_media": item.nb_media,
-            "created_at": item.created_at,
-            "torrent_info": _build_torrent_info_array(item),
-        }
-        recent_items.append(data)
-
-    # Événements du calendrier (prochains jours)
-    today = datetime.now().date()
-    future_date = today + timedelta(days=calendar_days)
-    calendar_events = (
-        db.query(CalendarEvent)
-        .filter(CalendarEvent.release_date >= today)
-        .filter(CalendarEvent.release_date <= future_date)
-        .order_by(CalendarEvent.release_date.asc())
-        .all()
-    )
-
-    # Requêtes récentes
-    recent_requests = (
-        db.query(JellyseerrRequest).order_by(JellyseerrRequest.created_at.desc()).limit(recent_requests_limit).all()
-    )
-
-    return {
-        "statistics": statistics,
-        "recent_items": recent_items,
-        "calendar_events": calendar_events,
-        "recent_requests": recent_requests,
-    }
 
 
 @router.get("/statistics", response_model=list[DashboardStatisticResponse])
