@@ -6,7 +6,14 @@ from sqlalchemy.orm import Session
 from app.api.schemas import ServiceConfigurationCreate, ServiceConfigurationResponse, ServiceConfigurationUpdate
 from app.db import get_db
 from app.models import ServiceConfiguration, ServiceType
-from app.services import JellyfinConnector, JellyseerrConnector, QBittorrentConnector, RadarrConnector, SonarrConnector
+from app.services import (
+    JellyfinConnector,
+    JellyseerrConnector,
+    ProwlarrConnector,
+    QBittorrentConnector,
+    RadarrConnector,
+    SonarrConnector,
+)
 
 router = APIRouter(prefix="/services", tags=["Services"])
 
@@ -113,6 +120,7 @@ async def test_service_connection(service_name: ServiceType, db: Session = Depen
             ServiceType.SONARR: SonarrConnector,
             ServiceType.JELLYFIN: JellyfinConnector,
             ServiceType.JELLYSEERR: JellyseerrConnector,
+            ServiceType.PROWLARR: ProwlarrConnector,
         }
         connector_class = connector_map.get(service_name)
         if not connector_class:

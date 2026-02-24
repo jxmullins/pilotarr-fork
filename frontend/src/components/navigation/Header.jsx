@@ -62,6 +62,12 @@ const Header = () => {
       tooltip: "Detailed usage statistics",
     },
     {
+      label: "Indexers",
+      path: "/indexer",
+      icon: "Rss",
+      tooltip: "Prowlarr indexer management and search",
+    },
+    {
       label: "Torrents",
       path: "/torrents",
       icon: "Download",

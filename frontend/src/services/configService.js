@@ -30,7 +30,7 @@ const mapServiceResponse = (data) => {
 export const getServiceConfigurations = async () => {
   try {
     // Fetch all services individually since the API uses /api/services/{service_name}
-    const serviceNames = ["jellyfin", "jellyseerr", "radarr", "sonarr", "qbittorrent"];
+    const serviceNames = ["jellyfin", "jellyseerr", "radarr", "sonarr", "qbittorrent", "prowlarr"];
     const promises = serviceNames?.map((name) =>
       pilotarrClient
         ?.get(`/services/${name}`)

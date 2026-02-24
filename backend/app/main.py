@@ -3,7 +3,18 @@ from contextlib import asynccontextmanager
 from fastapi import Depends, FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api.routes import analytics, auth, dashboard, jellyseerr, library, monitoring, services, sync, torrents
+from app.api.routes import (
+    analytics,
+    auth,
+    dashboard,
+    jellyseerr,
+    library,
+    monitoring,
+    prowlarr,
+    services,
+    sync,
+    torrents,
+)
 from app.core.config import settings
 from app.core.security import get_current_user
 from app.db import SessionLocal, check_db_connection, init_db
@@ -73,6 +84,7 @@ app.include_router(library.router, prefix="/api", dependencies=[Depends(get_curr
 app.include_router(monitoring.router, prefix="/api", dependencies=[Depends(get_current_user)])
 app.include_router(analytics.router, prefix="/api", dependencies=[Depends(get_current_user)])
 app.include_router(torrents.router, dependencies=[Depends(get_current_user)])
+app.include_router(prowlarr.router, prefix="/api", dependencies=[Depends(get_current_user)])
 
 
 @app.get("/")

@@ -12,6 +12,7 @@ import MediaDetail from "./pages/media-detail";
 import JellyseerrRequests from "./pages/jellyseerr-requests";
 import Calendar from "./pages/calendar";
 import Torrents from "./pages/torrents";
+import Indexer from "./pages/indexer";
 import Login from "./pages/login";
 import ChangePassword from "./pages/change-password";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
@@ -99,6 +100,14 @@ const Routes = () => {
               element={
                 <ProtectedRoute>
                   <Calendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/indexer"
+              element={
+                <ProtectedRoute>
+                  <Indexer />
                 </ProtectedRoute>
               }
             />
