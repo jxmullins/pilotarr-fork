@@ -4,6 +4,7 @@ A full-stack dashboard for managing your home media server stack. Pilotarr provi
 
 ![Pilotarr dashboard](docs/pilotarr-1.png)
 ![Pilotarr library](docs/pilotarr-2.png)
+[More screenshots here](docs/)
 
 ## Features
 
