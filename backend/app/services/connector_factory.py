@@ -5,6 +5,7 @@ Factory pour créer les connectors selon le type de service
 from app.models import ServiceConfiguration
 from app.services.jellyfin_connector import JellyfinConnector
 from app.services.jellyseerr_connector import JellyseerrConnector
+from app.services.prowlarr_connector import ProwlarrConnector
 from app.services.qbittorrent_connector import QBittorrentConnector
 from app.services.radarr_connector import RadarrConnector
 from app.services.sonarr_connector import SonarrConnector
@@ -44,6 +45,9 @@ def create_connector(service: ServiceConfiguration):
         return QBittorrentConnector(
             base_url=service.url, username=service.username, password=service.password, port=service.port
         )
+
+    elif service_type == "prowlarr":
+        return ProwlarrConnector(base_url=service.url, api_key=service.api_key, port=service.port)
 
     else:
         raise ValueError(f"Type de service non supporté : {service_type}")

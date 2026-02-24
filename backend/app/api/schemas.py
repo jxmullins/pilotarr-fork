@@ -83,7 +83,13 @@ class ServiceConfigurationCreate(ServiceConfigurationBase):
         service_name = self.service_name
 
         # Services qui utilisent API key
-        if service_name in [ServiceType.RADARR, ServiceType.SONARR, ServiceType.JELLYFIN, ServiceType.JELLYSEERR]:
+        if service_name in [
+            ServiceType.RADARR,
+            ServiceType.SONARR,
+            ServiceType.JELLYFIN,
+            ServiceType.JELLYSEERR,
+            ServiceType.PROWLARR,
+        ]:
             if not self.api_key:
                 raise ValueError(f"{service_name.value} needs api_key")
 
@@ -554,3 +560,64 @@ class ServerPerformanceResponse(BaseModel):
     bandwidth_status: str
     active_sessions: list[ActiveSessionItem]
     active_transcoding_count: int
+
+
+# ---------------------------------------------------------------------------
+# Prowlarr schemas
+# ---------------------------------------------------------------------------
+
+
+class ProwlarrIndexerStats(BaseModel):
+    numberOfQueries: int = 0  # noqa: N815
+    numberOfFailedQueries: int = 0  # noqa: N815
+    numberOfGrabs: int = 0  # noqa: N815
+    numberOfFailedGrabs: int = 0  # noqa: N815
+    averageResponseTime: int = 0  # noqa: N815
+
+
+class ProwlarrIndexerCapabilities(BaseModel):
+    categories: list[str] = []
+
+
+class ProwlarrIndexerResponse(BaseModel):
+    id: int
+    name: str
+    enable: bool
+    protocol: str
+    privacy: str
+    capabilities: ProwlarrIndexerCapabilities
+    stats: ProwlarrIndexerStats
+
+
+class ProwlarrIndexerToggle(BaseModel):
+    enable: bool
+
+
+class ProwlarrHistoryItem(BaseModel):
+    id: int | None = None
+    date: str | None = None
+    indexer: str = ""
+    query: str = ""
+    categories: list[str] = []
+    eventType: str = ""  # noqa: N815
+    successful: bool = True
+
+
+class ProwlarrSearchResult(BaseModel):
+    guid: str
+    title: str
+    indexer: str = ""
+    indexerId: int | None = None  # noqa: N815
+    size: int | None = None
+    seeders: int | None = None
+    leechers: int | None = None
+    protocol: str = "torrent"
+    publishDate: str | None = None  # noqa: N815
+    categories: list[str] = []
+    downloadUrl: str | None = None  # noqa: N815
+    magnetUrl: str | None = None  # noqa: N815
+
+
+class ProwlarrGrabRequest(BaseModel):
+    guid: str
+    indexerId: int  # noqa: N815

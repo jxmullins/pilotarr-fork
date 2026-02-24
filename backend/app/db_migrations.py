@@ -124,6 +124,14 @@ def create_analytics_tables():
             print(f"❌ Erreur lors de l'ajout de watched sur episodes : {e}")
             return False
 
+    # Add 'prowlarr' to sync_metadata.service_name ENUM
+    if "sync_metadata" in get_existing_tables():
+        try:
+            migrate_add_prowlarr_to_sync_metadata_enum()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de prowlarr dans sync_metadata enum : {e}")
+            return False
+
     return True
 
 
@@ -366,6 +374,41 @@ def migrate_add_watched_to_episodes():
         db.execute(text("CREATE INDEX idx_episodes_watched ON episodes (watched)"))
         db.commit()
         print("✅ watched column added to episodes")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_add_prowlarr_to_sync_metadata_enum():
+    """Add 'prowlarr' to the sync_metadata.service_name ENUM if not already present."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"]: col for col in inspector.get_columns("sync_metadata")}
+    if "service_name" not in columns:
+        print("⚠️  service_name column not found in sync_metadata, skipping")
+        return
+
+    col_type = str(columns["service_name"]["type"])
+    if "prowlarr" in col_type.lower():
+        print("✅ 'prowlarr' already in sync_metadata.service_name ENUM, skipping")
+        return
+
+    print("🔄 Adding 'prowlarr' to sync_metadata.service_name ENUM...")
+    db = SessionLocal()
+    try:
+        db.execute(
+            text(
+                "ALTER TABLE sync_metadata MODIFY COLUMN service_name "
+                "ENUM('jellyfin','jellyseerr','sonarr','radarr','qbittorrent','prowlarr') NOT NULL"
+            )
+        )
+        db.commit()
+        print("✅ 'prowlarr' added to sync_metadata.service_name ENUM")
     except Exception as e:
         db.rollback()
         raise e

@@ -65,6 +65,15 @@ const InitialConfiguration = () => {
       password: "",
       port: "8080",
     },
+    {
+      id: "prowlarr",
+      name: "Prowlarr",
+      icon: "Rss",
+      description: "Indexer manager for *arr services",
+      url: "",
+      apiKey: "",
+      port: "9696",
+    },
   ];
 
   const [configurations, setConfigurations] = useState(

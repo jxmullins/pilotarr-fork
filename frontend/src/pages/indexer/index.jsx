@@ -15,6 +15,7 @@ const Indexer = () => {
   const [loadingIndexers, setLoadingIndexers] = useState(true);
   const [loadingSearch, setLoadingSearch] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(true);
+  const [loadingHistory, setLoadingHistory] = useState(false);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,6 +27,13 @@ const Indexer = () => {
     };
     fetchData();
   }, []);
+
+  const refreshHistory = async () => {
+    setLoadingHistory(true);
+    const histData = await getHistory(15);
+    setHistory(histData);
+    setLoadingHistory(false);
+  };
 
   const handleSearch = async (query, type) => {
     setLoadingSearch(true);
@@ -213,7 +221,11 @@ const Indexer = () => {
 
           {historyOpen && (
             <div className="bg-card border border-border rounded-lg overflow-hidden">
-              <SearchHistory history={history} />
+              <SearchHistory
+                history={history}
+                onRefresh={refreshHistory}
+                loading={loadingHistory}
+              />
             </div>
           )}
         </div>
