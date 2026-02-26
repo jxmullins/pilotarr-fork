@@ -36,7 +36,10 @@ async def trigger_sync(background_tasks: BackgroundTasks):
             await streams_service.sync_all()
 
         except Exception as e:
+            import traceback
+
             print(f"❌ Erreur lors de la synchro manuelle: {e}")
+            traceback.print_exc()
         finally:
             db.close()
 
