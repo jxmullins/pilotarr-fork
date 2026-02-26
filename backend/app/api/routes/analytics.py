@@ -76,7 +76,11 @@ async def receive_playback_webhook(
         # Vérifier le secret webhook si configuré
         webhook_secret = settings.WEBHOOK_SECRET
         if webhook_secret:
-            request_secret = request.headers.get("X-Webhook-Secret", "")
+            request_secret = request.headers.get("X-Webhook-Secret")
+            if not request_secret:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN, detail="Header X-Webhook-Secret manquant"
+                )
             if not hmac.compare_digest(request_secret, webhook_secret):
                 raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Secret webhook invalide")
 
@@ -86,14 +90,25 @@ async def receive_playback_webhook(
             raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Payload trop volumineux")
 
         # Récupérer le payload
-        payload = json.loads(body)
+        try:
+            payload = json.loads(body)
+        except json.JSONDecodeError as e:
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Payload JSON invalide") from e
+        if not isinstance(payload, dict):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Payload JSON invalide")
 
         # Extraire les données principales
         event_type_raw = payload.get("Event")
         item = payload.get("Item", {})
         user = payload.get("User", {})
         session_info = payload.get("Session", {})
+        if not isinstance(item, dict) or not isinstance(user, dict) or not isinstance(session_info, dict):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Structure de payload invalide")
         play_state = session_info.get("PlayState", {})
+        if play_state is None:
+            play_state = {}
+        if not isinstance(play_state, dict):
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Structure de payload invalide")
 
         # Mapping des événements
         event_mapping = {

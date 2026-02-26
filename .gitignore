@@ -49,6 +49,7 @@ service-account*.json
 # Logs
 *.log
 logs/
+.coverage
 
 # Database
 *.db

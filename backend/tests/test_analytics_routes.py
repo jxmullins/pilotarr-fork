@@ -183,6 +183,11 @@ class TestWebhookErrors:
         r = _post_webhook(client, _play_payload(), secret="wrong-secret")
         assert r.status_code == 403
 
+    def test_missing_webhook_secret_header_returns_403(self, client):
+        headers = {"Content-Type": "application/json"}
+        r = client.post(WEBHOOK_URL, content=json.dumps(_play_payload()), headers=headers)
+        assert r.status_code == 403
+
     def test_wrong_api_key_returns_401(self, client):
         headers = {"X-Webhook-Secret": WEBHOOK_SECRET, "Content-Type": "application/json"}
         r = client.post(
@@ -214,6 +219,17 @@ class TestWebhookErrors:
         big_body = "x" * (1_048_576 + 1)
         r = client.post(WEBHOOK_URL, content=big_body, headers=headers)
         assert r.status_code == 413
+
+    def test_invalid_json_payload_returns_400(self, client):
+        headers = {"X-Webhook-Secret": WEBHOOK_SECRET, "Content-Type": "application/json"}
+        r = client.post(WEBHOOK_URL, content="{bad-json", headers=headers)
+        assert r.status_code == 400
+
+    def test_invalid_payload_structure_returns_400(self, client):
+        payload = _play_payload()
+        payload["Item"] = []
+        r = _post_webhook(client, payload)
+        assert r.status_code == 400
 
 
 # ── GET /analytics/usage ───────────────────────────────────────────────────────
