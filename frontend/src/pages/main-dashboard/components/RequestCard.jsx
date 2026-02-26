@@ -21,10 +21,10 @@ const RequestCard = ({ request, onApprove, onReject }) => {
     return colors?.[request?.priority] || colors?.low;
   };
 
-  // Check if request is already approved (status = 1)
-  const isApproved = request?.status === 1;
-  // Check if request is pending/partially available (status = 2)
-  const isRequested = request?.status === 2;
+  // PENDING=1, APPROVED=2, DECLINED=3
+  const isPending = request?.status === 1;
+  const isApproved = request?.status === 2;
+  const isDeclined = request?.status === 3;
 
   return (
     <div className="bg-card border border-border rounded-lg p-3 md:p-4 hover:shadow-elevation-2 transition-smooth">
@@ -89,7 +89,7 @@ const RequestCard = ({ request, onApprove, onReject }) => {
               <span className="text-muted-foreground">Quality: {request?.quality}</span>
             </div>
           )}
-          {!isApproved && !isRequested && (
+          {isPending && (
             <div className="flex gap-2">
               <Button
                 variant="success"
@@ -119,10 +119,10 @@ const RequestCard = ({ request, onApprove, onReject }) => {
               <span className="font-medium">Approved</span>
             </div>
           )}
-          {isRequested && (
-            <div className="flex items-center gap-2 text-xs text-yellow-400">
-              <Icon name="Hourglass" size={14} />
-              <span className="font-medium">Requested / Partially Available</span>
+          {isDeclined && (
+            <div className="flex items-center gap-2 text-xs text-error">
+              <Icon name="XCircle" size={14} />
+              <span className="font-medium">Declined</span>
             </div>
           )}
         </div>

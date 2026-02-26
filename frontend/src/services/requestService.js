@@ -62,6 +62,34 @@ export const deleteJellyseerrRequest = async (id) => {
 };
 
 /**
+ * Approve a Jellyseerr request
+ * @param {string} id - Request ID
+ * @returns {Promise<boolean>} Success status
+ */
+export const approveRequest = async (id) => {
+  try {
+    await pilotarrClient?.post(`/jellyseerr/requests/${id}/approve`);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+/**
+ * Decline a Jellyseerr request
+ * @param {string} id - Request ID
+ * @returns {Promise<boolean>} Success status
+ */
+export const declineRequest = async (id) => {
+  try {
+    await pilotarrClient?.post(`/jellyseerr/requests/${id}/decline`);
+    return true;
+  } catch (error) {
+    return false;
+  }
+};
+
+/**
  * Update request priority
  * @param {string} id - Request ID
  * @param {string} priority - New priority

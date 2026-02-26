@@ -122,7 +122,19 @@ async def get_calendar(
 
 
 @router.get("/requests", response_model=list[JellyseerrRequestResponse])
-async def get_requests(limit: int = Query(default=20, ge=1, le=100), db: Session = Depends(get_db)):
+async def get_requests(
+    limit: int = Query(default=20, ge=1, le=100),
+    status: int | None = Query(default=None),
+    db: Session = Depends(get_db),
+):
     """Récupérer les requêtes Jellyseerr"""
-    requests = db.query(JellyseerrRequest).order_by(JellyseerrRequest.created_at.desc()).limit(limit).all()
-    return requests
+    from app.models.enums import RequestStatus
+
+    query = db.query(JellyseerrRequest)
+    if status is not None:
+        try:
+            status_enum = RequestStatus(status)
+            query = query.filter(JellyseerrRequest.status == status_enum)
+        except ValueError:
+            return []
+    return query.order_by(JellyseerrRequest.created_at.desc()).limit(limit).all()

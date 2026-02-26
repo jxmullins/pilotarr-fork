@@ -9,7 +9,11 @@ import MiniCalendar from "./components/MiniCalendar";
 import RequestCard from "./components/RequestCard";
 import { getDashboardStatistics, getRecentItems } from "../../services/dashboardService";
 import { getCalendarEvents } from "../../services/calendarService";
-import { getJellyseerrRequests, deleteJellyseerrRequest } from "../../services/requestService";
+import {
+  getJellyseerrRequests,
+  approveRequest,
+  declineRequest,
+} from "../../services/requestService";
 import { triggerSync } from "../../services/syncService";
 
 const MainDashboard = () => {
@@ -229,9 +233,8 @@ const MainDashboard = () => {
 
   const handleApproveRequest = async (id) => {
     try {
-      const success = await deleteJellyseerrRequest(id);
+      const success = await approveRequest(id);
       if (success) {
-        console.log("Approved request:", id);
         await loadJellyseerrRequests();
       }
     } catch (error) {
@@ -241,9 +244,8 @@ const MainDashboard = () => {
 
   const handleRejectRequest = async (id) => {
     try {
-      const success = await deleteJellyseerrRequest(id);
+      const success = await declineRequest(id);
       if (success) {
-        console.log("Rejected request:", id);
         await loadJellyseerrRequests();
       }
     } catch (error) {

@@ -5,7 +5,11 @@ import FilterToolbar from "./components/FilterToolbar";
 import RequestCard from "../main-dashboard/components/RequestCard";
 import Icon from "../../components/AppIcon";
 import Button from "../../components/ui/Button";
-import { getJellyseerrRequests, deleteJellyseerrRequest } from "../../services/requestService";
+import {
+  getJellyseerrRequests,
+  approveRequest,
+  declineRequest,
+} from "../../services/requestService";
 
 const JellyseerrRequests = () => {
   const navigate = useNavigate();
@@ -53,11 +57,9 @@ const JellyseerrRequests = () => {
     // Status filter - map numeric status to string
     if (filters?.status !== "all") {
       const statusMap = {
-        pending: 0,
-        approved: 1,
-        processing: 2,
+        pending: 1,
+        approved: 2,
         declined: 3,
-        available: 4,
       };
       const numericStatus = statusMap?.[filters?.status];
       filtered = filtered?.filter((request) => request?.status === numericStatus);
@@ -84,14 +86,14 @@ const JellyseerrRequests = () => {
   };
 
   const handleApproveRequest = async (id) => {
-    const success = await deleteJellyseerrRequest(id);
+    const success = await approveRequest(id);
     if (success) {
-      setRequests((prev) => prev?.map((req) => (req?.id === id ? { ...req, status: 1 } : req)));
+      setRequests((prev) => prev?.map((req) => (req?.id === id ? { ...req, status: 2 } : req)));
     }
   };
 
   const handleRejectRequest = async (id) => {
-    const success = await deleteJellyseerrRequest(id);
+    const success = await declineRequest(id);
     if (success) {
       setRequests((prev) => prev?.map((req) => (req?.id === id ? { ...req, status: 3 } : req)));
     }
@@ -99,33 +101,27 @@ const JellyseerrRequests = () => {
 
   const getStatusColor = (status) => {
     const colors = {
-      0: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      1: "bg-green-500/10 text-green-400 border-green-500/20",
-      2: "bg-yellow-500/10 text-yellow-400 border-yellow-500/20",
+      1: "bg-blue-500/10 text-blue-400 border-blue-500/20",
+      2: "bg-green-500/10 text-green-400 border-green-500/20",
       3: "bg-red-500/10 text-red-400 border-red-500/20",
-      4: "bg-gray-500/10 text-gray-400 border-gray-500/20",
     };
-    return colors?.[status] || colors?.[0];
+    return colors?.[status] || colors?.[1];
   };
 
   const getStatusIcon = (status) => {
     const icons = {
-      0: "Clock",
-      1: "CheckCircle",
-      2: "Loader",
+      1: "Clock",
+      2: "CheckCircle",
       3: "XCircle",
-      4: "Download",
     };
     return icons?.[status] || "Clock";
   };
 
   const getStatusLabel = (status) => {
     const labels = {
-      0: "pending",
-      1: "approved",
-      2: "processing",
+      1: "pending",
+      2: "approved",
       3: "declined",
-      4: "available",
     };
     return labels?.[status] || "pending";
   };
@@ -165,8 +161,8 @@ const JellyseerrRequests = () => {
         />
 
         {/* Status Summary */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mb-6">
-          {[0, 1, 2, 3, 4]?.map((statusNum) => {
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
+          {[1, 2, 3]?.map((statusNum) => {
             const count = requests?.filter((r) => r?.status === statusNum)?.length;
             const statusLabel = getStatusLabel(statusNum);
             return (
