@@ -105,8 +105,6 @@ async def receive_playback_webhook(
         if not isinstance(item, dict) or not isinstance(user, dict) or not isinstance(session_info, dict):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Structure de payload invalide")
         play_state = session_info.get("PlayState", {})
-        if play_state is None:
-            play_state = {}
         if not isinstance(play_state, dict):
             raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Structure de payload invalide")
 
