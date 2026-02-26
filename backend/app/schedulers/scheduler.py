@@ -36,7 +36,10 @@ class AppScheduler:
             await streams_service.sync_all()
 
         except Exception as e:
+            import traceback
+
             print(f"❌ Erreur lors de la synchro planifiée: {e}")
+            traceback.print_exc()
         finally:
             db.close()
 
