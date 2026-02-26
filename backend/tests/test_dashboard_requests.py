@@ -3,7 +3,8 @@ Integration tests for GET /api/dashboard/requests.
 
 Covers:
 - Returns all requests when no status filter
-- Returns only matching requests when status filter is applied
+- Returns only matching requests when status filter is applied (numeric and string)
+- ?status=all returns all requests
 - Respects limit parameter
 - Returns empty list when no requests in DB
 - Unknown status filter returns empty list (not an error)
@@ -118,6 +119,50 @@ class TestGetDashboardRequests:
         data = resp.json()
         assert len(data) == 2
         assert all(r["status"] == RequestStatus.PENDING.value for r in data)
+
+    # ── String status params (sent by frontend) ───────────────────────────────
+
+    def test_filters_by_string_pending(self, auth_client, db):
+        _make_request(db, "Pending Movie", jellyseerr_id=1, status=RequestStatus.PENDING)
+        _make_request(db, "Approved Movie", jellyseerr_id=2, status=RequestStatus.APPROVED)
+
+        resp = auth_client.get("/api/dashboard/requests?status=pending")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) == 1
+        assert data[0]["title"] == "Pending Movie"
+
+    def test_filters_by_string_approved(self, auth_client, db):
+        _make_request(db, "Pending Movie", jellyseerr_id=1, status=RequestStatus.PENDING)
+        _make_request(db, "Approved Movie", jellyseerr_id=2, status=RequestStatus.APPROVED)
+
+        resp = auth_client.get("/api/dashboard/requests?status=approved")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) == 1
+        assert data[0]["title"] == "Approved Movie"
+
+    def test_filters_by_string_declined(self, auth_client, db):
+        _make_request(db, "Declined Movie", jellyseerr_id=1, status=RequestStatus.DECLINED)
+        _make_request(db, "Pending Movie", jellyseerr_id=2, status=RequestStatus.PENDING)
+
+        resp = auth_client.get("/api/dashboard/requests?status=declined")
+
+        assert resp.status_code == 200
+        data = resp.json()
+        assert len(data) == 1
+        assert data[0]["title"] == "Declined Movie"
+
+    def test_status_all_returns_all_requests(self, auth_client, db):
+        _make_request(db, "Movie A", jellyseerr_id=1, status=RequestStatus.PENDING)
+        _make_request(db, "Movie B", jellyseerr_id=2, status=RequestStatus.APPROVED)
+
+        resp = auth_client.get("/api/dashboard/requests?status=all")
+
+        assert resp.status_code == 200
+        assert len(resp.json()) == 2
 
     def test_response_contains_expected_fields(self, auth_client, db):
         _make_request(db, "Test Movie", jellyseerr_id=1)
