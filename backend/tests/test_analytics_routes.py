@@ -197,12 +197,15 @@ class TestWebhookErrors:
 
     def test_webhook_rate_limit_returns_429(self, client, monkeypatch):
         clear_webhook_rate_limit_state()
-        monkeypatch.setattr(settings, "WEBHOOK_RATE_LIMIT_MAX_REQUESTS", 1)
-        monkeypatch.setattr(settings, "WEBHOOK_RATE_LIMIT_WINDOW_SECONDS", 60)
-        first = _post_webhook(client, _play_payload())
-        second = _post_webhook(client, _play_payload())
-        assert first.status_code == 200
-        assert second.status_code == 429
+        try:
+            monkeypatch.setattr(settings, "WEBHOOK_RATE_LIMIT_MAX_REQUESTS", 1)
+            monkeypatch.setattr(settings, "WEBHOOK_RATE_LIMIT_WINDOW_SECONDS", 60)
+            first = _post_webhook(client, _play_payload())
+            second = _post_webhook(client, _play_payload())
+            assert first.status_code == 200
+            assert second.status_code == 429
+        finally:
+            clear_webhook_rate_limit_state()
 
     def test_wrong_api_key_returns_401(self, client):
         headers = {"X-Webhook-Secret": WEBHOOK_SECRET, "Content-Type": "application/json"}
