@@ -74,6 +74,8 @@ SECRET_KEY=your_secret_key
 
 #API KEY FOR Jellyfin (needed for playback session)
 API_KEY=your_api_key
+WEBHOOK_SECRET=optional_shared_secret
+CORS_ORIGINS=http://localhost:5173,http://127.0.0.1:5173
 
 # Jellyfin
 JELLYFIN_PUBLIC_URL=http://your-jellyfin-url
@@ -182,7 +184,9 @@ Sends playback events (play, pause, resume, stop) to Pilotarr in real time.
 
 The `apiKey` must match the `API_KEY` value in your backend `.env`.
 
-> If you configured a `WEBHOOK_SECRET` in `.env`, also add the header `X-Webhook-Secret: <your_secret>` in the webhook plugin settings.
+> If you configured a `WEBHOOK_SECRET` in `.env`, add either:
+> - `X-Webhook-Secret: <your_secret>` header, or
+> - `X-Webhook-Signature: sha256=<hmac_of_raw_body>` header.
 
 #### 2. Playback Reporting plugin
 

@@ -2,7 +2,6 @@
 Routes API pour les analytics et webhooks
 """
 
-import hmac
 import json
 import logging
 import re
@@ -23,8 +22,7 @@ from app.api.schemas import (
     UsageAnalyticsResponse,
     UserLeaderboardItem,
 )
-from app.core.config import settings
-from app.core.security import verify_webhook_api_key
+from app.core.security import enforce_webhook_rate_limit, validate_webhook_secret, verify_webhook_api_key
 from app.db import get_db
 from app.models.enums import MediaType, PlaybackMethod, ServiceType, SessionStatus
 from app.models.models import (
@@ -62,6 +60,7 @@ async def receive_playback_webhook(
     request: Request,
     db: Session = Depends(get_db),
     _: str = Depends(verify_webhook_api_key),
+    __: None = Depends(enforce_webhook_rate_limit),
 ):
     """
     Endpoint pour recevoir les webhooks de lecture depuis Jellyfin
@@ -73,17 +72,12 @@ async def receive_playback_webhook(
     - Resume : Reprise de lecture
     """
     try:
-        # Vérifier le secret webhook si configuré
-        webhook_secret = settings.WEBHOOK_SECRET
-        if webhook_secret:
-            request_secret = request.headers.get("X-Webhook-Secret", "")
-            if not hmac.compare_digest(request_secret, webhook_secret):
-                raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Secret webhook invalide")
-
         # Valider la taille du payload (max 1 Mo)
         body = await request.body()
         if len(body) > 1_048_576:
             raise HTTPException(status_code=status.HTTP_413_REQUEST_ENTITY_TOO_LARGE, detail="Payload trop volumineux")
+
+        validate_webhook_secret(request.headers, body)
 
         # Récupérer le payload
         payload = json.loads(body)

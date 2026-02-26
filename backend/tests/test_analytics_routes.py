@@ -1,10 +1,14 @@
 """Integration tests for analytics routes (webhook + protected GET endpoints)."""
 
+import hashlib
+import hmac
 import json
 from datetime import date, datetime, timedelta
 
 import pytest
 
+from app.core.config import settings
+from app.core.security import clear_webhook_rate_limit_state
 from app.models.enums import DeviceType, MediaType, SessionStatus
 
 # ── Shared helpers ─────────────────────────────────────────────────────────────
@@ -179,9 +183,26 @@ class TestWebhookPauseResume:
 
 
 class TestWebhookErrors:
+    def test_hmac_signature_header_is_accepted(self, client):
+        payload = _play_payload()
+        body = json.dumps(payload).encode("utf-8")
+        signature = "sha256=" + hmac.new(WEBHOOK_SECRET.encode("utf-8"), body, hashlib.sha256).hexdigest()
+        headers = {"X-Webhook-Signature": signature, "Content-Type": "application/json"}
+        r = client.post(WEBHOOK_URL, content=body, headers=headers)
+        assert r.status_code == 200
+
     def test_wrong_webhook_secret_returns_403(self, client):
         r = _post_webhook(client, _play_payload(), secret="wrong-secret")
         assert r.status_code == 403
+
+    def test_webhook_rate_limit_returns_429(self, client, monkeypatch):
+        clear_webhook_rate_limit_state()
+        monkeypatch.setattr(settings, "WEBHOOK_RATE_LIMIT_MAX_REQUESTS", 1)
+        monkeypatch.setattr(settings, "WEBHOOK_RATE_LIMIT_WINDOW_SECONDS", 60)
+        first = _post_webhook(client, _play_payload())
+        second = _post_webhook(client, _play_payload())
+        assert first.status_code == 200
+        assert second.status_code == 429
 
     def test_wrong_api_key_returns_401(self, client):
         headers = {"X-Webhook-Secret": WEBHOOK_SECRET, "Content-Type": "application/json"}
