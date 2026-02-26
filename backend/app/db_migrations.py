@@ -156,6 +156,14 @@ def create_analytics_tables():
             print(f"❌ Erreur lors de l'ajout de radarr dans sync_metadata enum : {e}")
             return False
 
+    # Convert sync_metadata.service_name from ENUM to VARCHAR to avoid SQLAlchemy _object_lookup issues
+    if "sync_metadata" in get_existing_tables():
+        try:
+            migrate_sync_metadata_service_name_to_varchar()
+        except Exception as e:
+            print(f"❌ Erreur lors de la conversion de sync_metadata.service_name en VARCHAR : {e}")
+            return False
+
     return True
 
 
@@ -551,6 +559,42 @@ def migrate_add_radarr_to_sync_metadata_enum():
         )
         db.commit()
         print("✅ 'radarr' added to sync_metadata.service_name ENUM")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
+
+
+def migrate_sync_metadata_service_name_to_varchar():
+    """Convert sync_metadata.service_name from ENUM to VARCHAR(50).
+
+    SQLAlchemy's native MySQL ENUM type builds _object_lookup at class-definition time.
+    On some installs the lookup misses 'radarr', causing a LookupError when reading rows.
+    Converting to VARCHAR bypasses this entirely, matching how service_configurations
+    already stores service_name.
+    """
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"]: col for col in inspector.get_columns("sync_metadata")}
+    if "service_name" not in columns:
+        print("⚠️  service_name column not found in sync_metadata, skipping")
+        return
+
+    col_type = str(columns["service_name"]["type"])
+    if "enum" not in col_type.lower():
+        print("✅ sync_metadata.service_name is already VARCHAR/non-ENUM, skipping")
+        return
+
+    print("🔄 Converting sync_metadata.service_name from ENUM → VARCHAR(50)...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE sync_metadata MODIFY COLUMN service_name VARCHAR(50) NOT NULL"))
+        db.commit()
+        print("✅ sync_metadata.service_name converted to VARCHAR(50)")
     except Exception as e:
         db.rollback()
         raise e

@@ -27,7 +27,6 @@ from app.models.enums import (
     PlaybackMethod,
     RequestPriority,
     RequestStatus,
-    ServiceType,
     SessionStatus,
     StatType,
     SyncStatus,
@@ -89,7 +88,7 @@ class SyncMetadata(Base):
     __tablename__ = "sync_metadata"
 
     id = Column(String(36), primary_key=True, default=generate_uuid)
-    service_name = Column(SQLEnum(ServiceType), nullable=False, index=True)
+    service_name = Column(String(50), nullable=False, index=True)
     last_sync_time = Column(DateTime(timezone=True))
     sync_status = Column(SQLEnum(SyncStatus), default=SyncStatus.PENDING, index=True)
     error_message = Column(Text)
