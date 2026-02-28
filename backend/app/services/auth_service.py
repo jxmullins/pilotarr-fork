@@ -15,8 +15,6 @@ from app.models.models import User
 logger = logging.getLogger(__name__)
 
 ALGORITHM = "HS256"
-DEFAULT_USERNAME = "pilotarr"
-DEFAULT_PASSWORD = "rratolip"
 
 
 # ---------------------------------------------------------------------------
@@ -75,15 +73,23 @@ def authenticate_user(db: Session, username: str, password: str) -> User | None:
 
 
 def init_default_user(db: Session) -> None:
-    """Create the default admin user if it does not exist yet."""
-    existing = get_user_by_username(db, DEFAULT_USERNAME)
-    if existing:
+    """Create a bootstrap admin user once when explicitly configured."""
+    username = (settings.BOOTSTRAP_ADMIN_USERNAME or "").strip() or None
+    password = settings.BOOTSTRAP_ADMIN_PASSWORD
+
+    if not username and not password:
+        logger.info("Bootstrap admin credentials not configured; skipping initial admin creation")
         return
-    user = User(
-        username=DEFAULT_USERNAME,
-        hashed_password=hash_password(DEFAULT_PASSWORD),
-        is_active=True,
-    )
+
+    if not username or not password:
+        logger.warning("Incomplete bootstrap admin credentials; skipping initial admin creation")
+        return
+
+    existing_user = db.query(User.id).first()
+    if existing_user:
+        return
+
+    user = User(username=username, hashed_password=hash_password(password), is_active=True)
     db.add(user)
     db.commit()
-    logger.info("✅ Default user '%s' created", DEFAULT_USERNAME)
+    logger.info("✅ Bootstrap user '%s' created", username)

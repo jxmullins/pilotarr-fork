@@ -74,6 +74,8 @@ SECRET_KEY=your_secret_key
 
 #API KEY FOR Jellyfin (needed for playback session)
 API_KEY=your_api_key
+BOOTSTRAP_ADMIN_USERNAME=choose_a_username
+BOOTSTRAP_ADMIN_PASSWORD=choose_a_strong_password
 
 # Jellyfin
 JELLYFIN_PUBLIC_URL=http://your-jellyfin-url
@@ -150,9 +152,10 @@ cd frontend && npm start          # Vite dev server on :4028
 ```
 
 #### First Login
-user : pilotarr
-
-password : rratolip
+Before the first startup, set `BOOTSTRAP_ADMIN_USERNAME` and `BOOTSTRAP_ADMIN_PASSWORD`
+in your environment. Pilotarr creates that account only when the database has no users,
+then ignores those bootstrap values on later starts. Remove the bootstrap password from
+your environment after the first successful login.
 
 ## Jellyfin Integration
 

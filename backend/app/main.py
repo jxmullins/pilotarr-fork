@@ -36,7 +36,7 @@ async def lifespan(app: FastAPI):
         create_analytics_tables()
         print("✅ Migrations appliquées")
 
-        # Seed default user if it doesn't exist
+        # Seed bootstrap user once when explicitly configured
         from app.services.auth_service import init_default_user
 
         db = SessionLocal()

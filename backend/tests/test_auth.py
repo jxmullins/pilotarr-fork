@@ -6,6 +6,9 @@ Integration tests for /api/auth routes.
 - POST /api/auth/change-password
 """
 
+from types import SimpleNamespace
+
+import app.services.auth_service as auth_service
 from app.models.models import User
 from app.services.auth_service import hash_password
 
@@ -117,3 +120,52 @@ class TestChangePassword:
             },
         )
         assert resp.status_code == 422
+
+
+class TestBootstrapAdmin:
+    def test_init_default_user_skips_without_explicit_bootstrap_credentials(self, db, monkeypatch):
+        monkeypatch.setattr(
+            auth_service,
+            "settings",
+            SimpleNamespace(
+                BOOTSTRAP_ADMIN_USERNAME=None,
+                BOOTSTRAP_ADMIN_PASSWORD=None,
+            ),
+        )
+
+        auth_service.init_default_user(db)
+
+        assert db.query(User).count() == 0
+
+    def test_init_default_user_uses_explicit_bootstrap_credentials(self, db, monkeypatch):
+        monkeypatch.setattr(
+            auth_service,
+            "settings",
+            SimpleNamespace(
+                BOOTSTRAP_ADMIN_USERNAME="bootstrap-admin",
+                BOOTSTRAP_ADMIN_PASSWORD="super-secret-pass",
+            ),
+        )
+
+        auth_service.init_default_user(db)
+
+        user = db.query(User).one()
+        assert user.username == "bootstrap-admin"
+        assert auth_service.verify_password("super-secret-pass", user.hashed_password)
+
+    def test_init_default_user_skips_bootstrap_when_user_already_exists(self, db, monkeypatch):
+        _seed_user(db, username="existing-admin", password="existingpass123")
+        monkeypatch.setattr(
+            auth_service,
+            "settings",
+            SimpleNamespace(
+                BOOTSTRAP_ADMIN_USERNAME="bootstrap-admin",
+                BOOTSTRAP_ADMIN_PASSWORD="super-secret-pass",
+            ),
+        )
+
+        auth_service.init_default_user(db)
+
+        users = db.query(User).all()
+        assert len(users) == 1
+        assert users[0].username == "existing-admin"
