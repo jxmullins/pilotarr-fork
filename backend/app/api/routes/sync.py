@@ -1,4 +1,6 @@
-from fastapi import APIRouter, BackgroundTasks, Depends
+import inspect
+
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.api.schemas import SyncMetadataResponse
@@ -9,6 +11,17 @@ from app.services.jellyfin_streams_service import JellyfinStreamsService
 from app.services.torrent_enrichment_service import TorrentEnrichmentService
 
 router = APIRouter(prefix="/sync", tags=["Synchronization"])
+
+
+def _validate_background_task_call(task_name: str, task, *args, **kwargs) -> None:
+    """Fail fast when a background task call no longer matches its target signature."""
+    try:
+        inspect.signature(task).bind(*args, **kwargs)
+    except TypeError as exc:
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail=f"Invalid background task configuration for {task_name}",
+        ) from exc
 
 
 @router.post("/trigger")
@@ -51,20 +64,28 @@ async def trigger_sync(background_tasks: BackgroundTasks):
 async def trigger_sonarr_episodes_sync(
     background_tasks: BackgroundTasks,
     full_sync: bool = False,
-    series_limit: int = 5,
+    batch_size: int = 5,
 ):
     """Déclencher la synchronisation des épisodes Sonarr"""
+
+    task_kwargs = {"full_sync": full_sync, "batch_size": batch_size}
+    _validate_background_task_call(
+        "sync_sonarr_episodes",
+        SyncService.sync_sonarr_episodes,
+        None,
+        **task_kwargs,
+    )
 
     async def run_episodes_sync():
         db = SessionLocal()
         try:
             print("=" * 80)
             print("🚀 EPISODES SYNC STARTED (Background)")
-            print(f"🚀 Parameters: full_sync={full_sync}, series_limit={series_limit}")
+            print(f"🚀 Parameters: full_sync={full_sync}, batch_size={batch_size}")
             print("=" * 80)
 
             sync_service = SyncService(db)
-            result = await sync_service.sync_sonarr_episodes(full_sync=full_sync, series_limit=series_limit)
+            result = await sync_service.sync_sonarr_episodes(**task_kwargs)
             print(f"📊 Episodes sync completed: {result}")
         except Exception as e:
             print(f"❌ Error in episodes sync: {e}")
@@ -77,7 +98,7 @@ async def trigger_sonarr_episodes_sync(
     background_tasks.add_task(run_episodes_sync)
 
     return {
-        "message": f"Synchronisation épisodes lancée (full_sync={full_sync}, limit={series_limit})",
+        "message": f"Synchronisation épisodes lancée (full_sync={full_sync}, batch_size={batch_size})",
         "status": "started",
     }
 

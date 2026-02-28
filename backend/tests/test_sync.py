@@ -52,13 +52,34 @@ class TestTriggerSync:
         # Background task: FastAPI returns 200 by default (no explicit 202)
         assert resp.status_code == 200
 
-    def test_trigger_service_sync_sonarr(self, auth_client):
-        with patch("app.api.routes.sync.SyncService") as mock_sync:
-            instance = MagicMock()
-            instance.sync_service = AsyncMock(return_value=None)
-            mock_sync.return_value = instance
-            resp = auth_client.post("/api/sync/trigger/sonarr")
-        assert resp.status_code in (200, 202)
+    def test_trigger_sonarr_episodes_uses_batch_size_parameter(self, auth_client):
+        instance = MagicMock()
+        calls = []
+
+        async def strict_sync_sonarr_episodes(full_sync: bool = True, batch_size: int = 20):
+            calls.append((full_sync, batch_size))
+            return {"success": True}
+
+        instance.sync_sonarr_episodes = strict_sync_sonarr_episodes
+
+        with (
+            patch("app.api.routes.sync.SessionLocal", return_value=MagicMock()),
+            patch("app.api.routes.sync.SyncService", return_value=instance),
+        ):
+            resp = auth_client.post("/api/sync/trigger/sonarr-episodes?full_sync=true&batch_size=7")
+
+        assert resp.status_code == 200
+        assert resp.json()["status"] == "started"
+        assert calls == [(True, 7)]
+
+    def test_trigger_sonarr_episodes_fails_fast_on_invalid_task_signature(self, auth_client):
+        async def broken_sync_sonarr_episodes(self, full_sync: bool = True):
+            return {"success": True}
+
+        with patch("app.api.routes.sync.SyncService.sync_sonarr_episodes", new=broken_sync_sonarr_episodes):
+            resp = auth_client.post("/api/sync/trigger/sonarr-episodes?batch_size=7")
+
+        assert resp.status_code == 500
 
     def test_trigger_unknown_service(self, auth_client):
         # The route path is a free string, not an enum — FastAPI returns 404
