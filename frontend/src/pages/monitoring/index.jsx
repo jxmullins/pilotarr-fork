@@ -67,7 +67,12 @@ const Monitoring = () => {
 
     // Status filter
     if (filters?.status !== "all") {
-      result = result?.filter((item) => item?.availabilityStatus === filters?.status);
+      const monitoringValues = ["monitored", "unmonitored"];
+      if (monitoringValues.includes(filters.status)) {
+        result = result?.filter((item) => item?.monitoringStatus === filters?.status);
+      } else {
+        result = result?.filter((item) => item?.availabilityStatus === filters?.status);
+      }
     }
 
     // Quality filter
