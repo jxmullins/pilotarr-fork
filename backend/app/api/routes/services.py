@@ -19,6 +19,36 @@ router = APIRouter(prefix="/services", tags=["Services"])
 
 # Credential fields that must never be overwritten with empty/null values
 _CREDENTIAL_FIELDS = {"api_key", "username", "password"}
+_API_KEY_SERVICES = {
+    ServiceType.RADARR,
+    ServiceType.SONARR,
+    ServiceType.JELLYFIN,
+    ServiceType.JELLYSEERR,
+    ServiceType.PROWLARR,
+}
+
+
+def _endpoint_changed(service: ServiceConfiguration, updates: dict) -> bool:
+    return ("url" in updates and updates["url"] != service.url) or ("port" in updates and updates["port"] != service.port)
+
+
+def _validate_endpoint_change_credentials(
+    service_name: ServiceType, service: ServiceConfiguration, updates: dict
+) -> None:
+    if not _endpoint_changed(service, updates):
+        return
+
+    if service_name in _API_KEY_SERVICES and not updates.get("api_key"):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Changing the server URL or port requires re-entering the API key.",
+        )
+
+    if service_name == ServiceType.QBITTORRENT and (not updates.get("username") or not updates.get("password")):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Changing the server URL or port requires re-entering the username and password.",
+        )
 
 
 @router.get("/{service_name}", response_model=ServiceConfigurationResponse)
@@ -38,16 +68,18 @@ async def update_service(
 ):
     """Créer ou mettre à jour une configuration de service (upsert)"""
     service = db.query(ServiceConfiguration).filter(ServiceConfiguration.service_name == service_name).first()
+    updates = service_data.model_dump(exclude_unset=True)
 
     if not service:
         # Fresh install: create the record
-        create_data = service_data.model_dump(exclude_unset=True)
-        create_data["service_name"] = service_name
-        service = ServiceConfiguration(**create_data)
+        updates["service_name"] = service_name
+        service = ServiceConfiguration(**updates)
         db.add(service)
     else:
+        _validate_endpoint_change_credentials(service_name, service, updates)
+
         # Update existing fields — never overwrite stored credentials with empty/null values
-        for field, value in service_data.model_dump(exclude_unset=True).items():
+        for field, value in updates.items():
             if field in _CREDENTIAL_FIELDS and not value:
                 continue
             setattr(service, field, value)

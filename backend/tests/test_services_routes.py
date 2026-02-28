@@ -66,35 +66,79 @@ class TestUpdateService:
         assert resp.status_code == 200
         assert resp.json()["service_name"] == "radarr"
 
-    def test_update_without_api_key_preserves_existing(self, auth_client, make_service_config, db):
-        """Omitting api_key in PUT must not wipe the stored credential."""
+    def test_update_without_api_key_preserves_existing_on_non_endpoint_change(
+        self, auth_client, make_service_config, db
+    ):
+        """Omitting api_key on a non-endpoint change must not wipe the stored credential."""
         make_service_config(service_name=ServiceType.SONARR, api_key="original-key")
-        # Update URL only — no api_key in payload
-        auth_client.put("/api/services/sonarr", json={"url": "http://updated-url"})
+        auth_client.put("/api/services/sonarr", json={"is_active": False})
         # Verify the stored api_key is untouched
         from app.models.models import ServiceConfiguration
 
         stored = db.query(ServiceConfiguration).filter_by(service_name="sonarr").first()
         assert stored.api_key == "original-key"
-        assert stored.url == "http://updated-url"
+        assert stored.is_active is False
 
-    def test_update_with_empty_api_key_preserves_existing(self, auth_client, make_service_config, db):
-        """Sending api_key=null must not wipe the stored credential."""
+    def test_update_with_empty_api_key_preserves_existing_on_non_endpoint_change(
+        self, auth_client, make_service_config, db
+    ):
+        """Sending api_key=null on a non-endpoint change must not wipe the stored credential."""
         make_service_config(service_name=ServiceType.SONARR, api_key="original-key")
-        auth_client.put("/api/services/sonarr", json={"url": "http://x", "api_key": None})
+        auth_client.put("/api/services/sonarr", json={"is_active": False, "api_key": None})
         from app.models.models import ServiceConfiguration
 
         stored = db.query(ServiceConfiguration).filter_by(service_name="sonarr").first()
         assert stored.api_key == "original-key"
 
+    def test_update_changing_endpoint_requires_new_api_key(self, auth_client, make_service_config, db):
+        make_service_config(service_name=ServiceType.SONARR, url="http://old-url", api_key="original-key")
+
+        resp = auth_client.put("/api/services/sonarr", json={"url": "http://new-url"})
+
+        assert resp.status_code == 400
+        assert "API key" in resp.json()["detail"]
+
+        from app.models.models import ServiceConfiguration
+
+        stored = db.query(ServiceConfiguration).filter_by(service_name="sonarr").first()
+        assert stored.url == "http://old-url"
+        assert stored.api_key == "original-key"
+
     def test_update_with_new_api_key_replaces_existing(self, auth_client, make_service_config, db):
         """Providing a non-empty api_key must replace the stored value."""
-        make_service_config(service_name=ServiceType.SONARR, api_key="old-key")
+        make_service_config(service_name=ServiceType.SONARR, url="http://old-url", api_key="old-key")
         auth_client.put("/api/services/sonarr", json={"url": "http://x", "api_key": "brand-new-key"})
         from app.models.models import ServiceConfiguration
 
         stored = db.query(ServiceConfiguration).filter_by(service_name="sonarr").first()
         assert stored.api_key == "brand-new-key"
+        assert stored.url == "http://x"
+
+    def test_update_changing_qbittorrent_endpoint_requires_password(self, auth_client, db):
+        from app.models.models import ServiceConfiguration
+
+        service = ServiceConfiguration(
+            service_name=ServiceType.QBITTORRENT,
+            url="http://old-qbt",
+            username="alice",
+            password="saved-password",
+            port=8080,
+            is_active=True,
+        )
+        db.add(service)
+        db.commit()
+
+        resp = auth_client.put(
+            "/api/services/qbittorrent",
+            json={"url": "http://new-qbt", "username": "alice", "port": 8080},
+        )
+
+        assert resp.status_code == 400
+        assert "username and password" in resp.json()["detail"]
+
+        stored = db.query(ServiceConfiguration).filter_by(service_name="qbittorrent").first()
+        assert stored.url == "http://old-qbt"
+        assert stored.password == "saved-password"
 
 
 # ── DELETE /api/services/{name} ───────────────────────────────────────────────
