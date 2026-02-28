@@ -1,7 +1,9 @@
 from fastapi import Depends, HTTPException, Query, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
+from sqlalchemy.orm import Session
 
 from app.core.config import settings
+from app.db import get_db
 
 # ---------------------------------------------------------------------------
 # Webhook: ?apiKey=xxx query parameter (machine-to-machine, Jellyfin webhook)
@@ -22,36 +24,38 @@ async def verify_webhook_api_key(api_key: str = Query(..., alias="apiKey")):
 _bearer_scheme = HTTPBearer(auto_error=True)
 
 
-async def get_current_user(
+def get_current_user(
     credentials: HTTPAuthorizationCredentials = Depends(_bearer_scheme),
+    db: Session = Depends(get_db),
 ):
     """
     Validate a Bearer JWT and return the corresponding User ORM object.
 
     Import is deferred to avoid circular dependency between security ↔ auth_service ↔ models.
     """
-    from app.db import SessionLocal
-    from app.services.auth_service import decode_access_token, get_user_by_username
+    from app.services.auth_service import decode_access_token_claims, get_user_by_username
 
     token = credentials.credentials
-    username = decode_access_token(token)
-    if not username:
+    claims = decode_access_token_claims(token)
+    if not claims:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired token",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-    db = SessionLocal()
-    try:
-        user = get_user_by_username(db, username)
-    finally:
-        db.close()
-
+    user = get_user_by_username(db, claims["username"])
     if not user or not user.is_active:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="User not found or inactive",
+            headers={"WWW-Authenticate": "Bearer"},
+        )
+
+    if user.token_version != claims["token_version"]:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Token revoked",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return user

@@ -23,6 +23,7 @@ os.environ.setdefault("WEBHOOK_SECRET", "test-webhook-secret")
 from app.services.auth_service import (  # noqa: E402
     create_access_token,
     decode_access_token,
+    decode_access_token_claims,
     hash_password,
     verify_password,
 )
@@ -63,6 +64,11 @@ class TestJWT:
         token = create_access_token("alice")
         username = decode_access_token(token)
         assert username == "alice"
+
+    def test_decode_claims_includes_token_version(self):
+        token = create_access_token("alice", token_version=3)
+        claims = decode_access_token_claims(token)
+        assert claims == {"username": "alice", "token_version": 3}
 
     def test_decode_invalid_token_returns_none(self):
         assert decode_access_token("not.a.valid.token") is None

@@ -43,7 +43,7 @@ async def login(body: LoginRequest, db: Session = Depends(get_db)):
             detail="Invalid username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    token = create_access_token(user.username)
+    token = create_access_token(user.username, user.token_version)
     return TokenResponse(access_token=token, token_type="bearer", username=user.username)
 
 
@@ -71,5 +71,6 @@ async def change_password(
             detail="New password must be at least 8 characters",
         )
     current_user.hashed_password = hash_password(body.new_password)
+    current_user.token_version += 1
     db.commit()
     logger.info("Password changed for user '%s'", current_user.username)

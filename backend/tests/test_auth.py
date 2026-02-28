@@ -121,6 +121,38 @@ class TestChangePassword:
         )
         assert resp.status_code == 422
 
+    def test_change_password_revokes_existing_token(self, client, db):
+        _seed_user(db, username="alice", password="alicepass123")
+
+        login_resp = client.post("/api/auth/login", json={"username": "alice", "password": "alicepass123"})
+        assert login_resp.status_code == 200
+        token = login_resp.json()["access_token"]
+        headers = {"Authorization": f"Bearer {token}"}
+
+        change_resp = client.post(
+            "/api/auth/change-password",
+            json={
+                "current_password": "alicepass123",
+                "new_password": "newpassword123",
+                "confirm_password": "newpassword123",
+            },
+            headers=headers,
+        )
+        assert change_resp.status_code == 204
+
+        stale_token_resp = client.get("/api/auth/me", headers=headers)
+        assert stale_token_resp.status_code == 401
+
+        old_login_resp = client.post("/api/auth/login", json={"username": "alice", "password": "alicepass123"})
+        assert old_login_resp.status_code == 401
+
+        fresh_login_resp = client.post("/api/auth/login", json={"username": "alice", "password": "newpassword123"})
+        assert fresh_login_resp.status_code == 200
+        fresh_headers = {"Authorization": f"Bearer {fresh_login_resp.json()['access_token']}"}
+
+        fresh_token_resp = client.get("/api/auth/me", headers=fresh_headers)
+        assert fresh_token_resp.status_code == 200
+
 
 class TestBootstrapAdmin:
     def test_init_default_user_skips_without_explicit_bootstrap_credentials(self, db, monkeypatch):

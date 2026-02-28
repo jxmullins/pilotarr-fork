@@ -26,7 +26,7 @@ class Settings(BaseSettings):
     SECRET_KEY: str
     API_KEY: str
     WEBHOOK_SECRET: str = ""
-    ACCESS_TOKEN_EXPIRE_HOURS: int = 720  # 30 days
+    ACCESS_TOKEN_EXPIRE_HOURS: int = 24
     BOOTSTRAP_ADMIN_USERNAME: str | None = None
     BOOTSTRAP_ADMIN_PASSWORD: str | None = None
 

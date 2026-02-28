@@ -124,6 +124,14 @@ def create_analytics_tables():
             print(f"❌ Erreur lors de l'ajout de watched sur episodes : {e}")
             return False
 
+    # Add token_version column to users for JWT revocation support
+    if "users" in get_existing_tables():
+        try:
+            migrate_add_token_version_to_users()
+        except Exception as e:
+            print(f"❌ Erreur lors de l'ajout de token_version sur users : {e}")
+            return False
+
     # Add 'prowlarr' to sync_metadata.service_name ENUM
     if "sync_metadata" in get_existing_tables():
         try:
@@ -165,6 +173,31 @@ def create_analytics_tables():
             return False
 
     return True
+
+
+def migrate_add_token_version_to_users():
+    """Add users.token_version when upgrading an existing install."""
+    from sqlalchemy import text
+
+    from app.db import SessionLocal
+
+    inspector = inspect(engine)
+    columns = {col["name"]: col for col in inspector.get_columns("users")}
+    if "token_version" in columns:
+        print("✅ users.token_version already exists, skipping migration")
+        return
+
+    print("🔄 Adding token_version column to users ...")
+    db = SessionLocal()
+    try:
+        db.execute(text("ALTER TABLE users ADD COLUMN token_version INT NOT NULL DEFAULT 0"))
+        db.commit()
+        print("✅ token_version column added to users")
+    except Exception as e:
+        db.rollback()
+        raise e
+    finally:
+        db.close()
 
 
 def migrate_torrent_hashes():

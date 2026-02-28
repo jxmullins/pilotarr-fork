@@ -147,8 +147,9 @@ def auth_headers(db):
     )
     db.add(user)
     db.commit()
+    db.refresh(user)
 
-    token = create_access_token("testuser")
+    token = create_access_token(user.username, user.token_version)
     return {"Authorization": f"Bearer {token}"}
 
 

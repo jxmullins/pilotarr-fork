@@ -4,6 +4,7 @@ Auth service — password hashing, JWT creation/verification, user management.
 
 import logging
 from datetime import datetime, timedelta, timezone
+from typing import TypedDict
 
 import bcrypt
 import jwt
@@ -15,6 +16,11 @@ from app.models.models import User
 logger = logging.getLogger(__name__)
 
 ALGORITHM = "HS256"
+
+
+class AccessTokenClaims(TypedDict):
+    username: str
+    token_version: int
 
 
 # ---------------------------------------------------------------------------
@@ -35,17 +41,40 @@ def verify_password(plain: str, hashed: str) -> bool:
 # ---------------------------------------------------------------------------
 
 
-def create_access_token(username: str) -> str:
+def create_access_token(username: str, token_version: int = 0) -> str:
     expire = datetime.now(timezone.utc) + timedelta(hours=settings.ACCESS_TOKEN_EXPIRE_HOURS)
-    payload = {"sub": username, "exp": expire}
+    payload = {"sub": username, "exp": expire, "ver": int(token_version)}
     return jwt.encode(payload, settings.SECRET_KEY, algorithm=ALGORITHM)
 
 
 def decode_access_token(token: str) -> str | None:
     """Decode a JWT and return the username, or None if invalid/expired."""
+    claims = decode_access_token_claims(token)
+    return claims["username"] if claims else None
+
+
+def decode_access_token_claims(token: str) -> AccessTokenClaims | None:
+    """Decode a JWT and return the validated username/version claims."""
     try:
         payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[ALGORITHM])
-        return payload.get("sub")
+        username = payload.get("sub")
+        token_version = payload.get("ver", 0)
+
+        if not username or not isinstance(username, str):
+            logger.warning("JWT missing subject")
+            return None
+
+        if isinstance(token_version, str):
+            if not token_version.isdigit():
+                logger.warning("JWT token version is not numeric")
+                return None
+            token_version = int(token_version)
+
+        if not isinstance(token_version, int):
+            logger.warning("JWT token version is invalid")
+            return None
+
+        return {"username": username, "token_version": token_version}
     except jwt.ExpiredSignatureError:
         logger.warning("JWT expired")
         return None
