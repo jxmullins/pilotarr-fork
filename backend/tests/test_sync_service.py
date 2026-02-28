@@ -324,6 +324,21 @@ class TestSyncRadarr:
         meta = db.query(SyncMetadata).filter_by(service_name=ServiceType.RADARR).first()
         assert meta.sync_status == SyncStatus.FAILED
 
+    async def test_failure_rolls_back_partial_movie_writes_before_marking_failed(self, sync, db):
+        _make_svc(db, ServiceType.RADARR)
+        mock = _mock_radarr_connector()
+        mock.get_calendar = AsyncMock(side_effect=Exception("calendar down"))
+
+        with patch("app.schedulers.sync_service.RadarrConnector", return_value=mock):
+            result = await sync.sync_radarr()
+
+        assert result["success"] is False
+        assert db.query(LibraryItem).filter_by(title="Inception").count() == 0
+
+        meta = db.query(SyncMetadata).filter_by(service_name=ServiceType.RADARR).first()
+        assert meta is not None
+        assert meta.sync_status == SyncStatus.FAILED
+
 
 # ── sync_sonarr ───────────────────────────────────────────────────────────────
 

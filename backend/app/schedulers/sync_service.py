@@ -87,6 +87,13 @@ class SyncService:
 
         self.db.commit()
 
+    def _record_sync_failure(self, service_type: ServiceType, start_time: float, error: Exception) -> dict[str, Any]:
+        """Rollback pending business writes before committing FAILED metadata."""
+        self.db.rollback()
+        duration_ms = int((time.time() - start_time) * 1000)
+        self.update_sync_metadata(service_type, SyncStatus.FAILED, 0, duration_ms, str(error))
+        return {"success": False, "error": str(error)}
+
     async def sync_monitored_items(self) -> dict[str, Any]:
         """
         Synchroniser les statistiques des items monitorés (Radarr + Sonarr)
@@ -379,10 +386,8 @@ class SyncService:
             return {"success": True, "movies_added": added_count, "calendar_events": calendar_count}
 
         except Exception as e:
-            duration_ms = int((time.time() - start_time) * 1000)
-            self.update_sync_metadata(ServiceType.RADARR, SyncStatus.FAILED, 0, duration_ms, str(e))
             print(f"❌ Erreur sync Radarr: {e}")
-            return {"success": False, "error": str(e)}
+            return self._record_sync_failure(ServiceType.RADARR, start_time, e)
         finally:
             await connector.close()
 
@@ -705,10 +710,8 @@ class SyncService:
             }
 
         except Exception as e:
-            duration_ms = int((time.time() - start_time) * 1000)
-            self.update_sync_metadata(ServiceType.SONARR, SyncStatus.FAILED, 0, duration_ms, str(e))
             print(f"❌ Erreur sync Sonarr: {e}")
-            return {"success": False, "error": str(e)}
+            return self._record_sync_failure(ServiceType.SONARR, start_time, e)
         finally:
             await connector.close()
 
@@ -999,10 +1002,8 @@ class SyncService:
             }
 
         except Exception as e:
-            duration_ms = int((time.time() - start_time) * 1000)
-            self.update_sync_metadata(ServiceType.JELLYFIN, SyncStatus.FAILED, 0, duration_ms, str(e))
             print(f"❌ Erreur sync Jellyfin: {e}")
-            return {"success": False, "error": str(e)}
+            return self._record_sync_failure(ServiceType.JELLYFIN, start_time, e)
         finally:
             await connector.close()
 
@@ -1164,10 +1165,8 @@ class SyncService:
             }
 
         except Exception as e:
-            duration_ms = int((time.time() - start_time) * 1000)
-            self.update_sync_metadata(ServiceType.JELLYSEERR, SyncStatus.FAILED, 0, duration_ms, str(e))
             print(f"❌ Erreur sync Jellyseerr: {e}")
-            return {"success": False, "error": str(e)}
+            return self._record_sync_failure(ServiceType.JELLYSEERR, start_time, e)
         finally:
             await connector.close()
 
